@@ -28,6 +28,7 @@ hr { border: none; border-top: 1px solid #21262d; margin: 30px 0; }
 <h2 id="project-table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#overview">Overview</a></li>
+<li><a href="#product-manager">Product Manager</a></li>
 <li><a href="#features">Features</a></li>
 <li><a href="#tech-stack">Tech Stack</a></li>
 <li><a href="#architecture">Architecture</a></li>
@@ -41,6 +42,531 @@ hr { border: none; border-top: 1px solid #21262d; margin: 30px 0; }
 <hr />
 <h2 id="project-overview">Overview</h2>
 <p>AI-powered family chore management app with voice-first onboarding, house scanning, gamified rewards, jobs board, and household routine management. Designed to reduce parental mental load by automating chore scheduling and making chores fun for kids through points, badges, and a rewards shop.</p>
+<hr />
+<h2 id="project-product-manager">Product Manager</h2>
+<blockquote>
+<p><strong>Status snapshot — iOS 1.0.1 Build 5 (2026-05-07)</strong>
+Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validation prototype and has been removed. Current focus: stabilize Build 5 in TestFlight, then ship v1.1 (auth providers + push + inter-family leaderboard).</p>
+</blockquote>
+<h3 id="implementation-status">Implementation Status</h3>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅ Live</td>
+<td>Implemented end-to-end (backend + iOS UI), shipped in Build 5</td>
+</tr>
+<tr>
+<td>⚠️ Partial</td>
+<td>One side missing (backend done, iOS pending — or vice versa)</td>
+</tr>
+<tr>
+<td>❌ Planned</td>
+<td>On the roadmap, no code yet</td>
+</tr>
+</tbody>
+</table>
+<h3 id="feature-matrix">Feature Matrix</h3>
+<h4 id="onboarding-auth">Onboarding &amp; Auth</h4>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Email + password (registration + login)</td>
+<td>✅</td>
+<td>bcrypt, JWT 7-day expiry</td>
+</tr>
+<tr>
+<td>Biometric login (Face ID / Touch ID)</td>
+<td>✅</td>
+<td>Crash-free in Build 5 (Face ID privacy string fix)</td>
+</tr>
+<tr>
+<td>Family invite codes (6-char, no I/O/0/1)</td>
+<td>✅</td>
+<td>Shared flow for kids and partner parents</td>
+</tr>
+<tr>
+<td>Voice-first onboarding</td>
+<td>✅</td>
+<td>Real GPT-4o calls, TTS via OpenAI <code>tts-1</code> (voice: nova)</td>
+</tr>
+<tr>
+<td>House scanning (room photos → chores)</td>
+<td>✅</td>
+<td>GPT-4o Vision, smart appliance detection (robot vac, dishwasher)</td>
+</tr>
+<tr>
+<td>Manual form fallback (5-step)</td>
+<td>✅</td>
+<td>Inline on the onboarding screen</td>
+</tr>
+<tr>
+<td>Sign in with Apple</td>
+<td>❌</td>
+<td>Backend route missing; iOS framework imported, button hidden</td>
+</tr>
+<tr>
+<td>Sign in with Google</td>
+<td>❌</td>
+<td>Backend route missing; needs GoogleSignIn pod</td>
+</tr>
+</tbody>
+</table>
+<h4 id="chore-system">Chore System</h4>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI 7-day distribution (GPT-4o-mini)</td>
+<td>✅</td>
+<td>Index-based IO, rule validation, deterministic fallback if AI sparse</td>
+</tr>
+<tr>
+<td>Daily habit templates (brush teeth, bed, etc.)</td>
+<td>✅</td>
+<td>Auto-assigned to all eligible kids, age-gated</td>
+</tr>
+<tr>
+<td>Pet &amp; bin auto-chores</td>
+<td>✅</td>
+<td>Generated from <code>house_details</code> rotation config</td>
+</tr>
+<tr>
+<td>Routine rotation (walks, litter, bins)</td>
+<td>✅</td>
+<td>Round-robin across configured children</td>
+</tr>
+<tr>
+<td>Personal-space / shared-room chores</td>
+<td>✅</td>
+<td><code>owner_user_ids[]</code> field, only owners get assigned</td>
+</tr>
+<tr>
+<td>Transfer chore (100% points to recipient)</td>
+<td>✅</td>
+<td><code>transfer_type='transfer'</code></td>
+</tr>
+<tr>
+<td>Support request (50 / 50 split)</td>
+<td>✅</td>
+<td><code>transfer_type='support'</code>, both get <code>ceil(points/2)</code></td>
+</tr>
+<tr>
+<td>Extra chore claim (bonus from sibling's day)</td>
+<td>✅</td>
+<td>Pulls future pending chores from other kids</td>
+</tr>
+<tr>
+<td>Approval workflow (pending → approved/rejected)</td>
+<td>✅</td>
+<td>Parent must approve before points award</td>
+</tr>
+<tr>
+<td>Photo proof (optional <code>proof_image_url</code>)</td>
+<td>✅</td>
+<td>Field exists; iOS picker wiring partial</td>
+</tr>
+<tr>
+<td>Star burst animation on completion</td>
+<td>✅</td>
+<td>iOS visual feedback</td>
+</tr>
+</tbody>
+</table>
+<h4 id="gamification-rewards">Gamification &amp; Rewards</h4>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Points + difficulty tiers (10/15/25)</td>
+<td>✅</td>
+<td>Easy / Medium / Hard</td>
+</tr>
+<tr>
+<td>XP + 15 levels (Apprentice → Mythic)</td>
+<td>✅</td>
+<td>100 XP per level</td>
+</tr>
+<tr>
+<td>Weekly badges (6-tier progression)</td>
+<td>✅</td>
+<td>Getting Started → Chore Champion</td>
+</tr>
+<tr>
+<td>Streak tracking (5 fire tiers)</td>
+<td>✅</td>
+<td>Warm Up → Legendary, resets on miss</td>
+</tr>
+<tr>
+<td>Weekly Superstar (silver) / Monthly Hero (gold)</td>
+<td>✅</td>
+<td>All chores every day for 7 / 30 days</td>
+</tr>
+<tr>
+<td>Rewards shop (points → reward)</td>
+<td>✅</td>
+<td>Per-child targeting, auto-deduct on purchase</td>
+</tr>
+<tr>
+<td>Curated default rewards (20)</td>
+<td>✅</td>
+<td>Seeded for new families during onboarding</td>
+</tr>
+<tr>
+<td>In-family leaderboard</td>
+<td>✅</td>
+<td>Points-ranked, all roles can view</td>
+</tr>
+<tr>
+<td><strong>Inter-family leaderboard</strong></td>
+<td>❌</td>
+<td>v1.1 priority. Needs opt-in privacy + family scoring endpoint</td>
+</tr>
+<tr>
+<td>Avatar customisation</td>
+<td>❌</td>
+<td>Concept stage</td>
+</tr>
+<tr>
+<td>Power-ups, seasonal events</td>
+<td>❌</td>
+<td>Future</td>
+</tr>
+</tbody>
+</table>
+<h4 id="jobs-board-contracts">Jobs Board (Contracts)</h4>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open jobs (any kid claims)</td>
+<td>✅</td>
+<td>Status: open → assigned</td>
+</tr>
+<tr>
+<td>Application jobs (parent picks winner)</td>
+<td>✅</td>
+<td>Reason + optional proposed price</td>
+</tr>
+<tr>
+<td>Counter-offers (kid → parent)</td>
+<td>✅</td>
+<td>Parent accepts/rejects counter</td>
+</tr>
+<tr>
+<td>Child-pitched jobs (entrepreneurship)</td>
+<td>✅</td>
+<td>Kid proposes → parent approves</td>
+</tr>
+<tr>
+<td>Subcontracting (assigned kid → sibling)</td>
+<td>✅</td>
+<td>Pays from original reward</td>
+</tr>
+<tr>
+<td>Cash rewards</td>
+<td>✅</td>
+<td>Parent confirms handover (no automation)</td>
+</tr>
+<tr>
+<td>Credibility / overdue penalty</td>
+<td>⚠️</td>
+<td>Concept exists in WIKI; lambda wiring not verified end-to-end</td>
+</tr>
+</tbody>
+</table>
+<h4 id="family-management">Family Management</h4>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Add / edit / remove children</td>
+<td>✅</td>
+<td>Inline forms in Parent Settings</td>
+</tr>
+<tr>
+<td>Add partner parent (via family code)</td>
+<td>✅</td>
+<td>Shared 6-char code</td>
+</tr>
+<tr>
+<td>Edit member name / age / role</td>
+<td>✅</td>
+<td><code>PATCH /v1/users/{id}</code></td>
+</tr>
+<tr>
+<td>Edit family name + house type</td>
+<td>✅</td>
+<td><code>PATCH /v1/families</code></td>
+</tr>
+<tr>
+<td>Delete entire family (cascade)</td>
+<td>✅</td>
+<td><code>DELETE /v1/families/{id}</code></td>
+</tr>
+<tr>
+<td>Parent participation (opt into chores)</td>
+<td>✅</td>
+<td>Settings toggle</td>
+</tr>
+<tr>
+<td>Multi-household / co-parenting</td>
+<td>❌</td>
+<td>v2.0 — shared kids across two homes, custody-aware schedules</td>
+</tr>
+</tbody>
+</table>
+<h4 id="house-rules-screen-time">House Rules &amp; Screen Time</h4>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bin schedule (days, frequency, rotation)</td>
+<td>✅</td>
+<td>Stored in <code>house_details.bin_schedule</code></td>
+</tr>
+<tr>
+<td>Pet care config (walks, litter, feeding)</td>
+<td>✅</td>
+<td>Per-pet rotation arrays</td>
+</tr>
+<tr>
+<td>Gaming schedule (per-child, per-device)</td>
+<td>✅</td>
+<td>Days, hours, device type</td>
+</tr>
+<tr>
+<td>Screen time chore-gate (app level)</td>
+<td>✅</td>
+<td>Must complete chores + hit point threshold</td>
+</tr>
+<tr>
+<td><strong>Deep iOS Screen Time API integration</strong></td>
+<td>❌</td>
+<td>Currently app-level only — no system-wide blocking</td>
+</tr>
+</tbody>
+</table>
+<h4 id="notifications">Notifications</h4>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Push notifications (APNs)</td>
+<td>❌</td>
+<td>No device token storage, no notifications table, no APNs cert</td>
+</tr>
+<tr>
+<td>Email digests for parents</td>
+<td>❌</td>
+<td>v1.2 backlog</td>
+</tr>
+</tbody>
+</table>
+<h3 id="chore-system-deep-dive">Chore System Deep Dive</h3>
+<h4 id="chore-types-chore_type-field-migration-011">Chore Types (<code>chore_type</code> field, migration 011)</h4>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Used for</th>
+<th>Auto-assign</th>
+<th>Min age (typical)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>daily_habit</code></td>
+<td>Hygiene &amp; routine (brush teeth, make bed, shower)</td>
+<td>All eligible kids, every day</td>
+<td>3+</td>
+</tr>
+<tr>
+<td><code>household</code></td>
+<td>Standard chores (dishes, hoover, mop)</td>
+<td>AI distribution, 7-day rotation</td>
+<td>varies (4+/8+)</td>
+</tr>
+<tr>
+<td><code>routine</code></td>
+<td>Pets &amp; bins</td>
+<td>Rotation from <code>house_details</code></td>
+<td>6+</td>
+</tr>
+<tr>
+<td><code>personal_space</code></td>
+<td>Clean own room</td>
+<td>Owner-specific only</td>
+<td>4+</td>
+</tr>
+<tr>
+<td><code>laundry</code></td>
+<td>Per-child laundry</td>
+<td>Rotation</td>
+<td>6+</td>
+</tr>
+</tbody>
+</table>
+<h4 id="distribution-algorithm-the-ai-brain">Distribution Algorithm (the AI brain)</h4>
+<ol>
+<li>Fetch household members (children, plus parents if opted in).</li>
+<li>Seed default chores for new families if the chore list is empty.</li>
+<li>Auto-create pet + bin chores from <code>house_details</code> if missing.</li>
+<li>Insert daily habits for the next 7 days (age-gated, all eligible kids).</li>
+<li>Insert routine rotation assignments (pet walks, litter, bins).</li>
+<li>Clear <code>pending</code> future household-chore assignments to avoid duplicates.</li>
+<li>Call <strong>GPT-4o-mini</strong> with member + chore index lists → 7-day schedule.</li>
+<li>Validate AI output: no duplicate chore on same day, age limits, valid indices.</li>
+<li>If AI output too sparse, fall back to deterministic round-robin with offset.</li>
+<li>Bulk-insert into <code>assigned_chores</code> with <code>status='pending'</code>.</li>
+</ol>
+<h4 id="distribution-rules">Distribution Rules</h4>
+<ul>
+<li><strong>No duplicate chore per day</strong> across the family.</li>
+<li><strong>No consecutive-day repeats</strong> for the same child.</li>
+<li><strong>Age tiers:</strong> easy = any, medium = 4+, hard = 8+.</li>
+<li><strong>Daily habits</strong> have their own <code>min_age</code> (often 3+).</li>
+<li><strong>Pet walks / litter</strong> have higher minimums (6 – 8) for safety.</li>
+</ul>
+<h4 id="point-math">Point Math</h4>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Original child</th>
+<th>Helper / recipient</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Approved</td>
+<td>full points</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>Rejected</td>
+<td>0</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><strong>Transferred</strong></td>
+<td>0</td>
+<td>100% on approval</td>
+</tr>
+<tr>
+<td><strong>Supported</strong> (50/50)</td>
+<td><code>ceil(points/2)</code></td>
+<td><code>ceil(points/2)</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="status-flow">Status Flow</h4>
+<pre><code>pending → in_progress → completed → approved   (full points awarded)
+                                  → rejected   (no points)
+</code></pre>
+<p>Transfers and support requests sit on top of this flow — they don't change the status, only who gets credit when the parent approves.</p>
+<h3 id="key-product-decisions">Key Product Decisions</h3>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-04-02</td>
+<td>Validate concept via React web prototype</td>
+<td>Test the idea before learning native iOS dev</td>
+</tr>
+<tr>
+<td>2026-04-14</td>
+<td>Build 4 distributed via TestFlight</td>
+<td>First feature-complete iOS build</td>
+</tr>
+<tr>
+<td>2026-05-07</td>
+<td><strong>Pivot: mobile-only</strong>, remove web validation</td>
+<td>iOS reached parity; web was dead code</td>
+</tr>
+<tr>
+<td>2026-05-07</td>
+<td>Build 5 to fix Face ID crash</td>
+<td>Missing <code>NSFaceIDUsageDescription</code> privacy string</td>
+</tr>
+<tr>
+<td>2026-05-07</td>
+<td>Adopt fastlane for TestFlight automation</td>
+<td>Replace manual Xcode archive + upload</td>
+</tr>
+</tbody>
+</table>
+<h3 id="next-up-v11-priorities">Next Up (v1.1 priorities)</h3>
+<p>Ranked by <code>user_value × delivery_cost</code>:</p>
+<ol>
+<li><strong>Sign in with Apple</strong> — App Store guideline 4.8 compliance + zero-friction returning users. Backend route + iOS button.</li>
+<li><strong>Push notifications (APNs)</strong> — chore reminders, approval alerts, badge unlocks. Needs APNs cert, device-token table, lambda hook on assignment/approval/badge events.</li>
+<li><strong>Inter-family leaderboard</strong> — opt-in family-vs-family scoring. Privacy decision needed (anonymous handle vs real family name).</li>
+<li><strong>Sign in with Google</strong> — broaden adoption beyond Apple ecosystem.</li>
+<li><strong>Deep iOS Screen Time integration</strong> — replace app-level chore gate with system-wide enforcement using Screen Time API.</li>
+</ol>
+<h3 id="open-questions">Open Questions</h3>
+<ul>
+<li><strong>Inter-family leaderboard privacy:</strong> opt-in only, anonymised handle, or display family name? Default-off?</li>
+<li><strong>Push frequency cap:</strong> how many per kid per day before they tune out? (Gut: 3.)</li>
+<li><strong>Screen time philosophy:</strong> pure block, or also reward extra time when kids over-deliver on chores?</li>
+<li><strong>Pricing:</strong> free forever, freemium (premium = AI distribution / inter-family leaderboard), or flat family subscription?</li>
+<li><strong>Credibility system:</strong> how harsh should overdue-job penalties be? (Currently designed as 20%.)</li>
+</ul>
 <hr />
 <h2 id="project-features">Features</h2>
 <h3 id="onboarding">Onboarding</h3>

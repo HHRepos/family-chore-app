@@ -10,6 +10,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Product Manager](#product-manager)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
@@ -25,6 +26,188 @@
 ## Overview
 
 AI-powered family chore management app with voice-first onboarding, house scanning, gamified rewards, jobs board, and household routine management. Designed to reduce parental mental load by automating chore scheduling and making chores fun for kids through points, badges, and a rewards shop.
+
+---
+
+## Product Manager
+
+> **Status snapshot — iOS 1.0.1 Build 5 (2026-05-07)**
+> Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validation prototype and has been removed. Current focus: stabilize Build 5 in TestFlight, then ship v1.1 (auth providers + push + inter-family leaderboard).
+
+### Implementation Status
+
+| Stage | What it means |
+| --- | --- |
+| ✅ Live | Implemented end-to-end (backend + iOS UI), shipped in Build 5 |
+| ⚠️ Partial | One side missing (backend done, iOS pending — or vice versa) |
+| ❌ Planned | On the roadmap, no code yet |
+
+### Feature Matrix
+
+#### Onboarding & Auth
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| Email + password (registration + login) | ✅ | bcrypt, JWT 7-day expiry |
+| Biometric login (Face ID / Touch ID) | ✅ | Crash-free in Build 5 (Face ID privacy string fix) |
+| Family invite codes (6-char, no I/O/0/1) | ✅ | Shared flow for kids and partner parents |
+| Voice-first onboarding | ✅ | Real GPT-4o calls, TTS via OpenAI `tts-1` (voice: nova) |
+| House scanning (room photos → chores) | ✅ | GPT-4o Vision, smart appliance detection (robot vac, dishwasher) |
+| Manual form fallback (5-step) | ✅ | Inline on the onboarding screen |
+| Sign in with Apple | ❌ | Backend route missing; iOS framework imported, button hidden |
+| Sign in with Google | ❌ | Backend route missing; needs GoogleSignIn pod |
+
+#### Chore System
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| AI 7-day distribution (GPT-4o-mini) | ✅ | Index-based IO, rule validation, deterministic fallback if AI sparse |
+| Daily habit templates (brush teeth, bed, etc.) | ✅ | Auto-assigned to all eligible kids, age-gated |
+| Pet & bin auto-chores | ✅ | Generated from `house_details` rotation config |
+| Routine rotation (walks, litter, bins) | ✅ | Round-robin across configured children |
+| Personal-space / shared-room chores | ✅ | `owner_user_ids[]` field, only owners get assigned |
+| Transfer chore (100% points to recipient) | ✅ | `transfer_type='transfer'` |
+| Support request (50 / 50 split) | ✅ | `transfer_type='support'`, both get `ceil(points/2)` |
+| Extra chore claim (bonus from sibling's day) | ✅ | Pulls future pending chores from other kids |
+| Approval workflow (pending → approved/rejected) | ✅ | Parent must approve before points award |
+| Photo proof (optional `proof_image_url`) | ✅ | Field exists; iOS picker wiring partial |
+| Star burst animation on completion | ✅ | iOS visual feedback |
+
+#### Gamification & Rewards
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| Points + difficulty tiers (10/15/25) | ✅ | Easy / Medium / Hard |
+| XP + 15 levels (Apprentice → Mythic) | ✅ | 100 XP per level |
+| Weekly badges (6-tier progression) | ✅ | Getting Started → Chore Champion |
+| Streak tracking (5 fire tiers) | ✅ | Warm Up → Legendary, resets on miss |
+| Weekly Superstar (silver) / Monthly Hero (gold) | ✅ | All chores every day for 7 / 30 days |
+| Rewards shop (points → reward) | ✅ | Per-child targeting, auto-deduct on purchase |
+| Curated default rewards (20) | ✅ | Seeded for new families during onboarding |
+| In-family leaderboard | ✅ | Points-ranked, all roles can view |
+| **Inter-family leaderboard** | ❌ | v1.1 priority. Needs opt-in privacy + family scoring endpoint |
+| Avatar customisation | ❌ | Concept stage |
+| Power-ups, seasonal events | ❌ | Future |
+
+#### Jobs Board (Contracts)
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| Open jobs (any kid claims) | ✅ | Status: open → assigned |
+| Application jobs (parent picks winner) | ✅ | Reason + optional proposed price |
+| Counter-offers (kid → parent) | ✅ | Parent accepts/rejects counter |
+| Child-pitched jobs (entrepreneurship) | ✅ | Kid proposes → parent approves |
+| Subcontracting (assigned kid → sibling) | ✅ | Pays from original reward |
+| Cash rewards | ✅ | Parent confirms handover (no automation) |
+| Credibility / overdue penalty | ⚠️ | Concept exists in WIKI; lambda wiring not verified end-to-end |
+
+#### Family Management
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| Add / edit / remove children | ✅ | Inline forms in Parent Settings |
+| Add partner parent (via family code) | ✅ | Shared 6-char code |
+| Edit member name / age / role | ✅ | `PATCH /v1/users/{id}` |
+| Edit family name + house type | ✅ | `PATCH /v1/families` |
+| Delete entire family (cascade) | ✅ | `DELETE /v1/families/{id}` |
+| Parent participation (opt into chores) | ✅ | Settings toggle |
+| Multi-household / co-parenting | ❌ | v2.0 — shared kids across two homes, custody-aware schedules |
+
+#### House Rules & Screen Time
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| Bin schedule (days, frequency, rotation) | ✅ | Stored in `house_details.bin_schedule` |
+| Pet care config (walks, litter, feeding) | ✅ | Per-pet rotation arrays |
+| Gaming schedule (per-child, per-device) | ✅ | Days, hours, device type |
+| Screen time chore-gate (app level) | ✅ | Must complete chores + hit point threshold |
+| **Deep iOS Screen Time API integration** | ❌ | Currently app-level only — no system-wide blocking |
+
+#### Notifications
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| Push notifications (APNs) | ❌ | No device token storage, no notifications table, no APNs cert |
+| Email digests for parents | ❌ | v1.2 backlog |
+
+### Chore System Deep Dive
+
+#### Chore Types (`chore_type` field, migration 011)
+
+| Type | Used for | Auto-assign | Min age (typical) |
+| --- | --- | --- | --- |
+| `daily_habit` | Hygiene & routine (brush teeth, make bed, shower) | All eligible kids, every day | 3+ |
+| `household` | Standard chores (dishes, hoover, mop) | AI distribution, 7-day rotation | varies (4+/8+) |
+| `routine` | Pets & bins | Rotation from `house_details` | 6+ |
+| `personal_space` | Clean own room | Owner-specific only | 4+ |
+| `laundry` | Per-child laundry | Rotation | 6+ |
+
+#### Distribution Algorithm (the AI brain)
+
+1. Fetch household members (children, plus parents if opted in).
+2. Seed default chores for new families if the chore list is empty.
+3. Auto-create pet + bin chores from `house_details` if missing.
+4. Insert daily habits for the next 7 days (age-gated, all eligible kids).
+5. Insert routine rotation assignments (pet walks, litter, bins).
+6. Clear `pending` future household-chore assignments to avoid duplicates.
+7. Call **GPT-4o-mini** with member + chore index lists → 7-day schedule.
+8. Validate AI output: no duplicate chore on same day, age limits, valid indices.
+9. If AI output too sparse, fall back to deterministic round-robin with offset.
+10. Bulk-insert into `assigned_chores` with `status='pending'`.
+
+#### Distribution Rules
+
+- **No duplicate chore per day** across the family.
+- **No consecutive-day repeats** for the same child.
+- **Age tiers:** easy = any, medium = 4+, hard = 8+.
+- **Daily habits** have their own `min_age` (often 3+).
+- **Pet walks / litter** have higher minimums (6 – 8) for safety.
+
+#### Point Math
+
+| Action | Original child | Helper / recipient |
+| --- | --- | --- |
+| Approved | full points | n/a |
+| Rejected | 0 | n/a |
+| **Transferred** | 0 | 100% on approval |
+| **Supported** (50/50) | `ceil(points/2)` | `ceil(points/2)` |
+
+#### Status Flow
+
+```
+pending → in_progress → completed → approved   (full points awarded)
+                                  → rejected   (no points)
+```
+
+Transfers and support requests sit on top of this flow — they don't change the status, only who gets credit when the parent approves.
+
+### Key Product Decisions
+
+| Date | Decision | Why |
+| --- | --- | --- |
+| 2026-04-02 | Validate concept via React web prototype | Test the idea before learning native iOS dev |
+| 2026-04-14 | Build 4 distributed via TestFlight | First feature-complete iOS build |
+| 2026-05-07 | **Pivot: mobile-only**, remove web validation | iOS reached parity; web was dead code |
+| 2026-05-07 | Build 5 to fix Face ID crash | Missing `NSFaceIDUsageDescription` privacy string |
+| 2026-05-07 | Adopt fastlane for TestFlight automation | Replace manual Xcode archive + upload |
+
+### Next Up (v1.1 priorities)
+
+Ranked by `user_value × delivery_cost`:
+
+1. **Sign in with Apple** — App Store guideline 4.8 compliance + zero-friction returning users. Backend route + iOS button.
+2. **Push notifications (APNs)** — chore reminders, approval alerts, badge unlocks. Needs APNs cert, device-token table, lambda hook on assignment/approval/badge events.
+3. **Inter-family leaderboard** — opt-in family-vs-family scoring. Privacy decision needed (anonymous handle vs real family name).
+4. **Sign in with Google** — broaden adoption beyond Apple ecosystem.
+5. **Deep iOS Screen Time integration** — replace app-level chore gate with system-wide enforcement using Screen Time API.
+
+### Open Questions
+
+- **Inter-family leaderboard privacy:** opt-in only, anonymised handle, or display family name? Default-off?
+- **Push frequency cap:** how many per kid per day before they tune out? (Gut: 3.)
+- **Screen time philosophy:** pure block, or also reward extra time when kids over-deliver on chores?
+- **Pricing:** free forever, freemium (premium = AI distribution / inter-family leaderboard), or flat family subscription?
+- **Credibility system:** how harsh should overdue-job penalties be? (Currently designed as 20%.)
 
 ---
 
