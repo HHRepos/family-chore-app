@@ -198,14 +198,18 @@ a:hover { text-decoration: underline; }
   border-radius: 0 6px 6px 0;
 }
 .main blockquote p { color: var(--text-muted); }
+.main .table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 16px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
 .main table {
   width: 100%;
   border-collapse: collapse;
-  margin: 16px 0;
   font-size: 14px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
+  min-width: 480px;
 }
 .main th {
   background: var(--bg-elev);
@@ -214,6 +218,7 @@ a:hover { text-decoration: underline; }
   color: var(--purple);
   font-weight: 600;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 .main td { padding: 10px 12px; border-top: 1px solid var(--border); }
 .main tr:nth-child(even) td { background: var(--bg-elev); }
@@ -255,27 +260,59 @@ a:hover { text-decoration: underline; }
 
 /* ---------- Mobile ---------- */
 @media (max-width: 900px) {
+  html, body { font-size: 15px; }
   .layout { grid-template-columns: 1fr; }
   .sidebar {
     position: fixed;
     top: 56px;
     left: 0;
-    width: 280px;
+    width: min(86vw, 320px);
+    height: calc(100vh - 56px);
     background: var(--bg);
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    transition: transform 0.22s ease;
     z-index: 40;
     border-right: 1px solid var(--border);
+    box-shadow: 12px 0 32px rgba(0,0,0,0.4);
   }
   .sidebar.open { transform: translateX(0); }
-  .main { padding: 24px 20px 96px; }
-  .topbar .menu { display: block; margin-right: 12px; }
+  .sidebar a.nav-link { padding: 10px 14px; font-size: 15px; }
+  .main { padding: 20px 18px 96px; max-width: 100%; }
+  .main h1 { font-size: 26px; }
+  .main h2 { font-size: 20px; margin-top: 36px; }
+  .main h3 { font-size: 16px; }
+  .main pre { font-size: 12px; padding: 12px; }
+  .main blockquote { padding: 8px 12px; }
+  .topbar { padding: 0 14px; }
+  .topbar .menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    margin-right: 10px;
+    padding: 0;
+    font-size: 18px;
+  }
+  .topbar .badge { display: none; }
+  .topbar .brand { font-size: 15px; }
   .scrim {
-    position: fixed; inset: 56px 0 0; background: rgba(0,0,0,0.5);
+    position: fixed; inset: 56px 0 0; background: rgba(0,0,0,0.55);
     z-index: 35; display: none;
   }
   .scrim.open { display: block; }
+  .section-marker { margin: 48px 0 8px; }
 }
+
+@media (max-width: 480px) {
+  .main { padding: 16px 14px 96px; }
+  .main h1 { font-size: 23px; }
+  .main h2 { font-size: 18px; padding-bottom: 6px; }
+  .topbar .ext { font-size: 12px; padding: 4px 8px; }
+}
+
+/* Long inline code (URLs, paths) shouldn't break layout */
+.main code { word-break: break-word; }
+.main p, .main li { overflow-wrap: anywhere; }
 
 /* ---------- Scrollbar polish ---------- */
 .sidebar::-webkit-scrollbar { width: 8px; }
@@ -330,7 +367,7 @@ a:hover { text-decoration: underline; }
 Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validation prototype and has been removed. Current focus: stabilize Build 5 in TestFlight, then ship v1.1 (auth providers + push + inter-family leaderboard).</p>
 </blockquote>
 <h3 id="implementation-status">Implementation Status</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Stage</th>
@@ -351,10 +388,10 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>On the roadmap, no code yet</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="feature-matrix">Feature Matrix</h3>
 <h4 id="onboarding-auth">Onboarding &amp; Auth</h4>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Feature</th>
@@ -404,9 +441,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Backend route missing; needs GoogleSignIn pod</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4 id="chore-system">Chore System</h4>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Feature</th>
@@ -471,9 +508,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>iOS visual feedback</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4 id="gamification-rewards">Gamification &amp; Rewards</h4>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Feature</th>
@@ -538,9 +575,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Future</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4 id="jobs-board-contracts">Jobs Board (Contracts)</h4>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Feature</th>
@@ -585,9 +622,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Concept exists in WIKI; lambda wiring not verified end-to-end</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4 id="family-management">Family Management</h4>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Feature</th>
@@ -632,9 +669,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>v2.0 — shared kids across two homes, custody-aware schedules</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4 id="house-rules-screen-time">House Rules &amp; Screen Time</h4>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Feature</th>
@@ -669,9 +706,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Currently app-level only — no system-wide blocking</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4 id="notifications">Notifications</h4>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Feature</th>
@@ -691,10 +728,10 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>v1.2 backlog</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="chore-system-deep-dive">Chore System Deep Dive</h3>
 <h4 id="chore-types-chore_type-field-migration-011">Chore Types (<code>chore_type</code> field, migration 011)</h4>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Type</th>
@@ -735,7 +772,7 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>6+</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4 id="distribution-algorithm-the-ai-brain">Distribution Algorithm (the AI brain)</h4>
 <ol>
 <li>Fetch household members (children, plus parents if opted in).</li>
@@ -758,7 +795,7 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <li><strong>Pet walks / litter</strong> have higher minimums (6 – 8) for safety.</li>
 </ul>
 <h4 id="point-math">Point Math</h4>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Action</th>
@@ -788,14 +825,14 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td><code>ceil(points/2)</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h4 id="status-flow">Status Flow</h4>
 <pre><code>pending → in_progress → completed → approved   (full points awarded)
                                   → rejected   (no points)
 </code></pre>
 <p>Transfers and support requests sit on top of this flow — they don't change the status, only who gets credit when the parent approves.</p>
 <h3 id="key-product-decisions">Key Product Decisions</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Date</th>
@@ -830,7 +867,7 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Replace manual Xcode archive + upload</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="next-up-v11-priorities">Next Up (v1.1 priorities)</h3>
 <p>Ranked by <code>user_value × delivery_cost</code>:</p>
 <ol>
@@ -929,7 +966,7 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 </ul>
 <hr />
 <h2 id="project-tech-stack">Tech Stack</h2>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Layer</th>
@@ -966,7 +1003,7 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>esbuild (Lambda), Xcode (iOS)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <hr />
 <h2 id="project-architecture">Architecture</h2>
 <pre><code>family-chore-app/
@@ -992,7 +1029,7 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <hr />
 <h2 id="project-api-endpoints">API Endpoints</h2>
 <h3 id="auth">Auth</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -1017,9 +1054,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Get current user profile</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="families">Families</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -1084,9 +1121,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Store scanned rooms + create chores</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="chores">Chores</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -1141,9 +1178,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Request help (50/50 split)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="rewards">Rewards</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -1178,9 +1215,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Redeem reward with points</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="jobs">Jobs</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -1220,9 +1257,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Confirm + award (parent)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="ai">AI</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -1252,9 +1289,9 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>GPT-4o Vision room analysis</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="other">Other</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -1294,11 +1331,11 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Parent chore participation</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <hr />
 <h2 id="project-database-schema">Database Schema</h2>
 <h3 id="tables">Tables</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Table</th>
@@ -1355,7 +1392,7 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>Invite tokens for child account creation</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="key-columns">Key Columns</h3>
 <ul>
 <li><code>families.house_details</code> (JSONB) — stores <code>scanned_rooms</code>, <code>bin_schedule</code>, <code>pets</code>, <code>gaming_schedule</code></li>
@@ -1379,7 +1416,7 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <hr />
 <h2 id="project-deployment">Deployment</h2>
 <h3 id="infrastructure-aws-eu-west-1">Infrastructure (AWS eu-west-1)</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Component</th>
@@ -1404,7 +1441,7 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 <td>App Store Connect / TestFlight (bundle id <code>com.snow.omyday</code>)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="deploy-commands">Deploy Commands</h3>
 <pre><code class="language-bash"># Backend (AWS Lambda)
 cd lambda-backend &amp;&amp; npm run build &amp;&amp; npm run package
@@ -1439,7 +1476,7 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 </ul>
 <hr />
 <h2 id="project-related-docs">Related Docs</h2>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Document</th>
@@ -1479,7 +1516,7 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 <td>Live-rendered hub for both wikis</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <hr />
 <h2 id="project-changelog">Changelog</h2>
 <h3 id="2026-05-07-later-build-5">2026-05-07 (later) — Build 5</h3>
@@ -1669,7 +1706,7 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 <h2 id="ios-auth-flow">Auth Flow</h2>
 <h3 id="smart-auth-one-screen-multiple-paths">Smart Auth — One Screen, Multiple Paths</h3>
 <p>The app uses a single <code>SmartAuthView</code> that replaces traditional role selection + separate login/register screens.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Path</th>
@@ -1714,7 +1751,7 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 <td>Returning users</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="how-it-works">How It Works</h3>
 <ol>
 <li><strong>No role selection</strong> — the API profile response contains the role</li>
@@ -1734,7 +1771,7 @@ Auth + has family → MainTabView
 <hr />
 <h2 id="ios-app-routing">App Routing</h2>
 <h3 id="child-tabs">Child Tabs</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Tab</th>
@@ -1769,9 +1806,9 @@ Auth + has family → MainTabView
 <td>Stats, badges, streak badges, logout</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="parent-tabs">Parent Tabs</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Tab</th>
@@ -1806,7 +1843,7 @@ Auth + has family → MainTabView
 <td>Family config, chores, routines, room scan, participation</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <hr />
 <h2 id="ios-child-experience">Child Experience</h2>
 <h3 id="questmapview-daily-hub">QuestMapView (Daily Hub)</h3>
@@ -1938,7 +1975,7 @@ Auth + has family → MainTabView
 <h2 id="ios-api-endpoints">API Endpoints</h2>
 <p>All endpoints use Bearer JWT authentication. Base URL: <code>https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1</code></p>
 <h3 id="auth">Auth</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -1963,9 +2000,9 @@ Auth + has family → MainTabView
 <td>Get current user</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="family">Family</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -2005,9 +2042,9 @@ Auth + has family → MainTabView
 <td>Save scanned rooms</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="chores">Chores</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -2062,9 +2099,9 @@ Auth + has family → MainTabView
 <td>Claim bonus</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="gamification">Gamification</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -2099,9 +2136,9 @@ Auth + has family → MainTabView
 <td>Pending approvals</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="rewards-jobs">Rewards &amp; Jobs</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -2171,9 +2208,9 @@ Auth + has family → MainTabView
 <td>Confirm + award</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="screen-time-ai">Screen Time &amp; AI</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Method</th>
@@ -2218,10 +2255,10 @@ Auth + has family → MainTabView
 <td>Room detection</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <hr />
 <h2 id="ios-models">Models</h2>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Model</th>
@@ -2274,7 +2311,7 @@ Auth + has family → MainTabView
 <td>100 XP/level, titles: Apprentice→Mythic</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <hr />
 <h2 id="ios-theme-amp-design">Theme &amp; Design</h2>
 <ul>

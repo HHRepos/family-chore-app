@@ -55,6 +55,9 @@ def render_with_toc(md_text: str, prefix: str):
         if tok["name"] in SKIP_NAV:
             continue
         sections.append({"id": new_id, "name": tok["name"]})
+    # Wrap tables for horizontal scroll on narrow viewports
+    html = re.sub(r"(<table>)", r'<div class="table-wrap">\1', html)
+    html = re.sub(r"(</table>)", r"\1</div>", html)
     return html, sections
 
 
@@ -260,14 +263,18 @@ a:hover { text-decoration: underline; }
   border-radius: 0 6px 6px 0;
 }
 .main blockquote p { color: var(--text-muted); }
+.main .table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 16px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
 .main table {
   width: 100%;
   border-collapse: collapse;
-  margin: 16px 0;
   font-size: 14px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
+  min-width: 480px;
 }
 .main th {
   background: var(--bg-elev);
@@ -276,6 +283,7 @@ a:hover { text-decoration: underline; }
   color: var(--purple);
   font-weight: 600;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 .main td { padding: 10px 12px; border-top: 1px solid var(--border); }
 .main tr:nth-child(even) td { background: var(--bg-elev); }
@@ -317,27 +325,59 @@ a:hover { text-decoration: underline; }
 
 /* ---------- Mobile ---------- */
 @media (max-width: 900px) {
+  html, body { font-size: 15px; }
   .layout { grid-template-columns: 1fr; }
   .sidebar {
     position: fixed;
     top: 56px;
     left: 0;
-    width: 280px;
+    width: min(86vw, 320px);
+    height: calc(100vh - 56px);
     background: var(--bg);
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    transition: transform 0.22s ease;
     z-index: 40;
     border-right: 1px solid var(--border);
+    box-shadow: 12px 0 32px rgba(0,0,0,0.4);
   }
   .sidebar.open { transform: translateX(0); }
-  .main { padding: 24px 20px 96px; }
-  .topbar .menu { display: block; margin-right: 12px; }
+  .sidebar a.nav-link { padding: 10px 14px; font-size: 15px; }
+  .main { padding: 20px 18px 96px; max-width: 100%; }
+  .main h1 { font-size: 26px; }
+  .main h2 { font-size: 20px; margin-top: 36px; }
+  .main h3 { font-size: 16px; }
+  .main pre { font-size: 12px; padding: 12px; }
+  .main blockquote { padding: 8px 12px; }
+  .topbar { padding: 0 14px; }
+  .topbar .menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    margin-right: 10px;
+    padding: 0;
+    font-size: 18px;
+  }
+  .topbar .badge { display: none; }
+  .topbar .brand { font-size: 15px; }
   .scrim {
-    position: fixed; inset: 56px 0 0; background: rgba(0,0,0,0.5);
+    position: fixed; inset: 56px 0 0; background: rgba(0,0,0,0.55);
     z-index: 35; display: none;
   }
   .scrim.open { display: block; }
+  .section-marker { margin: 48px 0 8px; }
 }
+
+@media (max-width: 480px) {
+  .main { padding: 16px 14px 96px; }
+  .main h1 { font-size: 23px; }
+  .main h2 { font-size: 18px; padding-bottom: 6px; }
+  .topbar .ext { font-size: 12px; padding: 4px 8px; }
+}
+
+/* Long inline code (URLs, paths) shouldn't break layout */
+.main code { word-break: break-word; }
+.main p, .main li { overflow-wrap: anywhere; }
 
 /* ---------- Scrollbar polish ---------- */
 .sidebar::-webkit-scrollbar { width: 8px; }
