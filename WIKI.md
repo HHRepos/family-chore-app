@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
 > **Last updated:** 2026-05-07
-> **Version:** iOS 1.0.1 (Build 4) — TestFlight
+> **Version:** iOS 1.0.1 (Build 5) — TestFlight
 > **API:** https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07)
 

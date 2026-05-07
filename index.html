@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OMyDays — Family Chore App</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 48px 24px;
+      background: #0B0F1A;
+      color: #e0e0e0;
+      line-height: 1.65;
+    }
+    h1 {
+      color: #00D4FF;
+      border-bottom: 2px solid #00D4FF;
+      padding-bottom: 12px;
+      letter-spacing: -0.02em;
+      font-size: 2.4em;
+      margin-bottom: 8px;
+    }
+    .tagline { color: #9CA3AF; font-size: 16px; margin-bottom: 8px; }
+    .meta {
+      color: #6B7280;
+      font-size: 13px;
+      margin-bottom: 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .meta span { white-space: nowrap; }
+    .badge {
+      display: inline-block;
+      background: #151A2E;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #1E2440;
+      color: #00FF88;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    .nav {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 40px 0;
+    }
+    .nav a {
+      display: block;
+      padding: 24px 28px;
+      background: #151A2E;
+      border: 1px solid #1E2440;
+      border-radius: 12px;
+      flex: 1;
+      min-width: 280px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .nav a:hover {
+      border-color: #00D4FF;
+      transform: translateY(-2px);
+    }
+    .nav .label {
+      color: #00D4FF;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .nav .desc {
+      color: #9CA3AF;
+      font-size: 13px;
+    }
+    h2 {
+      color: #00D4FF;
+      border-bottom: 1px solid #1E2440;
+      padding-bottom: 8px;
+      margin-top: 40px;
+    }
+    a { color: #00FF88; }
+    a:hover { text-decoration: underline; }
+    code {
+      background: #1E2440;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #FF69B4;
+      font-size: 0.9em;
+    }
+    .links {
+      list-style: none;
+      padding: 0;
+    }
+    .links li {
+      padding: 10px 0;
+      border-bottom: 1px solid #1E2440;
+    }
+    .links li:last-child { border-bottom: none; }
+    .links .key { color: #A855F7; font-weight: 600; min-width: 140px; display: inline-block; }
+  </style>
+</head>
+<body>
+  <h1>OMyDays</h1>
+  <p class="tagline">AI-powered family chore management — voice onboarding, gamified rewards, smart scheduling.</p>
+  <div class="meta">
+    <span><span class="badge">iOS 1.0.1 — Build 5</span></span>
+    <span>Last updated: 2026-05-07</span>
+  </div>
+
+  <div class="nav">
+    <a href="wiki.html">
+      <div class="label">Project Wiki →</div>
+      <div class="desc">Full project overview: features, tech stack, architecture, API, database, deployment, roadmap.</div>
+    </a>
+    <a href="ios-app/wiki.html">
+      <div class="label">iOS App Wiki →</div>
+      <div class="desc">SwiftUI app internals: file structure, stores, views, biometric auth, TestFlight builds.</div>
+    </a>
+  </div>
+
+  <h2>Quick Reference</h2>
+  <ul class="links">
+    <li><span class="key">Source code:</span> <a href="https://github.com/HHRepos/family-chore-app">github.com/HHRepos/family-chore-app</a></li>
+    <li><span class="key">Backend API:</span> <code>https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1</code></li>
+    <li><span class="key">Database:</span> AWS RDS Postgres (eu-west-1)</li>
+    <li><span class="key">iOS bundle:</span> <code>com.snow.omyday</code></li>
+    <li><span class="key">TestFlight:</span> Build 5 (Face ID crash fix, 2026-05-07)</li>
+  </ul>
+
+  <h2>Recent Changes</h2>
+  <ul>
+    <li><strong>2026-05-07</strong> — Build 5: Fixed Face ID login crash (added <code>NSFaceIDUsageDescription</code> privacy string)</li>
+    <li><strong>2026-05-07</strong> — Pivot: Removed legacy web validation code; project is now mobile-only</li>
+    <li><strong>2026-05-07</strong> — Added fastlane automation for TestFlight uploads</li>
+    <li><strong>2026-04-14</strong> — Build 4 distributed via TestFlight</li>
+  </ul>
+
+  <h2>Roadmap (v1.1)</h2>
+  <ul>
+    <li>Inter-family leaderboard</li>
+    <li>Sign in with Apple (backend route exists)</li>
+    <li>Sign in with Google</li>
+    <li>iOS parity: push notifications, screen-time UI, transfer/support UI</li>
+  </ul>
+</body>
+</html>
