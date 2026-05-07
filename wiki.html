@@ -1,28 +1,23 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>OMyDays — Project Wiki</title><style>
-body { font-family: -apple-system, system-ui, "Segoe UI", sans-serif; max-width: 920px; margin: 0 auto; padding: 24px; background: #0B0F1A; color: #e0e0e0; line-height: 1.65; }
-h1, h2, h3 { color: #00D4FF; }
-h1 { border-bottom: 2px solid #00D4FF; padding-bottom: 10px; letter-spacing: -0.02em; }
-h2 { border-bottom: 1px solid #1E2440; padding-bottom: 8px; margin-top: 40px; }
+body { font-family: -apple-system, system-ui, "Segoe UI", sans-serif; max-width: 920px; margin: 0 auto; padding: 24px; background: #0d1117; color: #e6edf3; line-height: 1.65; }
+h1, h2, h3 { color: #e6edf3; }
+h1 { border-bottom: 2px solid #21262d; padding-bottom: 10px; letter-spacing: -0.02em; }
+h2 { border-bottom: 1px solid #21262d; padding-bottom: 8px; margin-top: 40px; }
 h3 { margin-top: 28px; }
-a { color: #00FF88; text-decoration: none; }
+a { color: #79c0ff; text-decoration: none; }
 a:hover { text-decoration: underline; }
-code { background: #1E2440; padding: 2px 6px; border-radius: 4px; color: #FF69B4; font-size: 0.9em; }
-pre { background: #151A2E; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #1E2440; }
-pre code { background: none; padding: 0; color: inherit; }
+code { background: #1c2128; padding: 2px 6px; border-radius: 4px; color: #ff7b72; font-size: 0.9em; border: 1px solid #21262d; }
+pre { background: #1c2128; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #21262d; }
+pre code { background: none; padding: 0; border: none; color: inherit; }
 table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-th { background: #151A2E; padding: 10px; text-align: left; color: #A855F7; border: 1px solid #1E2440; }
-td { padding: 8px 10px; border: 1px solid #1E2440; }
-tr:nth-child(even) { background: #0f1225; }
-blockquote { border-left: 3px solid #00D4FF; padding-left: 16px; color: #999; margin: 16px 0; }
-hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
-.nav { display: flex; gap: 16px; flex-wrap: wrap; margin: 32px 0; }
-.nav a { display: block; padding: 24px 28px; background: #151A2E; border: 1px solid #1E2440; border-radius: 12px; flex: 1; min-width: 280px; transition: all 0.2s; }
-.nav a:hover { border-color: #00D4FF; transform: translateY(-2px); text-decoration: none; }
-.nav .label { color: #00D4FF; font-size: 18px; font-weight: 600; margin-bottom: 6px; }
-.nav .desc { color: #9CA3AF; font-size: 13px; }
-.crumb { font-size: 13px; color: #6B7280; margin-bottom: 24px; }
-.crumb a { color: #6B7280; }
-</style></head><body><h1>OMyDays — Project Wiki</h1>
+th { background: #161b22; padding: 10px; text-align: left; color: #d2a8ff; border: 1px solid #21262d; }
+td { padding: 8px 10px; border: 1px solid #21262d; }
+tr:nth-child(even) { background: #161b22; }
+blockquote { border-left: 3px solid #58c6ff; padding-left: 16px; color: #8b949e; margin: 16px 0; }
+hr { border: none; border-top: 1px solid #21262d; margin: 30px 0; }
+.crumb { font-size: 13px; color: #6e7681; margin-bottom: 24px; }
+.crumb a { color: #6e7681; }
+</style></head><body><div class="crumb"><a href="index.html">← Wiki home</a></div><h1 id="omydays-project-wiki">OMyDays — Project Wiki</h1>
 <blockquote>
 <p><strong>Last updated:</strong> 2026-05-07
 <strong>Version:</strong> iOS 1.0.1 (Build 5) — TestFlight
@@ -30,7 +25,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07)</p>
 </blockquote>
 <hr />
-<h2>Table of Contents</h2>
+<h2 id="project-table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#features">Features</a></li>
@@ -44,11 +39,11 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <li><a href="#changelog">Changelog</a></li>
 </ul>
 <hr />
-<h2>Overview</h2>
+<h2 id="project-overview">Overview</h2>
 <p>AI-powered family chore management app with voice-first onboarding, house scanning, gamified rewards, jobs board, and household routine management. Designed to reduce parental mental load by automating chore scheduling and making chores fun for kids through points, badges, and a rewards shop.</p>
 <hr />
-<h2>Features</h2>
-<h3>Onboarding</h3>
+<h2 id="project-features">Features</h2>
+<h3 id="onboarding">Onboarding</h3>
 <ul>
 <li><strong>Voice-first setup</strong> — ChatGPT-style conversational UI with speech recognition and TTS</li>
 <li><strong>House scanning</strong> — Upload room photos, GPT-4o Vision detects rooms/appliances and suggests chores</li>
@@ -56,7 +51,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <li><strong>Rewards selection</strong> — Parents pick from suggested rewards during setup</li>
 <li><strong>Manual form fallback</strong> — 5-step form mode if voice isn't preferred</li>
 </ul>
-<h3>Chore Management</h3>
+<h3 id="chore-management">Chore Management</h3>
 <ul>
 <li><strong>AI-powered distribution</strong> — GPT-4o-mini creates a fair 7-day schedule with rules:</li>
 <li>No same chore for two children on the same day</li>
@@ -71,7 +66,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <li><strong>Parent participation</strong> — Parents can opt-in to the chore rotation via Settings toggle</li>
 <li><strong>Star burst animation</strong> — Visual feedback when completing a chore</li>
 </ul>
-<h3>Gamification</h3>
+<h3 id="gamification">Gamification</h3>
 <ul>
 <li><strong>Points system</strong> — Earn points for completing chores, jobs, and bonus tasks</li>
 <li><strong>Difficulty tiers</strong> — Rookie (easy/10pts), Pro (medium/15pts), Legend (hard/25pts)</li>
@@ -81,7 +76,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <li><strong>Monthly Hero badge</strong> (gold) — Complete all chores every day for the month</li>
 <li><strong>Family leaderboard</strong> — Ranked by points with medal indicators</li>
 </ul>
-<h3>Rewards Shop</h3>
+<h3 id="rewards-shop">Rewards Shop</h3>
 <ul>
 <li><strong>Points-based store</strong> — Children browse and buy rewards with earned points</li>
 <li><strong>Galaxy-themed UI</strong> — Twinkling star animations, glowing point balance</li>
@@ -89,7 +84,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <li><strong>Parent management view</strong> — Add, edit, delete rewards directly from Shop tab</li>
 <li><strong>Purchase animation</strong> — Green "Purchased!" feedback on buy</li>
 </ul>
-<h3>Jobs Board</h3>
+<h3 id="jobs-board">Jobs Board</h3>
 <ul>
 <li><strong>Parent posts jobs</strong> — Title, description, reward (points or cash), due date</li>
 <li><strong>Two job types:</strong></li>
@@ -99,7 +94,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <li><strong>Credibility system</strong> — Overdue assigned jobs auto-expire with 20% point penalty</li>
 <li><strong>Job lifecycle:</strong> Open -&gt; Assigned -&gt; Completed -&gt; Confirmed (or Expired)</li>
 </ul>
-<h3>Family Rules</h3>
+<h3 id="family-rules">Family Rules</h3>
 <ul>
 <li><strong>Bin collection schedule</strong> — Collection days + weekly rotation between children</li>
 <li><strong>Pet care</strong> — Dog walk rotation, cat litter rotation with age-appropriate filtering</li>
@@ -107,26 +102,26 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <li><strong>Today's summary</strong> — Shows whose turn for bins, pet care, and gaming allowances today</li>
 <li><strong>Visible to everyone</strong> — Both parents and children see the Rules tab</li>
 </ul>
-<h3>Room Scanning (Post-Setup)</h3>
+<h3 id="room-scanning-post-setup">Room Scanning (Post-Setup)</h3>
 <ul>
 <li><strong>Scan additional rooms</strong> from Settings at any time</li>
 <li><strong>Appends</strong> new rooms without overwriting existing data</li>
 <li><strong>Auto-creates chores</strong> from AI suggestions</li>
 </ul>
-<h3>Screen Time Management</h3>
+<h3 id="screen-time-management">Screen Time Management</h3>
 <ul>
 <li><strong>Daily limits</strong> — Set minutes per day per child</li>
 <li><strong>Chore-gated access</strong> — Must complete daily chores to unlock screen time</li>
 <li><strong>Minimum points required</strong> — Set point threshold for access</li>
 </ul>
-<h3>User Management</h3>
+<h3 id="user-management">User Management</h3>
 <ul>
 <li><strong>Parent/child accounts</strong> — Role-based views and permissions</li>
 <li><strong>Child invitations</strong> — Generate invite links (7-day expiry) for children to create their own login</li>
 <li><strong>Family structure</strong> — Multiple children, optional parent participation</li>
 </ul>
 <hr />
-<h2>Tech Stack</h2>
+<h2 id="project-tech-stack">Tech Stack</h2>
 <table>
 <thead>
 <tr>
@@ -166,7 +161,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tbody>
 </table>
 <hr />
-<h2>Architecture</h2>
+<h2 id="project-architecture">Architecture</h2>
 <pre><code>family-chore-app/
 +-- ios-app/             # SwiftUI iOS app (OMyDay), 52+ Swift files
 |   +-- MyDay.xcodeproj  # Xcode project
@@ -188,8 +183,8 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <p>Web validation code (React/Vite frontend + Express microservice packages + Lerna monorepo) was removed on 2026-05-07. The iOS app has full feature parity and is the only shipping client.</p>
 </blockquote>
 <hr />
-<h2>API Endpoints</h2>
-<h3>Auth</h3>
+<h2 id="project-api-endpoints">API Endpoints</h2>
+<h3 id="auth">Auth</h3>
 <table>
 <thead>
 <tr>
@@ -216,7 +211,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tr>
 </tbody>
 </table>
-<h3>Families</h3>
+<h3 id="families">Families</h3>
 <table>
 <thead>
 <tr>
@@ -283,7 +278,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tr>
 </tbody>
 </table>
-<h3>Chores</h3>
+<h3 id="chores">Chores</h3>
 <table>
 <thead>
 <tr>
@@ -340,7 +335,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tr>
 </tbody>
 </table>
-<h3>Rewards</h3>
+<h3 id="rewards">Rewards</h3>
 <table>
 <thead>
 <tr>
@@ -377,7 +372,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tr>
 </tbody>
 </table>
-<h3>Jobs</h3>
+<h3 id="jobs">Jobs</h3>
 <table>
 <thead>
 <tr>
@@ -419,7 +414,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tr>
 </tbody>
 </table>
-<h3>AI</h3>
+<h3 id="ai">AI</h3>
 <table>
 <thead>
 <tr>
@@ -451,7 +446,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tr>
 </tbody>
 </table>
-<h3>Other</h3>
+<h3 id="other">Other</h3>
 <table>
 <thead>
 <tr>
@@ -494,8 +489,8 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tbody>
 </table>
 <hr />
-<h2>Database Schema</h2>
-<h3>Tables</h3>
+<h2 id="project-database-schema">Database Schema</h2>
+<h3 id="tables">Tables</h3>
 <table>
 <thead>
 <tr>
@@ -554,7 +549,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tr>
 </tbody>
 </table>
-<h3>Key Columns</h3>
+<h3 id="key-columns">Key Columns</h3>
 <ul>
 <li><code>families.house_details</code> (JSONB) — stores <code>scanned_rooms</code>, <code>bin_schedule</code>, <code>pets</code>, <code>gaming_schedule</code></li>
 <li><code>assigned_chores.transferred_from</code> — tracks who transferred a chore</li>
@@ -562,7 +557,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <li><code>users.participate_in_chores</code> — parent opt-in for chore rotation</li>
 <li><code>rewards.child_id</code> — optional per-child reward assignment</li>
 </ul>
-<h3>Migrations</h3>
+<h3 id="migrations">Migrations</h3>
 <ol>
 <li><code>001_initial_schema.sql</code> — Core tables</li>
 <li><code>002_seed_data.sql</code> — Default chores and rewards</li>
@@ -575,8 +570,8 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 <li><code>009_chore_transfers.sql</code> — Transfer/support tracking</li>
 </ol>
 <hr />
-<h2>Deployment</h2>
-<h3>Infrastructure (AWS eu-west-1)</h3>
+<h2 id="project-deployment">Deployment</h2>
+<h3 id="infrastructure-aws-eu-west-1">Infrastructure (AWS eu-west-1)</h3>
 <table>
 <thead>
 <tr>
@@ -603,7 +598,7 @@ hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
 </tr>
 </tbody>
 </table>
-<h3>Deploy Commands</h3>
+<h3 id="deploy-commands">Deploy Commands</h3>
 <pre><code class="language-bash"># Backend (AWS Lambda)
 cd lambda-backend &amp;&amp; npm run build &amp;&amp; npm run package
 aws lambda update-function-code --function-name family-chore-api --zip-file fileb://function.zip --region eu-west-1 --profile claude-admin
@@ -614,15 +609,15 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 # iOS — Archive in Xcode, upload via App Store Connect / Transporter
 </code></pre>
 <hr />
-<h2>Roadmap</h2>
+<h2 id="project-roadmap">Roadmap</h2>
 <p>See <a href="ROADMAP.md">ROADMAP.md</a> for the full feature backlog. Highlights:</p>
-<h3>Coming in v1.1</h3>
+<h3 id="coming-in-v11">Coming in v1.1</h3>
 <ul>
 <li><strong>Inter-Family Leaderboard</strong> — Families compete globally. Family score = sum of all members' points. Opt-in privacy. Weekly &amp; all-time rankings. "Top 10 Family" badge. Incentivizes collective effort.</li>
 <li><strong>iOS App Feature Parity</strong> — Complete the MyDay game-style iOS app with all web features</li>
 <li><strong>Push Notifications</strong> — Chore assignments, approvals, streak reminders, badge achievements</li>
 </ul>
-<h3>Backlog (v1.2+)</h3>
+<h3 id="backlog-v12">Backlog (v1.2+)</h3>
 <ul>
 <li>Notification system (push + in-app)</li>
 <li>Avatar customization (unlock outfits with points)</li>
@@ -636,7 +631,7 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 <li>AI Chore Coach, AR room detection, wearable integration</li>
 </ul>
 <hr />
-<h2>Related Docs</h2>
+<h2 id="project-related-docs">Related Docs</h2>
 <table>
 <thead>
 <tr>
@@ -679,13 +674,13 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 </tbody>
 </table>
 <hr />
-<h2>Changelog</h2>
-<h3>2026-05-07 (later) — Build 5</h3>
+<h2 id="project-changelog">Changelog</h2>
+<h3 id="2026-05-07-later-build-5">2026-05-07 (later) — Build 5</h3>
 <ul>
 <li><strong>Fix: Face ID login crash.</strong> App was hard-terminated by iOS the first time the user tapped "Sign in with Face ID" on the Welcome Back screen. Root cause: <code>NSFaceIDUsageDescription</code> was missing from the Xcode-generated Info.plist (other privacy strings were present — Camera, Microphone, Speech — but not Face ID). Added <code>INFOPLIST_KEY_NSFaceIDUsageDescription</code> to both Debug and Release build configurations. No code changes — Keychain biometric flow in <a href="ios-app/MyDay/Services/KeychainHelper.swift"><code>KeychainHelper.loadCredentialsWithBiometric</code></a> was already correct.</li>
 <li><strong>Bumped <code>CURRENT_PROJECT_VERSION</code> 4 → 5</strong> so the fix can be uploaded as a new TestFlight build. <code>MARKETING_VERSION</code> stays at 1.0.1 (same logical version, fix-only).</li>
 </ul>
-<h3>2026-05-07</h3>
+<h3 id="2026-05-07">2026-05-07</h3>
 <ul>
 <li><strong>Pivot to mobile-only.</strong> The web app was a validation prototype; the iOS app now has full feature parity and is the only shipping client.</li>
 <li>Removed <code>packages/web-app/</code> (React/Vite frontend), the four legacy microservice packages (<code>user-service</code>, <code>chore-service</code>, <code>gamification-service</code>, <code>ai-service</code>), Lerna config, root <code>package.json</code> / <code>package-lock.json</code>, and <code>node_modules/</code>. All API logic lives in <code>lambda-backend/src/index.ts</code>.</li>
@@ -694,7 +689,7 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 <li>Added <code>serve_wiki.py</code> — local wiki hub at http://localhost:8765/ that live-renders both this wiki and the iOS-specific wiki.</li>
 <li>Renamed wiki title to <strong>OMyDays</strong> to match the app branding; updated <code>Tech Stack</code>, <code>Architecture</code>, <code>Deployment</code>, and <code>Related Docs</code> sections to reflect mobile-only scope.</li>
 </ul>
-<h3>2026-04-14</h3>
+<h3 id="2026-04-14">2026-04-14</h3>
 <ul>
 <li><strong>OMyDay iOS app v1.0.1 (Build 4) on TestFlight</strong></li>
 <li>52 Swift files, full feature parity with web app + new features</li>
@@ -711,26 +706,26 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 <li>Play Time &amp; Gaming rules with device icons and weekend badges</li>
 <li>All backend endpoints deployed to AWS Lambda</li>
 </ul>
-<h3>2026-04-05</h3>
+<h3 id="2026-04-05">2026-04-05</h3>
 <ul>
 <li>MyDay iOS app created (35 Swift files — SwiftUI game-style RPG chore app)</li>
 <li>Feature roadmap &amp; backlog created (ROADMAP.md)</li>
 <li>Game concept wiki created (MyDay/GAME-WIKI.md)</li>
 <li>Inter-family leaderboard concept designed (v1.1)</li>
 </ul>
-<h3>2026-04-02</h3>
+<h3 id="2026-04-02">2026-04-02</h3>
 <ul>
 <li>Auto-generate pet care and bin chores during distribution</li>
 <li>Chore transfer system (full transfer to sibling, all points go to them)</li>
 <li>Support system (ask sibling for help, 50/50 point split)</li>
 <li>Project wiki created</li>
 </ul>
-<h3>2026-03-30</h3>
+<h3 id="2026-03-30">2026-03-30</h3>
 <ul>
 <li>Fixed AI chore distribution: index-based AI communication, unique DB constraint, clear old assignments before redistributing</li>
 <li>Lowered age thresholds: Pro from 4+, Legend from 8+</li>
 </ul>
-<h3>2026-03-29</h3>
+<h3 id="2026-03-29">2026-03-29</h3>
 <ul>
 <li>Room scanning in Settings (post-setup)</li>
 <li>Chore frequency dropdown (Daily/Weekly) in Add Chore form</li>
@@ -750,7 +745,7 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 <li>AI-powered chore distribution with GPT-4o-mini</li>
 <li>Interactive dashboard (clickable stats navigate to relevant pages)</li>
 </ul>
-<h3>2026-03-29 (earlier)</h3>
+<h3 id="2026-03-29-earlier">2026-03-29 (earlier)</h3>
 <ul>
 <li>Jobs Board: post jobs, applications, bidding, cash rewards, credibility system</li>
 <li>Extra chores: children claim bonus tasks for more points</li>

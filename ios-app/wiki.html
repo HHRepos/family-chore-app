@@ -1,18 +1,23 @@
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>OMyDay iOS Wiki</title>
-<style>
-body{font-family:-apple-system,system-ui,sans-serif;max-width:900px;margin:0 auto;padding:20px;background:#0B0F1A;color:#e0e0e0}
-h1,h2,h3{color:#00D4FF} h1{border-bottom:2px solid #00D4FF;padding-bottom:10px}
-h2{border-bottom:1px solid #1E2440;padding-bottom:8px;margin-top:40px}
-a{color:#00FF88} code{background:#1E2440;padding:2px 6px;border-radius:4px;color:#FF69B4;font-size:0.9em}
-pre{background:#151A2E;padding:16px;border-radius:8px;overflow-x:auto;border:1px solid #1E2440}
-pre code{background:none;padding:0}
-table{width:100%;border-collapse:collapse;margin:16px 0}
-th{background:#151A2E;padding:10px;text-align:left;color:#A855F7;border:1px solid #1E2440}
-td{padding:8px 10px;border:1px solid #1E2440}
-tr:nth-child(even){background:#0f1225}
-blockquote{border-left:3px solid #00D4FF;padding-left:16px;color:#999;margin:16px 0}
-hr{border:none;border-top:1px solid #1E2440;margin:30px 0}
-</style></head><body><h1 id="myday-ios-app-wiki">MyDay iOS App — Wiki</h1>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>OMyDays — iOS Wiki</title><style>
+body { font-family: -apple-system, system-ui, "Segoe UI", sans-serif; max-width: 920px; margin: 0 auto; padding: 24px; background: #0d1117; color: #e6edf3; line-height: 1.65; }
+h1, h2, h3 { color: #e6edf3; }
+h1 { border-bottom: 2px solid #21262d; padding-bottom: 10px; letter-spacing: -0.02em; }
+h2 { border-bottom: 1px solid #21262d; padding-bottom: 8px; margin-top: 40px; }
+h3 { margin-top: 28px; }
+a { color: #79c0ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #1c2128; padding: 2px 6px; border-radius: 4px; color: #ff7b72; font-size: 0.9em; border: 1px solid #21262d; }
+pre { background: #1c2128; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #21262d; }
+pre code { background: none; padding: 0; border: none; color: inherit; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+th { background: #161b22; padding: 10px; text-align: left; color: #d2a8ff; border: 1px solid #21262d; }
+td { padding: 8px 10px; border: 1px solid #21262d; }
+tr:nth-child(even) { background: #161b22; }
+blockquote { border-left: 3px solid #58c6ff; padding-left: 16px; color: #8b949e; margin: 16px 0; }
+hr { border: none; border-top: 1px solid #21262d; margin: 30px 0; }
+.crumb { font-size: 13px; color: #6e7681; margin-bottom: 24px; }
+.crumb a { color: #6e7681; }
+</style></head><body><div class="crumb"><a href="../index.html">← Wiki home</a></div><h1 id="myday-ios-app-wiki">MyDay iOS App — Wiki</h1>
 <blockquote>
 <p><strong>Last updated:</strong> 2026-04-14
 <strong>Version:</strong> 1.0.1 (Build 4)
@@ -21,7 +26,7 @@ hr{border:none;border-top:1px solid #1E2440;margin:30px 0}
 <strong>API:</strong> https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1</p>
 </blockquote>
 <hr />
-<h2 id="table-of-contents">Table of Contents</h2>
+<h2 id="ios-table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#architecture">Architecture</a></li>
@@ -38,11 +43,11 @@ hr{border:none;border-top:1px solid #1E2440;margin:30px 0}
 <li><a href="#changelog">Changelog</a></li>
 </ul>
 <hr />
-<h2 id="overview">Overview</h2>
+<h2 id="ios-overview">Overview</h2>
 <p>MyDay is a gamified family chore management iOS app. Children complete "quests" (chores) to earn XP and points, which they spend in a rewards shop. Parents manage chores, approve completions, post bounties (jobs), and configure household routines. The app uses a dark game theme with neon accents.</p>
 <p><strong>52 Swift files</strong> — SwiftUI, Observation framework, no third-party dependencies.</p>
 <hr />
-<h2 id="architecture">Architecture</h2>
+<h2 id="ios-architecture">Architecture</h2>
 <pre><code>ios-app/
 ├── MyDay.xcodeproj
 └── MyDay/
@@ -106,7 +111,7 @@ hr{border:none;border-top:1px solid #1E2440;margin:30px 0}
         └── MainTabView.swift
 </code></pre>
 <hr />
-<h2 id="auth-flow">Auth Flow</h2>
+<h2 id="ios-auth-flow">Auth Flow</h2>
 <h3 id="smart-auth-one-screen-multiple-paths">Smart Auth — One Screen, Multiple Paths</h3>
 <p>The app uses a single <code>SmartAuthView</code> that replaces traditional role selection + separate login/register screens.</p>
 <table>
@@ -172,7 +177,7 @@ Auth + child + no family → MainTabView (with join prompt)
 Auth + has family → MainTabView
 </code></pre>
 <hr />
-<h2 id="app-routing">App Routing</h2>
+<h2 id="ios-app-routing">App Routing</h2>
 <h3 id="child-tabs">Child Tabs</h3>
 <table>
 <thead>
@@ -248,7 +253,7 @@ Auth + has family → MainTabView
 </tbody>
 </table>
 <hr />
-<h2 id="child-experience">Child Experience</h2>
+<h2 id="ios-child-experience">Child Experience</h2>
 <h3 id="questmapview-daily-hub">QuestMapView (Daily Hub)</h3>
 <ul>
 <li>Welcome greeting + points balance</li>
@@ -286,7 +291,7 @@ Auth + has family → MainTabView
 <li>Purchase animation (green checkmark, 2s)</li>
 </ul>
 <hr />
-<h2 id="parent-experience">Parent Experience</h2>
+<h2 id="ios-parent-experience">Parent Experience</h2>
 <h3 id="commandcenterview-hq">CommandCenterView (HQ)</h3>
 <ul>
 <li>Quick stats: Today's Quests, Pending Approvals, Family Members</li>
@@ -328,7 +333,7 @@ Auth + has family → MainTabView
 <li>Save rooms + auto-create chores</li>
 </ul>
 <hr />
-<h2 id="shared-views">Shared Views</h2>
+<h2 id="ios-shared-views">Shared Views</h2>
 <h3 id="allchoresview">AllChoresView</h3>
 <ul>
 <li>Multi-day chore list grouped by date (Today, Tomorrow, etc.)</li>
@@ -357,7 +362,7 @@ Auth + has family → MainTabView
 <li>Family rankings by points with medal display</li>
 </ul>
 <hr />
-<h2 id="onboarding">Onboarding</h2>
+<h2 id="ios-onboarding">Onboarding</h2>
 <h3 id="setupfamilyflow-for-new-parents">SetupFamilyFlow (for new parents)</h3>
 <p>Integrated into registration — not a separate screen.</p>
 <p><strong>Options:</strong>
@@ -375,7 +380,7 @@ Auth + has family → MainTabView
 - Real-time extracted data card
 - Auto-transition to rewards when complete</p>
 <hr />
-<h2 id="api-endpoints">API Endpoints</h2>
+<h2 id="ios-api-endpoints">API Endpoints</h2>
 <p>All endpoints use Bearer JWT authentication. Base URL: <code>https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1</code></p>
 <h3 id="auth">Auth</h3>
 <table>
@@ -660,7 +665,7 @@ Auth + has family → MainTabView
 </tbody>
 </table>
 <hr />
-<h2 id="models">Models</h2>
+<h2 id="ios-models">Models</h2>
 <table>
 <thead>
 <tr>
@@ -716,7 +721,7 @@ Auth + has family → MainTabView
 </tbody>
 </table>
 <hr />
-<h2 id="theme-design">Theme &amp; Design</h2>
+<h2 id="ios-theme-amp-design">Theme &amp; Design</h2>
 <ul>
 <li><strong>Dark game background</strong> (#0B0F1A) with neon accents</li>
 <li><strong>Colors</strong>: neonBlue, neonGreen, neonPurple, neonOrange, neonYellow, neonRed, neonPink</li>
@@ -725,7 +730,7 @@ Auth + has family → MainTabView
 <li><strong>Animations</strong>: Star burst on completion, pulsing logo, spring tab transitions</li>
 </ul>
 <hr />
-<h2 id="roadmap">Roadmap</h2>
+<h2 id="ios-roadmap">Roadmap</h2>
 <h3 id="implementation-pipeline">Implementation Pipeline</h3>
 <ul>
 <li><strong>Sign in with Apple</strong> — Backend <code>POST /auth/apple</code> needed. iOS framework ready. HIGH priority.</li>
@@ -734,7 +739,7 @@ Auth + has family → MainTabView
 <li><strong>Avatar builder during registration</strong> — visual character creator instead of emoji picker</li>
 </ul>
 <hr />
-<h2 id="changelog">Changelog</h2>
+<h2 id="ios-changelog">Changelog</h2>
 <h3 id="2026-04-14">2026-04-14</h3>
 <ul>
 <li><strong>TestFlight Build 4</strong> (v1.0.1) published for beta testing</li>
