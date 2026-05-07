@@ -680,9 +680,10 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 </table>
 <hr />
 <h2>Changelog</h2>
-<h3>2026-05-07 (later)</h3>
+<h3>2026-05-07 (later) — Build 5</h3>
 <ul>
 <li><strong>Fix: Face ID login crash.</strong> App was hard-terminated by iOS the first time the user tapped "Sign in with Face ID" on the Welcome Back screen. Root cause: <code>NSFaceIDUsageDescription</code> was missing from the Xcode-generated Info.plist (other privacy strings were present — Camera, Microphone, Speech — but not Face ID). Added <code>INFOPLIST_KEY_NSFaceIDUsageDescription</code> to both Debug and Release build configurations. No code changes — Keychain biometric flow in <a href="ios-app/MyDay/Services/KeychainHelper.swift"><code>KeychainHelper.loadCredentialsWithBiometric</code></a> was already correct.</li>
+<li><strong>Bumped <code>CURRENT_PROJECT_VERSION</code> 4 → 5</strong> so the fix can be uploaded as a new TestFlight build. <code>MARKETING_VERSION</code> stays at 1.0.1 (same logical version, fix-only).</li>
 </ul>
 <h3>2026-05-07</h3>
 <ul>
