@@ -309,74 +309,6 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
       })));
     }
 
-    // Get available extra chores a child can pick up (from other days, not already assigned to them today)
-    if (path.match(/^\/v1\/users\/[^/]+\/extra-chores$/) && httpMethod === 'GET') {
-      const user = getUserFromToken(event);
-      if (!user) return response(401, { error: 'Unauthorized' });
-
-      const userId = path.split('/')[3];
-      const today = new Date().toISOString().split('T')[0];
-
-      // Get the child's family
-      const familyResult = await pool.query(
-        'SELECT family_id FROM family_members WHERE user_id = $1', [userId]
-      );
-      if (familyResult.rows.length === 0) return response(404, { error: 'User not in a family' });
-      const familyId = familyResult.rows[0].family_id;
-
-      // Get household chores from the family that are NOT already assigned to this child for today
-      // Excludes: daily_habit (already in routine), routine (pet chores assigned by rotation)
-      const result = await pool.query(
-        `SELECT c.chore_id, c.chore_name, c.description, c.difficulty, c.points
-         FROM chores c
-         WHERE c.family_id = $1
-           AND (c.chore_type IS NULL OR c.chore_type = 'household' OR c.chore_type = 'laundry')
-           AND c.is_active = true
-           AND c.chore_id NOT IN (
-             SELECT ac.chore_id FROM assigned_chores ac
-             WHERE ac.user_id = $2 AND ac.due_date = $3
-           )
-         ORDER BY c.points DESC`,
-        [familyId, userId, today]
-      );
-
-      return response(200, result.rows.map(r => ({
-        choreId: r.chore_id,
-        choreName: r.chore_name,
-        description: r.description,
-        difficulty: r.difficulty,
-        points: r.points,
-      })));
-    }
-
-    // Child claims an extra chore for today
-    if (path.match(/^\/v1\/users\/[^/]+\/extra-chores$/) && httpMethod === 'POST') {
-      const user = getUserFromToken(event);
-      if (!user) return response(401, { error: 'Unauthorized' });
-
-      const userId = path.split('/')[3];
-      const { chore_id } = data;
-      const today = new Date().toISOString().split('T')[0];
-
-      // Check not already assigned today
-      const existing = await pool.query(
-        'SELECT 1 FROM assigned_chores WHERE user_id = $1 AND chore_id = $2 AND due_date = $3',
-        [userId, chore_id, today]
-      );
-      if (existing.rows.length > 0) {
-        return response(400, { error: 'This chore is already assigned to you today' });
-      }
-
-      const assignedId = uuidv4();
-      await pool.query(
-        `INSERT INTO assigned_chores (assigned_chore_id, chore_id, user_id, due_date, status)
-         VALUES ($1, $2, $3, $4, 'pending')`,
-        [assignedId, chore_id, userId, today]
-      );
-
-      return response(201, { assigned_chore_id: assignedId, message: 'Extra chore added!' });
-    }
-
     // Get user stats: total completed, streak, total points
     if (path.match(/^\/v1\/users\/[^/]+\/stats$/) && httpMethod === 'GET') {
       const user = getUserFromToken(event);
@@ -1330,6 +1262,64 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
           }
         }
       }
+
+      // ── STEP 3.5: Fairness post-processing ──
+      // Rebalance the schedule so every family member ends up with within
+      // 1 chore of every other (and roughly balanced points), regardless of
+      // whether the AI or fallback produced the schedule. Without this the
+      // AI can drift to "everyone gets 2/day" locally while leaving global
+      // counts uneven once age filters drop assignments.
+      const countByMember = new Array<number>(allMembers.length).fill(0);
+      const pointsByMember = new Array<number>(allMembers.length).fill(0);
+      for (const e of finalSchedule) {
+        countByMember[e.memberIdx]++;
+        pointsByMember[e.memberIdx] += chores[e.choreIdx].points || 10;
+      }
+
+      const ageOk = (member: any, chore: any) => {
+        if (chore.difficulty === 'hard' && member.age && member.age < 8) return false;
+        if (chore.difficulty === 'medium' && member.age && member.age < 4) return false;
+        return true;
+      };
+
+      // Move chores from busiest → least-loaded member until gap ≤ 1.
+      // Cap iterations to prevent any pathological loop.
+      for (let iter = 0; iter < 100; iter++) {
+        let maxIdx = 0, minIdx = 0;
+        for (let i = 1; i < allMembers.length; i++) {
+          if (countByMember[i] > countByMember[maxIdx]) maxIdx = i;
+          if (countByMember[i] < countByMember[minIdx]) minIdx = i;
+        }
+        if (countByMember[maxIdx] - countByMember[minIdx] <= 1) break;
+
+        const minMember = allMembers[minIdx];
+        const minHasOnDay = new Set(
+          finalSchedule
+            .filter(e => e.memberIdx === minIdx)
+            .map(e => `${e.date}:${e.choreIdx}`)
+        );
+
+        let moved = false;
+        for (const entry of finalSchedule) {
+          if (entry.memberIdx !== maxIdx) continue;
+          const chore = chores[entry.choreIdx];
+          if (!ageOk(minMember, chore)) continue;
+          if (minHasOnDay.has(`${entry.date}:${entry.choreIdx}`)) continue;
+          entry.memberIdx = minIdx;
+          countByMember[maxIdx]--;
+          countByMember[minIdx]++;
+          pointsByMember[maxIdx] -= chore.points || 10;
+          pointsByMember[minIdx] += chore.points || 10;
+          moved = true;
+          break;
+        }
+        if (!moved) break; // can't rebalance (age constraints)
+      }
+
+      console.log(
+        `Fairness: chores per member = [${countByMember.join(', ')}], ` +
+        `points per member = [${pointsByMember.join(', ')}]`
+      );
 
       // ── STEP 4: Insert into DB ──
       for (const entry of finalSchedule) {

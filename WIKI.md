@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
 > **Last updated:** 2026-05-07
-> **Version:** iOS 1.0.1 (Build 5) — TestFlight
+> **Version:** iOS 1.0.1 (Build 6) — TestFlight
 > **API:** https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07)
 
@@ -31,8 +31,8 @@ AI-powered family chore management app with voice-first onboarding, house scanni
 
 ## Product Manager
 
-> **Status snapshot — iOS 1.0.1 Build 5 (2026-05-07)**
-> Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validation prototype and has been removed. Current focus: stabilize Build 5 in TestFlight, then ship v1.1 (auth providers + push + inter-family leaderboard).
+> **Status snapshot — iOS 1.0.1 Build 6 (2026-05-07)**
+> Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validation prototype and has been removed. Build 6 removes the "bonus chores" pool and adds a fairness post-processor so every family member ends up with the same number of chores (within 1) and roughly the same points. Current focus: stabilize in TestFlight, then ship v1.1 (auth providers + push + inter-family leaderboard).
 
 ### Implementation Status
 
@@ -68,7 +68,7 @@ AI-powered family chore management app with voice-first onboarding, house scanni
 | Personal-space / shared-room chores | ✅ | `owner_user_ids[]` field, only owners get assigned |
 | Transfer chore (100% points to recipient) | ✅ | `transfer_type='transfer'` |
 | Support request (50 / 50 split) | ✅ | `transfer_type='support'`, both get `ceil(points/2)` |
-| Extra chore claim (bonus from sibling's day) | ✅ | Pulls future pending chores from other kids |
+| Fairness post-processor | ✅ | Build 6: rebalances chore counts/points across kids before insert |
 | Approval workflow (pending → approved/rejected) | ✅ | Parent must approve before points award |
 | Photo proof (optional `proof_image_url`) | ✅ | Field exists; iOS picker wiring partial |
 | Star burst animation on completion | ✅ | iOS visual feedback |
@@ -228,7 +228,7 @@ Ranked by `user_value × delivery_cost`:
   - Fair rotation across all family members
 - **Auto-generated chores** — Pet care and bin collection chores created automatically from family config
 - **Chore frequency** — Daily or Weekly when adding chores
-- **Extra chores** — Children can claim additional chores from other days for bonus points
+- **Fairness post-processing** — After AI distribution, the backend rebalances so every family member ends up within 1 chore of every other (and points stay roughly even). No bonus pool, no extras to claim — every chore is owned by someone the moment it's distributed.
 - **Transfer system** — Children can transfer a chore to a sibling (100% points go to them)
 - **Support system** — Children can ask a sibling for help (points split 50/50)
 - **Parent participation** — Parents can opt-in to the chore rotation via Settings toggle
@@ -352,8 +352,6 @@ family-chore-app/
 |--------|------|-------------|
 | POST | `/v1/chores` | Create a chore |
 | GET | `/v1/users/{id}/chores` | User's assigned chores |
-| GET | `/v1/users/{id}/extra-chores` | Available extra chores |
-| POST | `/v1/users/{id}/extra-chores` | Claim an extra chore |
 | GET | `/v1/users/{id}/stats` | Total completed, streak, points |
 | PATCH | `/v1/chores/assigned/{id}` | Update chore status |
 | POST | `/v1/chores/assigned/{id}/approve` | Approve (handles split points) |
@@ -499,6 +497,13 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 
 ## Changelog
 
+### 2026-05-07 (later) — Build 6
+- **Removed bonus / extra chores feature.** The "Bonus" button on the Quest Map and the `GET/POST /v1/users/{id}/extra-chores` endpoints have been deleted. Every chore is now owned by a specific child the moment it's distributed — there is no pool of unclaimed chores for kids to grab for bonus points. The point rationale: bonus chores favoured the most motivated child and undermined the fairness goal.
+- **Added fairness post-processor.** After the AI (or fallback) builds the 7-day schedule, the backend now runs a balancing pass that moves chores from the busiest child to the least-loaded one until counts are within 1 of each other (subject to age constraints). Total points per child are tracked alongside and reported in CloudWatch logs. Without this, the AI could drift to "everyone gets 2/day" locally while leaving global totals uneven once age filters dropped assignments.
+- **Tightened AI distribution prompt.** Replaced the soft "Rotate fairly across the week" line with explicit rules: same total chores per person (within 1), points within ~10%, and a mix of difficulties so no one is stuck with all-hard or all-easy.
+- **iOS deletions:** `ExtraQuestsView.swift`, the `ExtraChore` model, `ChoreStore.extraChores`, `APIClient.getExtraChores` / `claimExtraChore`, the "Bonus" pill and its sheet on `QuestMapView`.
+- **Bumped `CURRENT_PROJECT_VERSION` 5 → 6.** `MARKETING_VERSION` stays at 1.0.1.
+
 ### 2026-05-07 (later) — Build 5
 - **Fix: Face ID login crash.** App was hard-terminated by iOS the first time the user tapped "Sign in with Face ID" on the Welcome Back screen. Root cause: `NSFaceIDUsageDescription` was missing from the Xcode-generated Info.plist (other privacy strings were present — Camera, Microphone, Speech — but not Face ID). Added `INFOPLIST_KEY_NSFaceIDUsageDescription` to both Debug and Release build configurations. No code changes — Keychain biometric flow in [`KeychainHelper.loadCredentialsWithBiometric`](ios-app/MyDay/Services/KeychainHelper.swift) was already correct.
 - **Bumped `CURRENT_PROJECT_VERSION` 4 → 5** so the fix can be uploaded as a new TestFlight build. `MARKETING_VERSION` stays at 1.0.1 (same logical version, fix-only).
@@ -564,7 +569,6 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 
 ### 2026-03-29 (earlier)
 - Jobs Board: post jobs, applications, bidding, cash rewards, credibility system
-- Extra chores: children claim bonus tasks for more points
 - Rewards Shop with galaxy theme and purchase animations
 - Rewards page with stats, weekly badges, streak tracking
 - Star burst animation on chore completion

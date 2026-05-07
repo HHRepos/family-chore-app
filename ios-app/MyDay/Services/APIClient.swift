@@ -194,14 +194,6 @@ final class APIClient: Sendable {
         let _: [String: String] = try await request(.POST, "/chores/assigned/\(assignedChoreId)/support", body: ["helper_user_id": helperUserId])
     }
 
-    func getExtraChores(_ userId: String) async throws -> [ExtraChore] {
-        try await request(.GET, "/users/\(userId)/extra-chores")
-    }
-
-    func claimExtraChore(_ userId: String, choreId: String) async throws {
-        let _: [String: String] = try await request(.POST, "/users/\(userId)/extra-chores", body: ["chore_id": choreId])
-    }
-
     // MARK: - Stats & Gamification
 
     func getUserStats(_ userId: String) async throws -> UserStats {

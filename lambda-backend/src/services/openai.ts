@@ -282,7 +282,10 @@ RULES:
 - On any given day, a chore can only be assigned to ONE person (no duplicates within a day)
 - Don't give the same chore to the same person on consecutive days
 - Children under 4: only easy chores. Under 8: no hard chores.
-- Rotate fairly across the week
+- FAIRNESS IS CRITICAL. Across the full week:
+  - Every person must end up with the same total number of chores (within 1)
+  - Total points per person must be balanced (within ~10% of each other)
+  - Mix difficulties so no one is stuck with only hard or only easy
 
 Output format (example with 2 members, 3 chores, 2 days):
 [[{"chore":0,"member":0},{"chore":1,"member":0},{"chore":2,"member":1},{"chore":0,"member":1}],[{"chore":1,"member":1},{"chore":2,"member":0},{"chore":0,"member":0},{"chore":1,"member":0}]]

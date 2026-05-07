@@ -496,16 +496,6 @@ Auth + has family → MainTabView
 <td><code>/chores/assigned/{id}/support</code></td>
 <td>Request help</td>
 </tr>
-<tr>
-<td>GET</td>
-<td><code>/users/{id}/extra-chores</code></td>
-<td>Bonus chores</td>
-</tr>
-<tr>
-<td>POST</td>
-<td><code>/users/{id}/extra-chores</code></td>
-<td>Claim bonus</td>
-</tr>
 </tbody>
 </table></div>
 <h3 id="gamification">Gamification</h3>
@@ -740,6 +730,17 @@ Auth + has family → MainTabView
 </ul>
 <hr />
 <h2 id="ios-changelog">Changelog</h2>
+<h3 id="2026-05-07-later-build-6">2026-05-07 (later) — Build 6</h3>
+<ul>
+<li><strong>Removed bonus / extra chores.</strong> Deleted <code>ExtraQuestsView</code>, <code>ExtraChore</code> model, <code>ChoreStore.extraChores</code>, <code>APIClient.getExtraChores</code> / <code>claimExtraChore</code>, and the "Bonus" pill on <code>QuestMapView</code>. Backend endpoints <code>GET/POST /v1/users/{id}/extra-chores</code> were removed alongside.</li>
+<li><strong>Fairness post-processor on the backend.</strong> AI-built schedules now get rebalanced so chore counts per family member are within 1 of each other (and points are roughly even).</li>
+<li><strong>Bumped <code>CURRENT_PROJECT_VERSION</code> 5 → 6.</strong></li>
+</ul>
+<h3 id="2026-05-07-build-5">2026-05-07 — Build 5</h3>
+<ul>
+<li><strong>Fix: Face ID login crash</strong> — added <code>INFOPLIST_KEY_NSFaceIDUsageDescription</code> to Debug + Release configs.</li>
+<li><strong>Bumped <code>CURRENT_PROJECT_VERSION</code> 4 → 5.</strong></li>
+</ul>
 <h3 id="2026-04-14">2026-04-14</h3>
 <ul>
 <li><strong>TestFlight Build 4</strong> (v1.0.1) published for beta testing</li>

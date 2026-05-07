@@ -320,8 +320,6 @@ All endpoints use Bearer JWT authentication. Base URL: `https://4aeyo9z2hf.execu
 | POST | `/chores/assigned/{id}/approve` | Approve |
 | POST | `/chores/assigned/{id}/transfer` | Transfer |
 | POST | `/chores/assigned/{id}/support` | Request help |
-| GET | `/users/{id}/extra-chores` | Bonus chores |
-| POST | `/users/{id}/extra-chores` | Claim bonus |
 
 ### Gamification
 | Method | Path | Description |
@@ -400,6 +398,15 @@ All endpoints use Bearer JWT authentication. Base URL: `https://4aeyo9z2hf.execu
 ---
 
 ## Changelog
+
+### 2026-05-07 (later) — Build 6
+- **Removed bonus / extra chores.** Deleted `ExtraQuestsView`, `ExtraChore` model, `ChoreStore.extraChores`, `APIClient.getExtraChores` / `claimExtraChore`, and the "Bonus" pill on `QuestMapView`. Backend endpoints `GET/POST /v1/users/{id}/extra-chores` were removed alongside.
+- **Fairness post-processor on the backend.** AI-built schedules now get rebalanced so chore counts per family member are within 1 of each other (and points are roughly even).
+- **Bumped `CURRENT_PROJECT_VERSION` 5 → 6.**
+
+### 2026-05-07 — Build 5
+- **Fix: Face ID login crash** — added `INFOPLIST_KEY_NSFaceIDUsageDescription` to Debug + Release configs.
+- **Bumped `CURRENT_PROJECT_VERSION` 4 → 5.**
 
 ### 2026-04-14
 - **TestFlight Build 4** (v1.0.1) published for beta testing

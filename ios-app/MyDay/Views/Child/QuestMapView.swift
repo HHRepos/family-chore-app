@@ -6,7 +6,6 @@ struct QuestMapView: View {
     @Environment(ShopStore.self) private var shop
     @State private var selectedChore: AssignedChore?
     @State private var showParticles = false
-    @State private var showExtraQuests = false
     @State private var showScreenTime = false
     @State private var showLeaderboard = false
     @State private var showAllChores = false
@@ -70,16 +69,6 @@ struct QuestMapView: View {
 
                     // Quick action buttons
                     HStack(spacing: 10) {
-                        Button { showExtraQuests = true } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "bolt.fill").font(.system(size: 14))
-                                Text("Bonus").font(.system(size: 12, weight: .bold, design: .rounded))
-                            }.foregroundStyle(.neonPurple)
-                            .padding(.horizontal, 14).padding(.vertical, 8)
-                            .background(Color.neonPurple.opacity(0.1))
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(Color.neonPurple.opacity(0.3), lineWidth: 1))
-                        }
                         Button { showLeaderboard = true } label: {
                             HStack(spacing: 6) {
                                 Image(systemName: "trophy.fill").font(.system(size: 14))

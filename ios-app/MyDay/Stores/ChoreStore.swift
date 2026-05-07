@@ -5,7 +5,6 @@ import Observation
 class ChoreStore {
     var chores: [AssignedChore] = []
     var pendingApprovals: [AssignedChore] = []
-    var extraChores: [ExtraChore] = []
     var isLoading = false
 
     private var todayString: String {
@@ -83,14 +82,6 @@ class ChoreStore {
             pendingApprovals = try await APIClient.shared.getPendingApprovals(familyId)
         } catch {
             print("Failed to load approvals: \(error)")
-        }
-    }
-
-    func loadExtraChores(userId: String) async {
-        do {
-            extraChores = try await APIClient.shared.getExtraChores(userId)
-        } catch {
-            print("Failed to load extra chores: \(error)")
         }
     }
 

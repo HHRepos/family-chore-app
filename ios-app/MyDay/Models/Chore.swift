@@ -88,32 +88,6 @@ enum DifficultyTier: String, Codable {
     }
 }
 
-struct ExtraChore: Decodable, Identifiable {
-    let choreId: String
-    let choreName: String
-    var description: String?
-    let difficulty: String
-    let points: Int
-
-    var id: String { choreId }
-
-    enum CodingKeys: String, CodingKey {
-        case choreId, choreName, description, difficulty, points
-        case chore_id, chore_name
-    }
-
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        choreId = (try? c.decodeStr(.choreId)) ?? (try? c.decodeStr(.chore_id)) ?? ""
-        choreName = (try? c.decode(String.self, forKey: .choreName)) ?? (try? c.decode(String.self, forKey: .chore_name)) ?? ""
-        description = try? c.decode(String.self, forKey: .description)
-        difficulty = (try? c.decode(String.self, forKey: .difficulty)) ?? "easy"
-        if let p = try? c.decode(Int.self, forKey: .points) { points = p }
-        else if let s = try? c.decode(String.self, forKey: .points), let p = Int(s) { points = p }
-        else { points = 0 }
-    }
-}
-
 // MARK: - Helper for decoding String or Int as String
 extension KeyedDecodingContainer {
     func decodeStr(_ key: Key) throws -> String {
