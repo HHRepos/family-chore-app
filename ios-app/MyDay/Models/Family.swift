@@ -37,11 +37,19 @@ struct FamilyMember: Decodable, Identifiable {
     var age: Int?
     var hasAccount: Bool?
     var emoji: String?
+    var participates: Bool?
 
     var id: String { userId }
 
+    var isChild: Bool { role == "child" }
+    var isParent: Bool { role == "parent" }
+
+    /// Counts as a chore-rotation participant: every child, plus parents who
+    /// have opted in via the Settings toggle.
+    var inChoreRotation: Bool { isChild || (isParent && participates == true) }
+
     enum CodingKeys: String, CodingKey {
-        case userId, firstName, nickname, role, age, hasAccount, emoji
+        case userId, firstName, nickname, role, age, hasAccount, emoji, participates
         case user_id, first_name, has_account
     }
 
@@ -58,6 +66,7 @@ struct FamilyMember: Decodable, Identifiable {
         age = try? c.decode(Int.self, forKey: .age)
         hasAccount = (try? c.decode(Bool.self, forKey: .hasAccount)) ?? (try? c.decode(Bool.self, forKey: .has_account))
         emoji = try? c.decode(String.self, forKey: .emoji)
+        participates = try? c.decode(Bool.self, forKey: .participates)
     }
 }
 

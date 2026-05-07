@@ -5,6 +5,7 @@ struct CommandCenterView: View {
     @Environment(FamilyStore.self) private var familyStore
     @Environment(ChoreStore.self) private var choreStore
     @Environment(ShopStore.self) private var shop
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showLeaderboard = false
     @State private var showRules = false
     @State private var showScreenTime = false
@@ -249,6 +250,18 @@ struct CommandCenterView: View {
         .task {
             if let fid = auth.familyId, let uid = auth.userId {
                 await shop.loadAll(userId: uid, familyId: fid)
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            // Refresh on app foreground so the parent sees up-to-date
+            // approvals + family chore counts when they come back.
+            guard newPhase == .active else { return }
+            Task {
+                if let fid = auth.familyId, let uid = auth.userId {
+                    await choreStore.loadFamilyChores(familyId: fid)
+                    await choreStore.loadApprovals(familyId: fid)
+                    await shop.loadAll(userId: uid, familyId: fid)
+                }
             }
         }
         .sheet(isPresented: $showLeaderboard) { LeaderboardView() }

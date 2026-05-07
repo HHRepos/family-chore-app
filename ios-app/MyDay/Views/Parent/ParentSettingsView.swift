@@ -3,6 +3,7 @@ import SwiftUI
 struct ParentSettingsView: View {
     @Environment(AuthManager.self) private var auth
     @Environment(FamilyStore.self) private var familyStore
+    @Environment(ChoreStore.self) private var choreStore
     @State private var showManageRewards = false
     @State private var showManageChores = false
     @State private var showManageFamily = false
@@ -16,6 +17,7 @@ struct ParentSettingsView: View {
     @State private var showDeleteFamilyConfirm = false
     @State private var showEditFamily = false
     @State private var participates = false
+    @State private var participatesLoaded = false
 
     var body: some View {
         ZStack {
@@ -81,7 +83,19 @@ struct ParentSettingsView: View {
                         Toggle("", isOn: $participates)
                             .tint(.neonGreen)
                             .onChange(of: participates) { _, val in
-                                Task { try? await APIClient.shared.setParticipation(auth.userId ?? "", participate: val) }
+                                // Skip the initial value emission from .task —
+                                // only react to actual user-driven toggles.
+                                guard participatesLoaded else { return }
+                                Task {
+                                    try? await APIClient.shared.setParticipation(auth.userId ?? "", participate: val)
+                                    // Re-distribute and reload so the parent shows up in (or
+                                    // disappears from) the chore rotation immediately.
+                                    if let fid = auth.familyId {
+                                        try? await APIClient.shared.distributeChores(fid)
+                                        await choreStore.loadFamilyChores(familyId: fid)
+                                        await familyStore.load(familyId: fid)
+                                    }
+                                }
                             }
                     }.gameCard()
 
@@ -143,6 +157,7 @@ struct ParentSettingsView: View {
             if let uid = auth.userId {
                 let result = try? await APIClient.shared.getParticipation(uid)
                 participates = result?["participate_in_chores"] ?? false
+                participatesLoaded = true
             }
         }
         .sheet(isPresented: $showManageRewards) { ManageRewardsView() }

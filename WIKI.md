@@ -498,6 +498,21 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ## Changelog
 
 ### 2026-05-07 (later) — Build 6
+
+**End-to-end review pass.** Audited the data layer, the Lambda handlers, and the iOS persona flows; fixed every concrete bug found that wasn't a feature request. Highlights:
+
+**Backend (data integrity):**
+- **Migration 013** — added `'proposed'` and `'rejected'` to the `jobs.status` CHECK constraint. The Lambda has been inserting `'proposed'` for kid-pitched contracts since migration 010, but the original constraint from migration 006 didn't allow it. Live INSERTs were failing with a constraint violation.
+- **Atomic reward redemption** — replaced the SELECT-check-UPDATE pattern with a single `UPDATE … WHERE points >= cost RETURNING points`. Two parallel redemption requests can no longer both pass the check and leave the user with negative points.
+- **Atomic chore approval** — same compare-and-swap pattern: `UPDATE assigned_chores SET status='approved' WHERE id=$1 AND status<>'approved' RETURNING …`. Awards points only if the row was actually transitioned, so a double-approve race can't double-credit.
+- **Date timezone fix** — date-only fields (`due_date`) were being wrapped in `new Date(…).toISOString().split('T')[0]`, which can shift by a day depending on the runtime TZ. Replaced with a UTC-explicit `dateOnly()` helper across the four read endpoints that returned dates.
+- **Timestamp consistency** — `createdAt` and `completedAt` were being returned as raw pg objects from some endpoints. Wrapped in an `isoOrNull()` helper so iOS always sees ISO 8601 strings.
+- **Family member response** — now includes `participates: bool` so the iOS app can tell which parents have opted into the chore rotation.
+
+**iOS (persona flows):**
+- **Parent participation visible in the child's transfer / support picker.** Previously `QuestDetailView.siblings` filtered for `role == 'child'`, so even if dad was in the rotation, kids couldn't transfer chores to him. The picker now uses `FamilyMember.inChoreRotation` (every child + any parent who participates).
+- **Parent participation toggle now actually triggers redistribution.** Toggling the switch in Settings calls `setParticipation`, then re-runs `distributeChores` and reloads `choreStore` + `familyStore` so the parent shows up in (or disappears from) the rotation immediately. Guarded with a `participatesLoaded` flag so the initial `.task`-driven value emission no longer triggers a redistribute on every Settings open.
+- **Parent home screen refreshes on foreground.** Added a `scenePhase` observer to `CommandCenterView` mirroring the one in `QuestMapView`, so points / approvals / chore counts stay live without a manual pull-to-refresh.
 - **Fix: stale points on the child's home screen.** After a chore was approved, the points pill at the top of the Quest Map kept showing the pre-approval total. The backend awards points correctly on `users.points`, but the iOS `ShopStore.points` cache was never invalidated. Fixed by:
   - Refreshing `ShopStore.loadAll()` when the app returns to the foreground (`scenePhase == .active`)
   - Refreshing when the child closes the chore detail sheet, leaderboard sheet, or all-chores sheet (anywhere they could have transitioned to/from chore approval)

@@ -28,6 +28,31 @@ const response = (statusCode: number, body: any): APIGatewayProxyResult => ({
   body: JSON.stringify(body)
 });
 
+// Format a postgres DATE value as a YYYY-MM-DD string without ever
+// passing through `new Date(...).toISOString()`, which is fragile when
+// the runtime TZ is not UTC (the date can shift by a day). pg returns
+// DATE columns as JS Date objects parsed at UTC midnight by default —
+// pull the parts off in UTC.
+const dateOnly = (d: any): string | null => {
+  if (d == null) return null;
+  if (typeof d === 'string') return d.slice(0, 10);
+  if (d instanceof Date) {
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  return String(d);
+};
+
+// Format a postgres TIMESTAMP / TIMESTAMPTZ as ISO 8601 with timezone.
+const isoOrNull = (d: any): string | null => {
+  if (d == null) return null;
+  if (typeof d === 'string') return d;
+  if (d instanceof Date) return d.toISOString();
+  return null;
+};
+
 const getUserFromToken = (event: APIGatewayProxyEvent) => {
   const authHeader = event.headers?.Authorization || event.headers?.authorization;
   if (!authHeader) return null;
@@ -208,7 +233,9 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
       if (familyResult.rows.length === 0) return response(404, { error: 'Family not found' });
 
       const membersResult = await pool.query(
-        `SELECT u.user_id, u.first_name, u.role, u.age, u.email, fm.nickname
+        `SELECT u.user_id, u.first_name, u.role, u.age, u.email,
+                COALESCE(u.participate_in_chores, false) AS participate_in_chores,
+                fm.nickname
          FROM users u JOIN family_members fm ON u.user_id = fm.user_id
          WHERE fm.family_id = $1`,
         [familyId]
@@ -226,7 +253,8 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
           nickname: m.nickname,
           role: m.role,
           age: m.age,
-          hasAccount: !!m.email
+          hasAccount: !!m.email,
+          participates: m.participate_in_chores
         }))
       });
     }
@@ -297,7 +325,7 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         assignedChoreId: r.assigned_chore_id,
         choreId: r.chore_id,
         userId: r.user_id,
-        dueDate: r.due_date ? new Date(r.due_date).toISOString().split('T')[0] : r.due_date,
+        dueDate: dateOnly(r.due_date),
         status: r.status,
         choreName: r.chore_name,
         description: r.description,
@@ -408,33 +436,43 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
 
       const assignedChoreId = path.split('/')[4];
 
-      const choreResult = await pool.query(
-        `SELECT ac.user_id, ac.transferred_from, ac.transfer_type, ac.original_points, c.points
-         FROM assigned_chores ac
-         JOIN chores c ON ac.chore_id = c.chore_id
-         WHERE ac.assigned_chore_id = $1`,
+      // Atomic transition: only flip the row to `approved` if it's not
+      // already approved. RETURNING gives us the values we need to award
+      // points without a separate SELECT race window. Two parallel approve
+      // requests can no longer both award.
+      const transition = await pool.query(
+        `UPDATE assigned_chores
+            SET status = 'approved', approved_at = NOW()
+          WHERE assigned_chore_id = $1 AND status <> 'approved'
+        RETURNING user_id, transferred_from, transfer_type, original_points, chore_id`,
         [assignedChoreId]
       );
 
-      if (choreResult.rows.length === 0) return response(404, { error: 'Chore not found' });
+      if (transition.rows.length === 0) {
+        // Either the chore doesn't exist or it's already approved.
+        const exists = await pool.query('SELECT 1 FROM assigned_chores WHERE assigned_chore_id = $1', [assignedChoreId]);
+        if (exists.rows.length === 0) return response(404, { error: 'Chore not found' });
+        return response(200, { message: 'Already approved', pointsAwarded: 0 });
+      }
 
-      const row = choreResult.rows[0];
+      const row = transition.rows[0];
 
-      await pool.query(
-        `UPDATE assigned_chores SET status = 'approved', approved_at = NOW() WHERE assigned_chore_id = $1`,
-        [assignedChoreId]
-      );
+      // Use original_points if it was snapshotted on transfer, otherwise
+      // fall back to the master chore's current points.
+      let pointsValue = row.original_points;
+      if (pointsValue == null) {
+        const pts = await pool.query('SELECT points FROM chores WHERE chore_id = $1', [row.chore_id]);
+        pointsValue = pts.rows[0]?.points ?? 0;
+      }
 
       if (row.transfer_type === 'support' && row.transferred_from) {
-        // Split points 50/50 between helper and original owner
-        const halfPoints = Math.ceil(row.points / 2);
+        const halfPoints = Math.ceil(pointsValue / 2);
         await pool.query('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', [halfPoints, row.user_id]);
         await pool.query('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', [halfPoints, row.transferred_from]);
         return response(200, { message: 'Approved (support)', pointsAwarded: halfPoints, splitWith: row.transferred_from });
       } else {
-        // Full points to the assigned user (normal or transferred)
-        await pool.query('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', [row.points, row.user_id]);
-        return response(200, { message: 'Approved', pointsAwarded: row.points });
+        await pool.query('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', [pointsValue, row.user_id]);
+        return response(200, { message: 'Approved', pointsAwarded: pointsValue });
       }
     }
 
@@ -513,12 +551,12 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         assignedChoreId: r.assigned_chore_id,
         choreId: r.chore_id,
         userId: r.user_id,
-        dueDate: r.due_date ? new Date(r.due_date).toISOString().split('T')[0] : r.due_date,
+        dueDate: dateOnly(r.due_date),
         status: r.status,
         choreName: r.chore_name,
         points: r.points,
         firstName: r.first_name,
-        completedAt: r.completed_at
+        completedAt: isoOrNull(r.completed_at)
       })));
     }
 
@@ -611,14 +649,14 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         assignedChoreId: r.assigned_chore_id,
         choreId: r.chore_id,
         userId: r.user_id,
-        dueDate: r.due_date ? new Date(r.due_date).toISOString().split('T')[0] : r.due_date,
+        dueDate: dateOnly(r.due_date),
         status: r.status,
         choreName: r.chore_name,
         description: r.description,
         points: r.points,
         difficulty: r.difficulty,
         firstName: r.first_name,
-        completedAt: r.completed_at,
+        completedAt: isoOrNull(r.completed_at),
         choreType: r.chore_type || 'household',
         timeOfDay: r.time_of_day || 'anytime'
       })));
@@ -784,22 +822,26 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
       if (rewardResult.rows.length === 0) return response(404, { error: 'Reward not found' });
       const reward = rewardResult.rows[0];
 
-      const userResult = await pool.query(
-        'SELECT COALESCE(points, 0) as points FROM users WHERE user_id = $1',
-        [user_id]
+      // Atomic compare-and-swap: deduct points only if the user still has
+      // enough at the moment of the UPDATE. Without this guard, two parallel
+      // redemption requests could each pass the SELECT/check and leave the
+      // user with negative points.
+      const updated = await pool.query(
+        `UPDATE users
+            SET points = COALESCE(points, 0) - $1
+          WHERE user_id = $2 AND COALESCE(points, 0) >= $1
+        RETURNING points`,
+        [reward.point_cost, user_id]
       );
 
-      if (userResult.rows.length === 0) return response(404, { error: 'User not found' });
-      const currentPoints = userResult.rows[0].points;
-
-      if (currentPoints < reward.point_cost) {
+      if (updated.rows.length === 0) {
+        // Either user not found or insufficient points — distinguish for nicer UX.
+        const exists = await pool.query('SELECT 1 FROM users WHERE user_id = $1', [user_id]);
+        if (exists.rows.length === 0) return response(404, { error: 'User not found' });
         return response(400, { error: 'Insufficient points' });
       }
 
-      const newBalance = currentPoints - reward.point_cost;
-      await pool.query('UPDATE users SET points = $1 WHERE user_id = $2', [newBalance, user_id]);
-
-      return response(200, { message: 'Reward redeemed!', new_point_balance: newBalance });
+      return response(200, { message: 'Reward redeemed!', new_point_balance: updated.rows[0].points });
     }
 
     if (path.match(/^\/v1\/families\/[^/]+\/leaderboard$/) && httpMethod === 'GET') {
@@ -1506,12 +1548,12 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         rewardType: r.reward_type,
         rewardAmount: Number(r.reward_amount),
         jobType: r.job_type,
-        dueDate: r.due_date ? new Date(r.due_date).toISOString().split('T')[0] : r.due_date,
+        dueDate: dateOnly(r.due_date),
         status: r.status,
         assignedTo: r.assigned_to,
         assignedToName: r.assigned_to_name,
         applicationCount: parseInt(r.application_count),
-        createdAt: r.created_at,
+        createdAt: isoOrNull(r.created_at),
         pitchReason: r.pitch_reason || null,
         proposedPrice: r.proposed_price ? Number(r.proposed_price) : null,
       })));
@@ -1593,7 +1635,7 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         reason: r.reason,
         bidAmount: r.bid_amount ? Number(r.bid_amount) : null,
         status: r.status,
-        createdAt: r.created_at,
+        createdAt: isoOrNull(r.created_at),
         counterAmount: r.counter_amount ? Number(r.counter_amount) : null,
         counterMessage: r.counter_message || null,
         negotiationRound: r.negotiation_round || 0,

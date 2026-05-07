@@ -15,8 +15,11 @@ struct QuestDetailView: View {
         var id: String { self == .transfer ? "t" : "s" }
     }
 
+    /// Eligible recipients for transfer / support: every other family member
+    /// who is part of the chore rotation (siblings + any parent who has opted
+    /// in via Settings → Join Chore Rotation).
     private var siblings: [FamilyMember] {
-        familyStore.children.filter { $0.userId != auth.userId }
+        familyStore.members.filter { $0.userId != auth.userId && $0.inChoreRotation }
     }
 
     private var difficultyColor: Color {
