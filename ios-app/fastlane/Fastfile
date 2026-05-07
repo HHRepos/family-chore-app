@@ -1,0 +1,57 @@
+default_platform(:ios)
+
+platform :ios do
+  before_all do
+    # Loads the App Store Connect API key from environment variables
+    # set in fastlane/.env (gitignored). Avoids interactive Apple ID login
+    # and works fully autonomously.
+    app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_PATH"),
+      duration: 1200,
+      in_house: false
+    )
+  end
+
+  desc "Archive and upload to TestFlight. Pass bump:true to auto-increment build number."
+  lane :beta do |options|
+    if options[:bump]
+      increment_build_number(xcodeproj: "MyDay.xcodeproj")
+      UI.message("Bumped build to #{get_build_number(xcodeproj: 'MyDay.xcodeproj')}")
+    end
+
+    build_app(
+      project: "MyDay.xcodeproj",
+      scheme: "MyDay",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "OMyDay.ipa",
+      clean: true,
+      include_symbols: true,
+      include_bitcode: false
+    )
+
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      skip_submission: true
+    )
+
+    # Surface the new build number in the run output
+    UI.success("Uploaded build #{get_build_number(xcodeproj: 'MyDay.xcodeproj')} to TestFlight")
+  end
+
+  desc "Build and export an .ipa locally without uploading (smoke test)"
+  lane :build_only do
+    build_app(
+      project: "MyDay.xcodeproj",
+      scheme: "MyDay",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "OMyDay.ipa",
+      clean: true
+    )
+  end
+end

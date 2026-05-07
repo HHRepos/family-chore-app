@@ -54,3 +54,9 @@ DerivedData/
 # Package manager locks (keep only one)
 # yarn.lock
 # package-lock.json
+
+# fastlane secrets
+ios-app/fastlane/.env
+ios-app/fastlane/report.xml
+ios-app/fastlane/README.md
+ios-app/build/
