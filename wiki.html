@@ -1193,6 +1193,11 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 <h2 id="project-changelog">Changelog</h2>
 <h3 id="2026-05-07-later-build-6">2026-05-07 (later) — Build 6</h3>
 <ul>
+<li><strong>Fix: stale points on the child's home screen.</strong> After a chore was approved, the points pill at the top of the Quest Map kept showing the pre-approval total. The backend awards points correctly on <code>users.points</code>, but the iOS <code>ShopStore.points</code> cache was never invalidated. Fixed by:</li>
+<li>Refreshing <code>ShopStore.loadAll()</code> when the app returns to the foreground (<code>scenePhase == .active</code>)</li>
+<li>Refreshing when the child closes the chore detail sheet, leaderboard sheet, or all-chores sheet (anywhere they could have transitioned to/from chore approval)</li>
+<li>Refreshing the parent's <code>ShopStore</code> after an approve/reject so leaderboard + their own totals stay in sync</li>
+<li>Reloading family chores after approve/reject so the parent's chores tab updates immediately</li>
 <li><strong>Removed bonus / extra chores feature.</strong> The "Bonus" button on the Quest Map and the <code>GET/POST /v1/users/{id}/extra-chores</code> endpoints have been deleted. Every chore is now owned by a specific child the moment it's distributed — there is no pool of unclaimed chores for kids to grab for bonus points. The point rationale: bonus chores favoured the most motivated child and undermined the fairness goal.</li>
 <li><strong>Added fairness post-processor.</strong> After the AI (or fallback) builds the 7-day schedule, the backend now runs a balancing pass that moves chores from the busiest child to the least-loaded one until counts are within 1 of each other (subject to age constraints). Total points per child are tracked alongside and reported in CloudWatch logs. Without this, the AI could drift to "everyone gets 2/day" locally while leaving global totals uneven once age filters dropped assignments.</li>
 <li><strong>Tightened AI distribution prompt.</strong> Replaced the soft "Rotate fairly across the week" line with explicit rules: same total chores per person (within 1), points within ~10%, and a mix of difficulties so no one is stuck with all-hard or all-easy.</li>

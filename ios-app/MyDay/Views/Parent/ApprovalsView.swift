@@ -3,6 +3,7 @@ import SwiftUI
 struct ApprovalsView: View {
     @Environment(AuthManager.self) private var auth
     @Environment(ChoreStore.self) private var choreStore
+    @Environment(ShopStore.self) private var shop
     @State private var approving: String?
     @State private var confirmApprove: AssignedChore?
     @State private var confirmReject: AssignedChore?
@@ -113,7 +114,13 @@ struct ApprovalsView: View {
                     approving = chore.assignedChoreId
                     await choreStore.approveChore(chore)
                     withAnimation { successMessage = "Approved! \(chore.points) points awarded to \(chore.firstName ?? "child")" }
-                    if let fid = auth.familyId { await choreStore.loadApprovals(familyId: fid) }
+                    if let fid = auth.familyId {
+                        await choreStore.loadApprovals(familyId: fid)
+                        await choreStore.loadFamilyChores(familyId: fid)
+                        if let uid = auth.userId {
+                            await shop.loadAll(userId: uid, familyId: fid)
+                        }
+                    }
                     approving = nil
                     try? await Task.sleep(for: .seconds(3))
                     withAnimation { successMessage = nil }
@@ -130,7 +137,10 @@ struct ApprovalsView: View {
                     approving = chore.assignedChoreId
                     await choreStore.rejectChore(chore)
                     withAnimation { successMessage = "Rejected — \(chore.firstName ?? "child") will need to redo it" }
-                    if let fid = auth.familyId { await choreStore.loadApprovals(familyId: fid) }
+                    if let fid = auth.familyId {
+                        await choreStore.loadApprovals(familyId: fid)
+                        await choreStore.loadFamilyChores(familyId: fid)
+                    }
                     approving = nil
                     try? await Task.sleep(for: .seconds(3))
                     withAnimation { successMessage = nil }

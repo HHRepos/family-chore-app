@@ -498,6 +498,11 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ## Changelog
 
 ### 2026-05-07 (later) — Build 6
+- **Fix: stale points on the child's home screen.** After a chore was approved, the points pill at the top of the Quest Map kept showing the pre-approval total. The backend awards points correctly on `users.points`, but the iOS `ShopStore.points` cache was never invalidated. Fixed by:
+  - Refreshing `ShopStore.loadAll()` when the app returns to the foreground (`scenePhase == .active`)
+  - Refreshing when the child closes the chore detail sheet, leaderboard sheet, or all-chores sheet (anywhere they could have transitioned to/from chore approval)
+  - Refreshing the parent's `ShopStore` after an approve/reject so leaderboard + their own totals stay in sync
+  - Reloading family chores after approve/reject so the parent's chores tab updates immediately
 - **Removed bonus / extra chores feature.** The "Bonus" button on the Quest Map and the `GET/POST /v1/users/{id}/extra-chores` endpoints have been deleted. Every chore is now owned by a specific child the moment it's distributed — there is no pool of unclaimed chores for kids to grab for bonus points. The point rationale: bonus chores favoured the most motivated child and undermined the fairness goal.
 - **Added fairness post-processor.** After the AI (or fallback) builds the 7-day schedule, the backend now runs a balancing pass that moves chores from the busiest child to the least-loaded one until counts are within 1 of each other (subject to age constraints). Total points per child are tracked alongside and reported in CloudWatch logs. Without this, the AI could drift to "everyone gets 2/day" locally while leaving global totals uneven once age filters dropped assignments.
 - **Tightened AI distribution prompt.** Replaced the soft "Rotate fairly across the week" line with explicit rules: same total chores per person (within 1), points within ~10%, and a mix of difficulties so no one is stuck with all-hard or all-easy.

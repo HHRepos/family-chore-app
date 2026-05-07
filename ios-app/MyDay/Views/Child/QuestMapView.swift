@@ -4,6 +4,7 @@ struct QuestMapView: View {
     @Environment(AuthManager.self) private var auth
     @Environment(ChoreStore.self) private var choreStore
     @Environment(ShopStore.self) private var shop
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selectedChore: AssignedChore?
     @State private var showParticles = false
     @State private var showScreenTime = false
@@ -202,13 +203,26 @@ struct QuestMapView: View {
                 }
             }
         }
-        .sheet(isPresented: $showExtraQuests) { ExtraQuestsView() }
         .sheet(isPresented: $showScreenTime) { ScreenTimeView() }
         .sheet(isPresented: $showLeaderboard) { LeaderboardView() }
         .sheet(isPresented: $showAllChores) { AllChoresView() }
         .task {
             await loadData()
             withAnimation { appeared = true }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                Task { await loadData() }
+            }
+        }
+        .onChange(of: showLeaderboard) { _, isPresented in
+            if !isPresented { Task { await loadData() } }
+        }
+        .onChange(of: showAllChores) { _, isPresented in
+            if !isPresented { Task { await loadData() } }
+        }
+        .onChange(of: selectedChore?.assignedChoreId) { _, id in
+            if id == nil { Task { await loadData() } }
         }
     }
 
