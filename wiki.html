@@ -1,521 +1,765 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Family Chore App — Wiki</title>
-<style>
-  :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #64748b; --border: #e2e8f0; --accent: #8b5cf6; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>OMyDays — Project Wiki</title><style>
+body { font-family: -apple-system, system-ui, "Segoe UI", sans-serif; max-width: 920px; margin: 0 auto; padding: 24px; background: #0B0F1A; color: #e0e0e0; line-height: 1.65; }
+h1, h2, h3 { color: #00D4FF; }
+h1 { border-bottom: 2px solid #00D4FF; padding-bottom: 10px; letter-spacing: -0.02em; }
+h2 { border-bottom: 1px solid #1E2440; padding-bottom: 8px; margin-top: 40px; }
+h3 { margin-top: 28px; }
+a { color: #00FF88; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #1E2440; padding: 2px 6px; border-radius: 4px; color: #FF69B4; font-size: 0.9em; }
+pre { background: #151A2E; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #1E2440; }
+pre code { background: none; padding: 0; color: inherit; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+th { background: #151A2E; padding: 10px; text-align: left; color: #A855F7; border: 1px solid #1E2440; }
+td { padding: 8px 10px; border: 1px solid #1E2440; }
+tr:nth-child(even) { background: #0f1225; }
+blockquote { border-left: 3px solid #00D4FF; padding-left: 16px; color: #999; margin: 16px 0; }
+hr { border: none; border-top: 1px solid #1E2440; margin: 30px 0; }
+.nav { display: flex; gap: 16px; flex-wrap: wrap; margin: 32px 0; }
+.nav a { display: block; padding: 24px 28px; background: #151A2E; border: 1px solid #1E2440; border-radius: 12px; flex: 1; min-width: 280px; transition: all 0.2s; }
+.nav a:hover { border-color: #00D4FF; transform: translateY(-2px); text-decoration: none; }
+.nav .label { color: #00D4FF; font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.nav .desc { color: #9CA3AF; font-size: 13px; }
+.crumb { font-size: 13px; color: #6B7280; margin-bottom: 24px; }
+.crumb a { color: #6B7280; }
+</style></head><body><h1>OMyDays — Project Wiki</h1>
+<blockquote>
+<p><strong>Last updated:</strong> 2026-05-07
+<strong>Version:</strong> iOS 1.0.1 (Build 4) — TestFlight
+<strong>API:</strong> https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1
+<strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07)</p>
+</blockquote>
+<hr />
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#features">Features</a></li>
+<li><a href="#tech-stack">Tech Stack</a></li>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#api-endpoints">API Endpoints</a></li>
+<li><a href="#database-schema">Database Schema</a></li>
+<li><a href="#deployment">Deployment</a></li>
+<li><a href="#roadmap">Roadmap</a></li>
+<li><a href="#related-docs">Related Docs</a></li>
+<li><a href="#changelog">Changelog</a></li>
+</ul>
+<hr />
+<h2>Overview</h2>
+<p>AI-powered family chore management app with voice-first onboarding, house scanning, gamified rewards, jobs board, and household routine management. Designed to reduce parental mental load by automating chore scheduling and making chores fun for kids through points, badges, and a rewards shop.</p>
+<hr />
+<h2>Features</h2>
+<h3>Onboarding</h3>
+<ul>
+<li><strong>Voice-first setup</strong> — ChatGPT-style conversational UI with speech recognition and TTS</li>
+<li><strong>House scanning</strong> — Upload room photos, GPT-4o Vision detects rooms/appliances and suggests chores</li>
+<li><strong>Smart appliance detection</strong> — Recognizes robot vacuums, dishwashers, dryers; suggests maintenance tasks instead of manual equivalents</li>
+<li><strong>Rewards selection</strong> — Parents pick from suggested rewards during setup</li>
+<li><strong>Manual form fallback</strong> — 5-step form mode if voice isn't preferred</li>
+</ul>
+<h3>Chore Management</h3>
+<ul>
+<li><strong>AI-powered distribution</strong> — GPT-4o-mini creates a fair 7-day schedule with rules:</li>
+<li>No same chore for two children on the same day</li>
+<li>No consecutive-day repeats for the same child</li>
+<li>Age-appropriate filtering (Rookie: any age, Pro: 4+, Legend: 8+)</li>
+<li>Fair rotation across all family members</li>
+<li><strong>Auto-generated chores</strong> — Pet care and bin collection chores created automatically from family config</li>
+<li><strong>Chore frequency</strong> — Daily or Weekly when adding chores</li>
+<li><strong>Extra chores</strong> — Children can claim additional chores from other days for bonus points</li>
+<li><strong>Transfer system</strong> — Children can transfer a chore to a sibling (100% points go to them)</li>
+<li><strong>Support system</strong> — Children can ask a sibling for help (points split 50/50)</li>
+<li><strong>Parent participation</strong> — Parents can opt-in to the chore rotation via Settings toggle</li>
+<li><strong>Star burst animation</strong> — Visual feedback when completing a chore</li>
+</ul>
+<h3>Gamification</h3>
+<ul>
+<li><strong>Points system</strong> — Earn points for completing chores, jobs, and bonus tasks</li>
+<li><strong>Difficulty tiers</strong> — Rookie (easy/10pts), Pro (medium/15pts), Legend (hard/25pts)</li>
+<li><strong>Weekly badges</strong> — Getting Started, On a Roll, Hard Worker, Super Helper, You're Cooking!, Chore Champion</li>
+<li><strong>Streak tracking</strong> — Consecutive days with all chores done (Warm Up, On Fire, Blazing, Inferno, Legendary)</li>
+<li><strong>Weekly Superstar badge</strong> (silver) — Complete all chores every day for the week</li>
+<li><strong>Monthly Hero badge</strong> (gold) — Complete all chores every day for the month</li>
+<li><strong>Family leaderboard</strong> — Ranked by points with medal indicators</li>
+</ul>
+<h3>Rewards Shop</h3>
+<ul>
+<li><strong>Points-based store</strong> — Children browse and buy rewards with earned points</li>
+<li><strong>Galaxy-themed UI</strong> — Twinkling star animations, glowing point balance</li>
+<li><strong>Per-child rewards</strong> — Parents can assign specific rewards to specific children</li>
+<li><strong>Parent management view</strong> — Add, edit, delete rewards directly from Shop tab</li>
+<li><strong>Purchase animation</strong> — Green "Purchased!" feedback on buy</li>
+</ul>
+<h3>Jobs Board</h3>
+<ul>
+<li><strong>Parent posts jobs</strong> — Title, description, reward (points or cash), due date</li>
+<li><strong>Two job types:</strong></li>
+<li><strong>Open</strong> — First come, first served (any child can claim instantly)</li>
+<li><strong>Application</strong> — Children submit applications with reason + optional bid; parent picks winner</li>
+<li><strong>Cash rewards</strong> — Parent confirms cash handover after job completion</li>
+<li><strong>Credibility system</strong> — Overdue assigned jobs auto-expire with 20% point penalty</li>
+<li><strong>Job lifecycle:</strong> Open -&gt; Assigned -&gt; Completed -&gt; Confirmed (or Expired)</li>
+</ul>
+<h3>Family Rules</h3>
+<ul>
+<li><strong>Bin collection schedule</strong> — Collection days + weekly rotation between children</li>
+<li><strong>Pet care</strong> — Dog walk rotation, cat litter rotation with age-appropriate filtering</li>
+<li><strong>Gaming schedule</strong> — Per-child rules: device (PC/VR/Console/Tablet), allowed days, hours per session</li>
+<li><strong>Today's summary</strong> — Shows whose turn for bins, pet care, and gaming allowances today</li>
+<li><strong>Visible to everyone</strong> — Both parents and children see the Rules tab</li>
+</ul>
+<h3>Room Scanning (Post-Setup)</h3>
+<ul>
+<li><strong>Scan additional rooms</strong> from Settings at any time</li>
+<li><strong>Appends</strong> new rooms without overwriting existing data</li>
+<li><strong>Auto-creates chores</strong> from AI suggestions</li>
+</ul>
+<h3>Screen Time Management</h3>
+<ul>
+<li><strong>Daily limits</strong> — Set minutes per day per child</li>
+<li><strong>Chore-gated access</strong> — Must complete daily chores to unlock screen time</li>
+<li><strong>Minimum points required</strong> — Set point threshold for access</li>
+</ul>
+<h3>User Management</h3>
+<ul>
+<li><strong>Parent/child accounts</strong> — Role-based views and permissions</li>
+<li><strong>Child invitations</strong> — Generate invite links (7-day expiry) for children to create their own login</li>
+<li><strong>Family structure</strong> — Multiple children, optional parent participation</li>
+</ul>
+<hr />
+<h2>Tech Stack</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mobile</td>
+<td>SwiftUI / Swift 5+ — iOS 14+, distributed via TestFlight</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td>Node.js 18 + TypeScript on AWS Lambda (consolidated, single function)</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>PostgreSQL 14+ on AWS RDS</td>
+</tr>
+<tr>
+<td>AI</td>
+<td>OpenAI GPT-4 Turbo (conversation), GPT-4o (vision), GPT-4o-mini (scheduling)</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>Email/password (bcrypt), JWT, biometric (FaceID/TouchID), 6-char invite codes</td>
+</tr>
+<tr>
+<td>Hosting</td>
+<td>API Gateway + Lambda (eu-west-1)</td>
+</tr>
+<tr>
+<td>Build</td>
+<td>esbuild (Lambda), Xcode (iOS)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Architecture</h2>
+<pre><code>family-chore-app/
++-- ios-app/             # SwiftUI iOS app (OMyDay), 52+ Swift files
+|   +-- MyDay.xcodeproj  # Xcode project
+|   +-- WIKI.md          # iOS-specific wiki (architecture, screens, models)
+|   +-- wiki.html        # Rendered iOS wiki
++-- lambda-backend/      # Consolidated AWS Lambda (all API routes)
+|   +-- src/index.ts     # Monolithic handler (~2.5k lines)
++-- database/
+|   +-- migrations/      # 12 SQL migration files (Postgres on RDS)
++-- docs/                # Architecture, AWS infra, AI integration, DB schema
++-- WIKI.md              # This file (project-wide wiki)
++-- wiki.html            # Rendered project wiki
++-- serve_wiki.py        # Local wiki server: python3 serve_wiki.py -&gt; :8765
++-- ROADMAP.md           # Feature backlog
++-- PM.md                # Product notes
+</code></pre>
+<p><strong>Production architecture:</strong> SwiftUI iOS app talks to a single AWS Lambda function (behind API Gateway, eu-west-1) that handles all routes. Lambda persists to RDS Postgres. AI features call OpenAI directly from Lambda.</p>
+<blockquote>
+<p>Web validation code (React/Vite frontend + Express microservice packages + Lerna monorepo) was removed on 2026-05-07. The iOS app has full feature parity and is the only shipping client.</p>
+</blockquote>
+<hr />
+<h2>API Endpoints</h2>
+<h3>Auth</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/auth/register</code></td>
+<td>Create parent account</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/auth/login</code></td>
+<td>Login (returns JWT)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/auth/profile</code></td>
+<td>Get current user profile</td>
+</tr>
+</tbody>
+</table>
+<h3>Families</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/families</code></td>
+<td>Create family</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/families/{id}</code></td>
+<td>Get family details + house_details</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/v1/families/{id}/config</code></td>
+<td>Update bins/pets/gaming config</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/families/{id}/members</code></td>
+<td>Add child to family</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/families/{id}/chores</code></td>
+<td>All assigned chores (parent view)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/families/{id}/approvals</code></td>
+<td>Pending approvals</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/families/{id}/badges</code></td>
+<td>Weekly/monthly badges for all children</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/families/{id}/rewards</code></td>
+<td>Active rewards list</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/families/{id}/leaderboard</code></td>
+<td>Points leaderboard</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/families/{id}/jobs</code></td>
+<td>All jobs (auto-expires overdue)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/families/{id}/rooms</code></td>
+<td>Store scanned rooms + create chores</td>
+</tr>
+</tbody>
+</table>
+<h3>Chores</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/chores</code></td>
+<td>Create a chore</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/users/{id}/chores</code></td>
+<td>User's assigned chores</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/users/{id}/extra-chores</code></td>
+<td>Available extra chores</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/users/{id}/extra-chores</code></td>
+<td>Claim an extra chore</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/users/{id}/stats</code></td>
+<td>Total completed, streak, points</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/v1/chores/assigned/{id}</code></td>
+<td>Update chore status</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/chores/assigned/{id}/approve</code></td>
+<td>Approve (handles split points)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/chores/assigned/{id}/transfer</code></td>
+<td>Transfer chore to another user</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/chores/assigned/{id}/support</code></td>
+<td>Request help (50/50 split)</td>
+</tr>
+</tbody>
+</table>
+<h3>Rewards</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/rewards</code></td>
+<td>Create reward</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/rewards/bulk</code></td>
+<td>Bulk create rewards</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/v1/rewards/{id}</code></td>
+<td>Update reward</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/v1/rewards/{id}</code></td>
+<td>Deactivate reward</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/rewards/redeem</code></td>
+<td>Redeem reward with points</td>
+</tr>
+</tbody>
+</table>
+<h3>Jobs</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/jobs</code></td>
+<td>Create job (parent)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/jobs/{id}/apply</code></td>
+<td>Apply/accept job (child)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/jobs/{id}/applications</code></td>
+<td>View applications (parent)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/jobs/{id}/assign</code></td>
+<td>Pick applicant (parent)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/jobs/{id}/complete</code></td>
+<td>Mark job done (child)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/jobs/{id}/confirm</code></td>
+<td>Confirm + award (parent)</td>
+</tr>
+</tbody>
+</table>
+<h3>AI</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/ai/voice-setup</code></td>
+<td>Conversational onboarding</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/ai/tts</code></td>
+<td>Text-to-speech</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/ai/families/{id}/distribute-chores</code></td>
+<td>AI chore scheduling</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/ai/analyze-room</code></td>
+<td>GPT-4o Vision room analysis</td>
+</tr>
+</tbody>
+</table>
+<h3>Other</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/children/{id}/invite</code></td>
+<td>Generate invite link</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/invitations/{token}</code></td>
+<td>Validate invitation</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/invitations/{token}/claim</code></td>
+<td>Claim invitation</td>
+</tr>
+<tr>
+<td>GET/PUT</td>
+<td><code>/v1/users/{id}/screen-time</code></td>
+<td>Screen time settings</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/users/{id}/screen-time/access</code></td>
+<td>Check screen time access</td>
+</tr>
+<tr>
+<td>GET/PATCH</td>
+<td><code>/v1/users/{id}/participate</code></td>
+<td>Parent chore participation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Database Schema</h2>
+<h3>Tables</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>families</code></td>
+<td>Family info + <code>house_details</code> JSONB (rooms, bins, pets, gaming)</td>
+</tr>
+<tr>
+<td><code>users</code></td>
+<td>Parent/child accounts, points, participation flag</td>
+</tr>
+<tr>
+<td><code>family_members</code></td>
+<td>Junction table (family &lt;-&gt; user)</td>
+</tr>
+<tr>
+<td><code>chores</code></td>
+<td>Master chore list per family (name, frequency, difficulty, points)</td>
+</tr>
+<tr>
+<td><code>assigned_chores</code></td>
+<td>Daily assignments (status, transfer tracking, unique constraint)</td>
+</tr>
+<tr>
+<td><code>rewards</code></td>
+<td>Reward catalog (per-family, optional per-child)</td>
+</tr>
+<tr>
+<td><code>user_rewards</code></td>
+<td>Redemption history</td>
+</tr>
+<tr>
+<td><code>screen_time_settings</code></td>
+<td>Per-child screen time rules</td>
+</tr>
+<tr>
+<td><code>points_history</code></td>
+<td>Point transaction log</td>
+</tr>
+<tr>
+<td><code>jobs</code></td>
+<td>Jobs board postings</td>
+</tr>
+<tr>
+<td><code>job_applications</code></td>
+<td>Job applications with reasons/bids</td>
+</tr>
+<tr>
+<td><code>child_invitations</code></td>
+<td>Invite tokens for child account creation</td>
+</tr>
+</tbody>
+</table>
+<h3>Key Columns</h3>
+<ul>
+<li><code>families.house_details</code> (JSONB) — stores <code>scanned_rooms</code>, <code>bin_schedule</code>, <code>pets</code>, <code>gaming_schedule</code></li>
+<li><code>assigned_chores.transferred_from</code> — tracks who transferred a chore</li>
+<li><code>assigned_chores.transfer_type</code> — 'transfer' (full points) or 'support' (50/50 split)</li>
+<li><code>users.participate_in_chores</code> — parent opt-in for chore rotation</li>
+<li><code>rewards.child_id</code> — optional per-child reward assignment</li>
+</ul>
+<h3>Migrations</h3>
+<ol>
+<li><code>001_initial_schema.sql</code> — Core tables</li>
+<li><code>002_seed_data.sql</code> — Default chores and rewards</li>
+<li><code>003_child_invitations.sql</code> — Invite system</li>
+<li><code>004_reward_type.sql</code> — Reward type column</li>
+<li><code>005_reward_child_id.sql</code> — Per-child rewards</li>
+<li><code>006_jobs_board.sql</code> — Jobs + applications tables</li>
+<li><code>007_parent_participate.sql</code> — Parent participation flag</li>
+<li><code>008_unique_assigned_chores.sql</code> — Prevent duplicate assignments</li>
+<li><code>009_chore_transfers.sql</code> — Transfer/support tracking</li>
+</ol>
+<hr />
+<h2>Deployment</h2>
+<h3>Infrastructure (AWS eu-west-1)</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Resource</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API</td>
+<td>API Gateway: <code>4aeyo9z2hf</code></td>
+</tr>
+<tr>
+<td>Backend</td>
+<td>Lambda: <code>family-chore-api</code> (Node 18, 512MB, 60s timeout)</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>RDS PostgreSQL: <code>family-chore-db.cxegq20iy20d.eu-west-1.rds.amazonaws.com</code></td>
+</tr>
+<tr>
+<td>iOS distribution</td>
+<td>App Store Connect / TestFlight (bundle id <code>com.snow.omyday</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3>Deploy Commands</h3>
+<pre><code class="language-bash"># Backend (AWS Lambda)
+cd lambda-backend &amp;&amp; npm run build &amp;&amp; npm run package
+aws lambda update-function-code --function-name family-chore-api --zip-file fileb://function.zip --region eu-west-1 --profile claude-admin
 
-  /* Nav */
-  .topbar { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 1rem 2rem; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-  .topbar h1 { font-size: 1.25rem; font-weight: 700; }
-  .topbar p { font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
-  .meta-bar { display: flex; gap: 1.5rem; flex-wrap: wrap; background: var(--card); border-bottom: 1px solid var(--border); padding: 0.75rem 2rem; font-size: 0.8rem; color: var(--muted); }
-  .meta-bar a { color: var(--primary); text-decoration: none; font-weight: 600; }
-  .meta-bar a:hover { text-decoration: underline; }
+# Database migration (run from lambda-backend with pg installed)
+cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 
-  /* Layout */
-  .wrapper { display: flex; max-width: 1200px; margin: 0 auto; }
-  .sidebar { width: 240px; padding: 1.5rem 1rem; position: sticky; top: 90px; height: calc(100vh - 90px); overflow-y: auto; border-right: 1px solid var(--border); background: var(--card); flex-shrink: 0; }
-  .sidebar a { display: block; padding: 6px 12px; font-size: 0.82rem; color: var(--muted); text-decoration: none; border-radius: 6px; margin-bottom: 2px; }
-  .sidebar a:hover, .sidebar a.active { background: #eef2ff; color: var(--primary); }
-  .sidebar .section-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 700; margin: 1rem 0 0.25rem 12px; }
-  .content { flex: 1; padding: 2rem; min-width: 0; }
-
-  /* Cards */
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-  .card h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 2px solid #eef2ff; color: var(--primary); }
-  .card h3 { font-size: 1rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--text); }
-  .card p, .card li { font-size: 0.88rem; color: #475569; }
-  .card ul { padding-left: 1.25rem; }
-  .card li { margin-bottom: 4px; }
-
-  /* Tables */
-  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.75rem 0; }
-  th { background: #f1f5f9; text-align: left; padding: 8px 12px; font-weight: 600; color: var(--text); border-bottom: 2px solid var(--border); }
-  td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: #475569; }
-  tr:hover td { background: #f8fafc; }
-  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; color: #be185d; }
-
-  /* Badges */
-  .badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; }
-  .badge-get { background: #dcfce7; color: #166534; }
-  .badge-post { background: #dbeafe; color: #1e40af; }
-  .badge-patch { background: #fef3c7; color: #92400e; }
-  .badge-delete { background: #fee2e2; color: #991b1b; }
-  .badge-put { background: #e0e7ff; color: #3730a3; }
-
-  /* Feature grid */
-  .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-  .feature-card { background: linear-gradient(135deg, #f8fafc, #eef2ff); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
-  .feature-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; }
-  .feature-card p { font-size: 0.8rem; color: var(--muted); }
-  .feature-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
-
-  /* Changelog */
-  .changelog-date { font-size: 0.85rem; font-weight: 700; color: var(--accent); margin-top: 1rem; }
-  .changelog-list { padding-left: 1.25rem; margin: 0.5rem 0 1rem; }
-  .changelog-list li { font-size: 0.82rem; color: #475569; margin-bottom: 3px; }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .sidebar { display: none; }
-    .content { padding: 1rem; }
-    .feature-grid { grid-template-columns: 1fr; }
-    .meta-bar { padding: 0.75rem 1rem; }
-  }
-</style>
-</head>
-<body>
-
-<div class="topbar">
-  <h1>Family Chore App — Project Wiki</h1>
-  <p>Living documentation — always up to date</p>
-</div>
-
-<div class="meta-bar">
-  <span><strong>Last updated:</strong> 2026-04-05</span>
-  <span><strong>Version:</strong> 1.0.0</span>
-  <span><strong>Live:</strong> <a href="https://dnekl5ak5edve.cloudfront.net" target="_blank">App</a></span>
-  <span><strong>API:</strong> <a href="https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1" target="_blank">Endpoint</a></span>
-</div>
-
-<div class="wrapper">
-
-<!-- Sidebar -->
-<nav class="sidebar">
-  <div class="section-label">General</div>
-  <a href="#overview">Overview</a>
-  <a href="#features">Features</a>
-  <a href="#tech-stack">Tech Stack</a>
-  <a href="#architecture">Architecture</a>
-  <div class="section-label">Reference</div>
-  <a href="#pages">Pages & Navigation</a>
-  <a href="#api">API Endpoints</a>
-  <a href="#database">Database Schema</a>
-  <div class="section-label">Operations</div>
-  <a href="#deployment">Deployment</a>
-  <a href="#roadmap">Roadmap</a>
-  <a href="#ios">iOS Game App</a>
-  <a href="#changelog">Changelog</a>
-</nav>
-
-<!-- Content -->
-<main class="content">
-
-<!-- Overview -->
-<div class="card" id="overview">
-  <h2>Overview</h2>
-  <p>AI-powered family chore management app with voice-first onboarding, house scanning, gamified rewards, jobs board, and household routine management. Designed to reduce parental mental load by automating chore scheduling and making chores fun for kids through points, badges, and a rewards shop.</p>
-</div>
-
-<!-- Features -->
-<div class="card" id="features">
-  <h2>Features</h2>
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="feature-icon">🎤</div>
-      <h4>Voice-First Onboarding</h4>
-      <p>ChatGPT-style conversational setup with speech recognition, TTS, house scanning via GPT-4o Vision, and rewards selection.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🤖</div>
-      <h4>AI Chore Distribution</h4>
-      <p>GPT-4o-mini creates fair 7-day schedules. No same-day duplicates, no consecutive repeats, age-appropriate filtering, fair rotation.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🏆</div>
-      <h4>Gamification</h4>
-      <p>Points (Rookie/Pro/Legend), weekly badges, streak tracking, Weekly Superstar (silver), Monthly Hero (gold), family leaderboard.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🛒</div>
-      <h4>Rewards Shop</h4>
-      <p>Galaxy-themed store where kids buy rewards with points. Parents manage inventory. Per-child reward assignment.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">💼</div>
-      <h4>Jobs Board</h4>
-      <p>Parents post jobs (points or cash). Open or application-based. Bidding system. Credibility penalties for overdue jobs.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📋</div>
-      <h4>Family Rules</h4>
-      <p>Bin rotation schedule, pet care (dog walks, cat litter), gaming schedule per child. Visible to entire family.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔄</div>
-      <h4>Transfer & Support</h4>
-      <p>Transfer chores to siblings (100% points) or ask for help (50/50 split). Smart point distribution on approval.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📷</div>
-      <h4>Smart Room Scanning</h4>
-      <p>Detects robot vacuums, dishwashers, dryers. Suggests maintenance tasks. Scan additional rooms anytime from Settings.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🐾</div>
-      <h4>Auto Pet & Bin Chores</h4>
-      <p>Automatically creates walk, feed, litter, and bin chores from family config during redistribution.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📱</div>
-      <h4>Screen Time Management</h4>
-      <p>Daily limits, chore-gated access, minimum points threshold per child.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">👨‍👩‍👧‍👦</div>
-      <h4>Family Management</h4>
-      <p>Parent/child accounts, invite links (7-day expiry), parent chore participation opt-in.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">⭐</div>
-      <h4>Extra Chores</h4>
-      <p>Children can claim bonus chores from other days for extra points. Star burst animation on completion.</p>
-    </div>
-  </div>
-</div>
-
-<!-- Tech Stack -->
-<div class="card" id="tech-stack">
-  <h2>Tech Stack</h2>
-  <table>
-    <tr><th>Layer</th><th>Technology</th></tr>
-    <tr><td>Frontend</td><td>React 18 + TypeScript + Vite 5</td></tr>
-    <tr><td>Styling</td><td>TailwindCSS 3.4</td></tr>
-    <tr><td>State</td><td>Zustand 4.4</td></tr>
-    <tr><td>Icons</td><td>Lucide React</td></tr>
-    <tr><td>Backend</td><td>Node.js + TypeScript (AWS Lambda)</td></tr>
-    <tr><td>Database</td><td>PostgreSQL 14+ (AWS RDS)</td></tr>
-    <tr><td>AI</td><td>OpenAI GPT-4o (vision), GPT-4o-mini (scheduling), GPT-4 Turbo (conversation)</td></tr>
-    <tr><td>Speech</td><td>Web Speech API + OpenAI TTS</td></tr>
-    <tr><td>Hosting</td><td>AWS S3 + CloudFront (frontend), API Gateway + Lambda (backend)</td></tr>
-    <tr><td>Monorepo</td><td>Lerna 8.1</td></tr>
-    <tr><td>Build</td><td>esbuild (Lambda), Vite (frontend)</td></tr>
-  </table>
-</div>
-
-<!-- Architecture -->
-<div class="card" id="architecture">
-  <h2>Architecture</h2>
-  <pre style="background:#f1f5f9;padding:1rem;border-radius:8px;font-size:0.8rem;overflow-x:auto;">
-family-chore-app/
-├── packages/
-│   ├── web-app/              # React frontend (Vite + TailwindCSS)
-│   ├── user-service/         # Auth & family management
-│   ├── chore-service/        # Chore CRUD
-│   ├── gamification-service/ # Points & rewards
-│   └── ai-service/           # Voice & vision AI
-├── lambda-backend/           # Consolidated AWS Lambda (all routes)
-├── database/
-│   └── migrations/           # 9 SQL migration files
-└── docs/                     # Documentation
-  </pre>
-  <p style="margin-top:0.75rem;font-size:0.85rem;color:var(--muted);">Production: Single Lambda function behind API Gateway. Frontend via S3 + CloudFront with HTTPS.</p>
-</div>
-
-<!-- Pages -->
-<div class="card" id="pages">
-  <h2>Pages & Navigation</h2>
-  <table>
-    <tr><th>Route</th><th>Page</th><th>Who</th><th>Description</th></tr>
-    <tr><td><code>/dashboard</code></td><td>Dashboard</td><td>All</td><td>Stats, today's chores, leaderboard, badges</td></tr>
-    <tr><td><code>/chores</code></td><td>Chores</td><td>All</td><td>Assigned chores, extra chores, transfer/support</td></tr>
-    <tr><td><code>/jobs</code></td><td>Jobs Board</td><td>All</td><td>Post/browse jobs, applications, completion</td></tr>
-    <tr><td><code>/rewards</code></td><td>Rewards</td><td>All</td><td>Stats, badges, streaks, weekly progress</td></tr>
-    <tr><td><code>/shop</code></td><td>Shop</td><td>All</td><td>Rewards store (child: buy, parent: manage)</td></tr>
-    <tr><td><code>/family-rules</code></td><td>Rules</td><td>All</td><td>Rooms, bins, pets, gaming schedule</td></tr>
-    <tr><td><code>/approvals</code></td><td>Approvals</td><td>Parents</td><td>Approve/reject completed chores</td></tr>
-    <tr><td><code>/settings</code></td><td>Settings</td><td>All</td><td>Family config, chores, rewards, routines</td></tr>
-    <tr><td><code>/login</code></td><td>Login</td><td>Public</td><td>Email/password login</td></tr>
-    <tr><td><code>/register</code></td><td>Register</td><td>Public</td><td>New parent account</td></tr>
-    <tr><td><code>/onboarding</code></td><td>Onboarding</td><td>Auth</td><td>Voice/manual setup + room scanning</td></tr>
-    <tr><td><code>/join/:token</code></td><td>Join Family</td><td>Public</td><td>Child invitation acceptance</td></tr>
-  </table>
-</div>
-
-<!-- API Endpoints -->
-<div class="card" id="api">
-  <h2>API Endpoints</h2>
-
-  <h3>Auth</h3>
-  <table>
-    <tr><th>Method</th><th>Path</th><th>Description</th></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/auth/register</code></td><td>Create parent account</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/auth/login</code></td><td>Login (returns JWT)</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/auth/profile</code></td><td>Get current user profile</td></tr>
-  </table>
-
-  <h3>Families</h3>
-  <table>
-    <tr><th>Method</th><th>Path</th><th>Description</th></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/families</code></td><td>Create family</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/families/{id}</code></td><td>Family details + house_details</td></tr>
-    <tr><td><span class="badge badge-patch">PATCH</span></td><td><code>/v1/families/{id}/config</code></td><td>Update bins/pets/gaming config</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/families/{id}/members</code></td><td>Add child</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/families/{id}/chores</code></td><td>All assigned chores</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/families/{id}/approvals</code></td><td>Pending approvals</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/families/{id}/badges</code></td><td>Weekly/monthly badges</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/families/{id}/rewards</code></td><td>Rewards list</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/families/{id}/leaderboard</code></td><td>Points leaderboard</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/families/{id}/jobs</code></td><td>All jobs</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/families/{id}/rooms</code></td><td>Store rooms + create chores</td></tr>
-  </table>
-
-  <h3>Chores</h3>
-  <table>
-    <tr><th>Method</th><th>Path</th><th>Description</th></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/chores</code></td><td>Create chore</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/users/{id}/chores</code></td><td>User's assigned chores</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/users/{id}/extra-chores</code></td><td>Available extra chores</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/users/{id}/extra-chores</code></td><td>Claim extra chore</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/users/{id}/stats</code></td><td>Total, streak, points</td></tr>
-    <tr><td><span class="badge badge-patch">PATCH</span></td><td><code>/v1/chores/assigned/{id}</code></td><td>Update status</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/chores/assigned/{id}/approve</code></td><td>Approve (handles splits)</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/chores/assigned/{id}/transfer</code></td><td>Transfer to sibling</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/chores/assigned/{id}/support</code></td><td>Request help (50/50)</td></tr>
-  </table>
-
-  <h3>Rewards</h3>
-  <table>
-    <tr><th>Method</th><th>Path</th><th>Description</th></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/rewards</code></td><td>Create reward</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/rewards/bulk</code></td><td>Bulk create</td></tr>
-    <tr><td><span class="badge badge-patch">PATCH</span></td><td><code>/v1/rewards/{id}</code></td><td>Update reward</td></tr>
-    <tr><td><span class="badge badge-delete">DELETE</span></td><td><code>/v1/rewards/{id}</code></td><td>Deactivate</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/rewards/redeem</code></td><td>Redeem with points</td></tr>
-  </table>
-
-  <h3>Jobs</h3>
-  <table>
-    <tr><th>Method</th><th>Path</th><th>Description</th></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/jobs</code></td><td>Create job</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/jobs/{id}/apply</code></td><td>Apply/accept</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/jobs/{id}/applications</code></td><td>View applications</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/jobs/{id}/assign</code></td><td>Pick applicant</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/jobs/{id}/complete</code></td><td>Mark done</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/jobs/{id}/confirm</code></td><td>Confirm + award</td></tr>
-  </table>
-
-  <h3>AI</h3>
-  <table>
-    <tr><th>Method</th><th>Path</th><th>Description</th></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/ai/voice-setup</code></td><td>Conversational onboarding</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/ai/tts</code></td><td>Text-to-speech</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/ai/families/{id}/distribute-chores</code></td><td>AI chore scheduling</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/ai/analyze-room</code></td><td>Room analysis (Vision)</td></tr>
-  </table>
-
-  <h3>Other</h3>
-  <table>
-    <tr><th>Method</th><th>Path</th><th>Description</th></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/children/{id}/invite</code></td><td>Generate invite link</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/invitations/{token}</code></td><td>Validate invitation</td></tr>
-    <tr><td><span class="badge badge-post">POST</span></td><td><code>/v1/invitations/{token}/claim</code></td><td>Claim invitation</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/users/{id}/screen-time</code></td><td>Screen time settings</td></tr>
-    <tr><td><span class="badge badge-put">PUT</span></td><td><code>/v1/users/{id}/screen-time</code></td><td>Update screen time</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/users/{id}/screen-time/access</code></td><td>Check access</td></tr>
-    <tr><td><span class="badge badge-get">GET</span></td><td><code>/v1/users/{id}/participate</code></td><td>Parent participation status</td></tr>
-    <tr><td><span class="badge badge-patch">PATCH</span></td><td><code>/v1/users/{id}/participate</code></td><td>Toggle participation</td></tr>
-  </table>
-</div>
-
-<!-- Database -->
-<div class="card" id="database">
-  <h2>Database Schema</h2>
-  <h3>Tables</h3>
-  <table>
-    <tr><th>Table</th><th>Purpose</th></tr>
-    <tr><td><code>families</code></td><td>Family info + <code>house_details</code> JSONB (rooms, bins, pets, gaming)</td></tr>
-    <tr><td><code>users</code></td><td>Parent/child accounts, points, participation flag</td></tr>
-    <tr><td><code>family_members</code></td><td>Junction table (family ↔ user)</td></tr>
-    <tr><td><code>chores</code></td><td>Master chore list (name, frequency, difficulty, points, room_type)</td></tr>
-    <tr><td><code>assigned_chores</code></td><td>Daily assignments (status, transfer tracking, unique constraint)</td></tr>
-    <tr><td><code>rewards</code></td><td>Reward catalog (per-family, optional per-child)</td></tr>
-    <tr><td><code>user_rewards</code></td><td>Redemption history</td></tr>
-    <tr><td><code>screen_time_settings</code></td><td>Per-child screen time rules</td></tr>
-    <tr><td><code>points_history</code></td><td>Point transaction log</td></tr>
-    <tr><td><code>jobs</code></td><td>Jobs board postings</td></tr>
-    <tr><td><code>job_applications</code></td><td>Applications with reasons/bids</td></tr>
-    <tr><td><code>child_invitations</code></td><td>Invite tokens for child accounts</td></tr>
-  </table>
-
-  <h3>Migrations</h3>
-  <table>
-    <tr><th>#</th><th>File</th><th>Description</th></tr>
-    <tr><td>1</td><td><code>001_initial_schema.sql</code></td><td>Core tables</td></tr>
-    <tr><td>2</td><td><code>002_seed_data.sql</code></td><td>Default chores and rewards</td></tr>
-    <tr><td>3</td><td><code>003_child_invitations.sql</code></td><td>Invite system</td></tr>
-    <tr><td>4</td><td><code>004_reward_type.sql</code></td><td>Reward type column</td></tr>
-    <tr><td>5</td><td><code>005_reward_child_id.sql</code></td><td>Per-child rewards</td></tr>
-    <tr><td>6</td><td><code>006_jobs_board.sql</code></td><td>Jobs + applications tables</td></tr>
-    <tr><td>7</td><td><code>007_parent_participate.sql</code></td><td>Parent participation flag</td></tr>
-    <tr><td>8</td><td><code>008_unique_assigned_chores.sql</code></td><td>Prevent duplicate assignments</td></tr>
-    <tr><td>9</td><td><code>009_chore_transfers.sql</code></td><td>Transfer/support tracking</td></tr>
-  </table>
-</div>
-
-<!-- Deployment -->
-<div class="card" id="deployment">
-  <h2>Deployment</h2>
-  <h3>Infrastructure (AWS eu-west-1)</h3>
-  <table>
-    <tr><th>Component</th><th>Resource</th></tr>
-    <tr><td>Frontend</td><td>S3: <code>family-chore-app-frontend-579201839256</code> + CloudFront: <code>E3PN7R8O20ARAV</code></td></tr>
-    <tr><td>API</td><td>API Gateway: <code>4aeyo9z2hf</code></td></tr>
-    <tr><td>Backend</td><td>Lambda: <code>family-chore-api</code> (Node 18, 512MB, 60s)</td></tr>
-    <tr><td>Database</td><td>RDS: <code>family-chore-db.cxegq20iy20d.eu-west-1.rds.amazonaws.com</code></td></tr>
-  </table>
-
-  <h3>Deploy Commands</h3>
-  <pre style="background:#f1f5f9;padding:1rem;border-radius:8px;font-size:0.78rem;overflow-x:auto;">
-# Frontend
-cd packages/web-app && npm run build
-aws s3 sync dist/ s3://family-chore-app-frontend-579201839256 --delete --profile claude-admin
-aws cloudfront create-invalidation --distribution-id E3PN7R8O20ARAV --paths "/*" --profile claude-admin
-
-# Backend
-cd lambda-backend && npm run build && npm run package
-aws lambda update-function-code --function-name family-chore-api \
-  --zip-file fileb://function.zip --region eu-west-1 --profile claude-admin</pre>
-</div>
-
-<!-- Roadmap -->
-<div class="card" id="roadmap">
-  <h2>Roadmap</h2>
-  <h3>v1.1 — Coming Next</h3>
-  <div class="feature-grid">
-    <div class="feature-card" style="background: linear-gradient(135deg, #0B0F1A, #1E2440); border-color: #A855F7;">
-      <div class="feature-icon">🌍</div>
-      <h4 style="color: #A855F7;">Inter-Family Leaderboard</h4>
-      <p>Families compete globally. Family score = sum of all members' points. Opt-in privacy. Weekly & all-time rankings. "Top 10 Family" badge.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📱</div>
-      <h4>iOS App Feature Parity</h4>
-      <p>Complete MyDay game-style iOS app with all web features, push notifications, and App Store submission.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔔</div>
-      <h4>Push Notifications</h4>
-      <p>Chore assignments, approval alerts, streak reminders, badge achievements, job postings.</p>
-    </div>
-  </div>
-  <h3>v1.2+ Backlog</h3>
-  <ul>
-    <li>Avatar customization (unlock outfits with points)</li>
-    <li>Advanced gamification (daily login bonus, power-ups, seasonal events)</li>
-    <li>Financial literacy (pocket money, savings goals, gift cards)</li>
-    <li>Deep screen time integration (iOS Screen Time API)</li>
-    <li>Social features (friend families, challenges)</li>
-    <li>Analytics dashboard (weekly reports, trends)</li>
-    <li>Multi-household / co-parenting support</li>
-    <li>Offline/PWA support</li>
-    <li>AI Chore Coach, AR room detection, Apple Watch</li>
-  </ul>
-  <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--muted);">Full backlog: <code>ROADMAP.md</code></p>
-</div>
-
-<!-- iOS Game App -->
-<div class="card" id="ios">
-  <h2>MyDay — iOS Game App</h2>
-  <p style="margin-bottom: 1rem;">Native SwiftUI game-style chore app. Dark space theme with neon accents. RPG quest experience for kids, command center for parents.</p>
-  <table>
-    <tr><th>Aspect</th><th>Detail</th></tr>
-    <tr><td>Platform</td><td>iPhone + iPad (iOS 26.2+)</td></tr>
-    <tr><td>Language</td><td>Swift 5 + SwiftUI</td></tr>
-    <tr><td>Files</td><td>35 Swift files</td></tr>
-    <tr><td>Theme</td><td>Dark navy (#0B0F1A) + neon accents</td></tr>
-    <tr><td>Backend</td><td>Same AWS API as web app</td></tr>
-    <tr><td>Location</td><td><code>/Users/ayataly/Desktop/MyDay/</code></td></tr>
-  </table>
-  <h3 style="margin-top: 1rem;">Child Tabs</h3>
-  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-    <span class="badge badge-post">Quests</span>
-    <span class="badge badge-patch">Shop</span>
-    <span class="badge badge-delete">Bounties</span>
-    <span class="badge badge-get">Rankings</span>
-    <span class="badge badge-put">Profile</span>
-  </div>
-  <h3 style="margin-top: 1rem;">Parent Tabs</h3>
-  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-    <span class="badge badge-post">HQ</span>
-    <span class="badge badge-get">Approve</span>
-    <span class="badge badge-delete">Bounties</span>
-    <span class="badge badge-get">Rankings</span>
-    <span class="badge badge-patch">Settings</span>
-  </div>
-  <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--muted);">Full game design: <code>MyDay/GAME-WIKI.md</code></p>
-</div>
-
-<!-- Changelog -->
-<div class="card" id="changelog">
-  <h2>Changelog</h2>
-
-  <div class="changelog-date">2026-04-05</div>
-  <ul class="changelog-list">
-    <li>MyDay iOS app created (35 Swift files — SwiftUI game-style RPG chore app)</li>
-    <li>Feature roadmap & backlog created (ROADMAP.md)</li>
-    <li>Game concept wiki created (MyDay/GAME-WIKI.md)</li>
-    <li>Inter-family leaderboard concept designed (v1.1)</li>
-  </ul>
-
-  <div class="changelog-date">2026-04-02</div>
-  <ul class="changelog-list">
-    <li>Auto-generate pet care and bin chores during distribution</li>
-    <li>Chore transfer system (full transfer to sibling, all points to them)</li>
-    <li>Support system (ask sibling for help, 50/50 point split)</li>
-    <li>Project wiki created (WIKI.md + wiki.html)</li>
-  </ul>
-
-  <div class="changelog-date">2026-03-30</div>
-  <ul class="changelog-list">
-    <li>Fixed AI chore distribution: index-based communication, unique constraint, clear old assignments</li>
-    <li>Lowered age thresholds: Pro from 4+, Legend from 8+</li>
-  </ul>
-
-  <div class="changelog-date">2026-03-29</div>
-  <ul class="changelog-list">
-    <li>Room scanning in Settings (post-setup), chore frequency dropdown</li>
-    <li>Bin collection schedule with weekly rotation</li>
-    <li>Pet care management (dog walks, cat litter rotation)</li>
-    <li>Gaming schedule per child (device, days, hours)</li>
-    <li>Family Rules page visible to all</li>
-    <li>Difficulty renamed: Rookie / Pro / Legend</li>
-    <li>AI-powered chore distribution with GPT-4o-mini</li>
-    <li>Interactive dashboard (clickable stats)</li>
-    <li>Jobs Board with applications, bidding, cash rewards</li>
-    <li>Rewards Shop with galaxy theme</li>
-    <li>Rewards page with stats, badges, streaks</li>
-    <li>Per-child reward customization</li>
-    <li>Weekly Superstar / Monthly Hero badges</li>
-    <li>Safari landscape nav fix</li>
-    <li>Fixed onboarding redirect loop</li>
-    <li>Voice-first onboarding with room scanning</li>
-    <li>Initial deployment to AWS</li>
-  </ul>
-</div>
-
-</main>
-</div>
-
-<script>
-// Highlight active sidebar link on scroll
-const sections = document.querySelectorAll('.card[id]');
-const navLinks = document.querySelectorAll('.sidebar a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(s => {
-    if (window.scrollY >= s.offsetTop - 120) current = s.id;
-  });
-  navLinks.forEach(a => {
-    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
-  });
-});
-</script>
-
-</body>
-</html>
+# iOS — Archive in Xcode, upload via App Store Connect / Transporter
+</code></pre>
+<hr />
+<h2>Roadmap</h2>
+<p>See <a href="ROADMAP.md">ROADMAP.md</a> for the full feature backlog. Highlights:</p>
+<h3>Coming in v1.1</h3>
+<ul>
+<li><strong>Inter-Family Leaderboard</strong> — Families compete globally. Family score = sum of all members' points. Opt-in privacy. Weekly &amp; all-time rankings. "Top 10 Family" badge. Incentivizes collective effort.</li>
+<li><strong>iOS App Feature Parity</strong> — Complete the MyDay game-style iOS app with all web features</li>
+<li><strong>Push Notifications</strong> — Chore assignments, approvals, streak reminders, badge achievements</li>
+</ul>
+<h3>Backlog (v1.2+)</h3>
+<ul>
+<li>Notification system (push + in-app)</li>
+<li>Avatar customization (unlock outfits with points)</li>
+<li>Advanced gamification (daily login bonus, power-ups, seasonal events)</li>
+<li>Financial literacy (pocket money tracking, savings goals, gift cards)</li>
+<li>Deep screen time integration (iOS Screen Time API, gaming platform hooks)</li>
+<li>Social features (friend families, challenges, community)</li>
+<li>Analytics dashboard (weekly reports, trends, per-child insights)</li>
+<li>Multi-household support (co-parenting)</li>
+<li>Offline/PWA support</li>
+<li>AI Chore Coach, AR room detection, wearable integration</li>
+</ul>
+<hr />
+<h2>Related Docs</h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Location</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Feature Roadmap</td>
+<td><a href="ROADMAP.md">ROADMAP.md</a></td>
+<td>Full backlog with priorities</td>
+</tr>
+<tr>
+<td>iOS App Wiki</td>
+<td><a href="ios-app/WIKI.md">ios-app/WIKI.md</a></td>
+<td>Architecture, auth, screens, models, theme — iOS-specific</td>
+</tr>
+<tr>
+<td>AI Integration</td>
+<td><a href="docs/ai-integration-guide.md">docs/ai-integration-guide.md</a></td>
+<td>OpenAI usage patterns</td>
+</tr>
+<tr>
+<td>AWS Infrastructure</td>
+<td><a href="docs/aws-infrastructure-and-deployment.md">docs/aws-infrastructure-and-deployment.md</a></td>
+<td>Lambda, API Gateway, RDS setup</td>
+</tr>
+<tr>
+<td>Database Schema</td>
+<td><a href="docs/database-schema.md">docs/database-schema.md</a></td>
+<td>Full Postgres schema</td>
+</tr>
+<tr>
+<td>Local Wiki Server</td>
+<td><code>python3 serve_wiki.py</code> → http://localhost:8765/</td>
+<td>Live-rendered hub for both wikis</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Changelog</h2>
+<h3>2026-05-07</h3>
+<ul>
+<li><strong>Pivot to mobile-only.</strong> The web app was a validation prototype; the iOS app now has full feature parity and is the only shipping client.</li>
+<li>Removed <code>packages/web-app/</code> (React/Vite frontend), the four legacy microservice packages (<code>user-service</code>, <code>chore-service</code>, <code>gamification-service</code>, <code>ai-service</code>), Lerna config, root <code>package.json</code> / <code>package-lock.json</code>, and <code>node_modules/</code>. All API logic lives in <code>lambda-backend/src/index.ts</code>.</li>
+<li>Removed web-only docs: <code>docs/api-specifications.md</code>, <code>docs/project-structure-and-config.md</code>, <code>docs/quick-start-guide.md</code>.</li>
+<li>Bumped iOS <code>MARKETING_VERSION</code> to 1.0.1 in the Xcode project (matches Build 4 on TestFlight).</li>
+<li>Added <code>serve_wiki.py</code> — local wiki hub at http://localhost:8765/ that live-renders both this wiki and the iOS-specific wiki.</li>
+<li>Renamed wiki title to <strong>OMyDays</strong> to match the app branding; updated <code>Tech Stack</code>, <code>Architecture</code>, <code>Deployment</code>, and <code>Related Docs</code> sections to reflect mobile-only scope.</li>
+</ul>
+<h3>2026-04-14</h3>
+<ul>
+<li><strong>OMyDay iOS app v1.0.1 (Build 4) on TestFlight</strong></li>
+<li>52 Swift files, full feature parity with web app + new features</li>
+<li>Smart auth (email, invite codes, biometric, kid exploring)</li>
+<li>AI onboarding with GPT-4o (voice + text, bins, pets, room scanning)</li>
+<li>Chore system v2: morning/evening routines, daily habits, household chores, pet rotation</li>
+<li>Contracts board (renamed from Bounties): kid pitching, portfolio, subcontracting</li>
+<li>Guided room scanning: name room → upload 1-4 photos → AI merges assets</li>
+<li>Unified invite codes (6-char): children, partners, link exploring kids</li>
+<li>Manage Family Members: add, invite, edit, remove, change role</li>
+<li>Manage Home: edit family name + house type</li>
+<li>Delete Family: cascading delete with confirmation</li>
+<li>Business Portfolio: reliability score, earnings, business levels</li>
+<li>Play Time &amp; Gaming rules with device icons and weekend badges</li>
+<li>All backend endpoints deployed to AWS Lambda</li>
+</ul>
+<h3>2026-04-05</h3>
+<ul>
+<li>MyDay iOS app created (35 Swift files — SwiftUI game-style RPG chore app)</li>
+<li>Feature roadmap &amp; backlog created (ROADMAP.md)</li>
+<li>Game concept wiki created (MyDay/GAME-WIKI.md)</li>
+<li>Inter-family leaderboard concept designed (v1.1)</li>
+</ul>
+<h3>2026-04-02</h3>
+<ul>
+<li>Auto-generate pet care and bin chores during distribution</li>
+<li>Chore transfer system (full transfer to sibling, all points go to them)</li>
+<li>Support system (ask sibling for help, 50/50 point split)</li>
+<li>Project wiki created</li>
+</ul>
+<h3>2026-03-30</h3>
+<ul>
+<li>Fixed AI chore distribution: index-based AI communication, unique DB constraint, clear old assignments before redistributing</li>
+<li>Lowered age thresholds: Pro from 4+, Legend from 8+</li>
+</ul>
+<h3>2026-03-29</h3>
+<ul>
+<li>Room scanning in Settings (post-setup)</li>
+<li>Chore frequency dropdown (Daily/Weekly) in Add Chore form</li>
+<li>Bin collection schedule with weekly child rotation</li>
+<li>Pet care management (dog walks, cat litter, rotation)</li>
+<li>Gaming schedule per child (device, days, hours)</li>
+<li>Family Rules page visible to all family members</li>
+<li>Fixed dashboard 0/0 count (date format normalization)</li>
+<li>Gaming difficulty renamed: Easy-&gt;Rookie, Medium-&gt;Pro, Hard-&gt;Legend</li>
+<li>Smart chore distribution (no same-day duplicates, no consecutive repeats)</li>
+<li>Enhanced room AI: detects smart appliances, suggests maintenance tasks</li>
+<li>Invite card hidden when all children registered</li>
+<li>Parent participation toggle for chore rotation</li>
+<li>Shop tab for parents (reward management)</li>
+<li>Fixed Shop keyboard dismissal bug on Safari</li>
+<li>Removed reward categories (all rewards available anytime)</li>
+<li>AI-powered chore distribution with GPT-4o-mini</li>
+<li>Interactive dashboard (clickable stats navigate to relevant pages)</li>
+</ul>
+<h3>2026-03-29 (earlier)</h3>
+<ul>
+<li>Jobs Board: post jobs, applications, bidding, cash rewards, credibility system</li>
+<li>Extra chores: children claim bonus tasks for more points</li>
+<li>Rewards Shop with galaxy theme and purchase animations</li>
+<li>Rewards page with stats, weekly badges, streak tracking</li>
+<li>Star burst animation on chore completion</li>
+<li>Per-child reward customization</li>
+<li>Weekly Superstar (silver) and Monthly Hero (gold) badges</li>
+<li>Reward management in Settings (add/edit/delete with categories)</li>
+<li>Fixed dashboard for parents (family-wide chore view)</li>
+<li>Fixed Chores tab for parents (shows all children's chores)</li>
+<li>Safari landscape nav fix</li>
+<li>Fixed onboarding redirect loop (family restored from API on refresh)</li>
+<li>Rewards selection during onboarding setup</li>
+<li>Voice-first onboarding with room scanning</li>
+<li>Initial deployment to AWS</li>
+</ul></body></html>

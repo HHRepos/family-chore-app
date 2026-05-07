@@ -1,9 +1,9 @@
-# Family Chore App — Project Wiki
+# OMyDays — Project Wiki
 
-> **Last updated:** 2026-04-05
-> **Version:** 1.0.0
-> **Live URL:** https://dnekl5ak5edve.cloudfront.net
+> **Last updated:** 2026-05-07
+> **Version:** iOS 1.0.1 (Build 4) — TestFlight
 > **API:** https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1
+> **Status:** Mobile-only (web validation code removed 2026-05-07)
 
 ---
 
@@ -13,7 +13,6 @@
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
-- [Pages & Navigation](#pages--navigation)
 - [API Endpoints](#api-endpoints)
 - [Database Schema](#database-schema)
 - [Deployment](#deployment)
@@ -105,17 +104,13 @@ AI-powered family chore management app with voice-first onboarding, house scanni
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 18 + TypeScript + Vite 5 |
-| Styling | TailwindCSS 3.4 |
-| State | Zustand 4.4 |
-| Icons | Lucide React |
-| Backend | Node.js + TypeScript (AWS Lambda) |
-| Database | PostgreSQL 14+ (AWS RDS) |
-| AI | OpenAI GPT-4o (vision), GPT-4o-mini (scheduling), GPT-4 Turbo (conversation) |
-| Speech | Web Speech API + OpenAI TTS |
-| Hosting | AWS S3 + CloudFront (frontend), API Gateway + Lambda (backend) |
-| Monorepo | Lerna 8.1 |
-| Build | esbuild (Lambda), Vite (frontend) |
+| Mobile | SwiftUI / Swift 5+ — iOS 14+, distributed via TestFlight |
+| Backend | Node.js 18 + TypeScript on AWS Lambda (consolidated, single function) |
+| Database | PostgreSQL 14+ on AWS RDS |
+| AI | OpenAI GPT-4 Turbo (conversation), GPT-4o (vision), GPT-4o-mini (scheduling) |
+| Auth | Email/password (bcrypt), JWT, biometric (FaceID/TouchID), 6-char invite codes |
+| Hosting | API Gateway + Lambda (eu-west-1) |
+| Build | esbuild (Lambda), Xcode (iOS) |
 
 ---
 
@@ -123,39 +118,25 @@ AI-powered family chore management app with voice-first onboarding, house scanni
 
 ```
 family-chore-app/
-+-- packages/
-|   +-- web-app/              # React frontend (Vite + TailwindCSS)
-|   +-- user-service/         # Auth & family management (microservice)
-|   +-- chore-service/        # Chore CRUD (microservice)
-|   +-- gamification-service/ # Points & rewards (microservice)
-|   +-- ai-service/           # Voice & vision AI (microservice)
-+-- lambda-backend/           # Consolidated AWS Lambda (all routes)
++-- ios-app/             # SwiftUI iOS app (OMyDay), 52+ Swift files
+|   +-- MyDay.xcodeproj  # Xcode project
+|   +-- WIKI.md          # iOS-specific wiki (architecture, screens, models)
+|   +-- wiki.html        # Rendered iOS wiki
++-- lambda-backend/      # Consolidated AWS Lambda (all API routes)
+|   +-- src/index.ts     # Monolithic handler (~2.5k lines)
 +-- database/
-|   +-- migrations/           # 9 SQL migration files
-+-- docs/                     # Documentation
+|   +-- migrations/      # 12 SQL migration files (Postgres on RDS)
++-- docs/                # Architecture, AWS infra, AI integration, DB schema
++-- WIKI.md              # This file (project-wide wiki)
++-- wiki.html            # Rendered project wiki
++-- serve_wiki.py        # Local wiki server: python3 serve_wiki.py -> :8765
++-- ROADMAP.md           # Feature backlog
++-- PM.md                # Product notes
 ```
 
-**Production architecture:** Single Lambda function handling all API routes behind API Gateway. Frontend served via S3 + CloudFront with HTTPS.
+**Production architecture:** SwiftUI iOS app talks to a single AWS Lambda function (behind API Gateway, eu-west-1) that handles all routes. Lambda persists to RDS Postgres. AI features call OpenAI directly from Lambda.
 
----
-
-## Pages & Navigation
-
-| Route | Page | Visibility | Description |
-|-------|------|-----------|-------------|
-| `/dashboard` | Dashboard | All | Stats, today's chores, leaderboard, badges |
-| `/chores` | Chores | All | Assigned chores, extra chores, transfer/support |
-| `/jobs` | Jobs Board | All | Post/browse jobs, applications, completion |
-| `/rewards` | Rewards | All | Stats, badges, streaks, weekly progress |
-| `/shop` | Shop | All | Rewards store (child: buy, parent: manage) |
-| `/family-rules` | Family Rules | All | Rooms, bins, pets, gaming schedule |
-| `/approvals` | Approvals | Parents | Approve/reject completed chores |
-| `/settings` | Settings | All | Family config, chores, rewards, routines |
-| `/screen-time` | Screen Time | All | Screen time rules and limits |
-| `/login` | Login | Public | Email/password login |
-| `/register` | Register | Public | New parent account |
-| `/onboarding` | Onboarding | Auth | Voice/manual family setup + room scanning |
-| `/join/:token` | Join Family | Public | Child invitation acceptance |
+> Web validation code (React/Vite frontend + Express microservice packages + Lerna monorepo) was removed on 2026-05-07. The iOS app has full feature parity and is the only shipping client.
 
 ---
 
@@ -278,24 +259,21 @@ family-chore-app/
 ### Infrastructure (AWS eu-west-1)
 | Component | Resource |
 |-----------|----------|
-| Frontend | S3: `family-chore-app-frontend-579201839256` + CloudFront: `E3PN7R8O20ARAV` |
 | API | API Gateway: `4aeyo9z2hf` |
 | Backend | Lambda: `family-chore-api` (Node 18, 512MB, 60s timeout) |
 | Database | RDS PostgreSQL: `family-chore-db.cxegq20iy20d.eu-west-1.rds.amazonaws.com` |
+| iOS distribution | App Store Connect / TestFlight (bundle id `com.snow.omyday`) |
 
 ### Deploy Commands
 ```bash
-# Frontend
-cd packages/web-app && npm run build
-aws s3 sync dist/ s3://family-chore-app-frontend-579201839256 --region eu-west-1 --delete --profile claude-admin
-aws cloudfront create-invalidation --distribution-id E3PN7R8O20ARAV --paths "/*" --profile claude-admin
-
-# Backend
+# Backend (AWS Lambda)
 cd lambda-backend && npm run build && npm run package
 aws lambda update-function-code --function-name family-chore-api --zip-file fileb://function.zip --region eu-west-1 --profile claude-admin
 
-# Database migration
+# Database migration (run from lambda-backend with pg installed)
 cd lambda-backend && node -e "const {Pool}=require('pg'); ..."
+
+# iOS — Archive in Xcode, upload via App Store Connect / Transporter
 ```
 
 ---
@@ -328,12 +306,23 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 | Document | Location | Description |
 |----------|----------|-------------|
 | Feature Roadmap | [ROADMAP.md](ROADMAP.md) | Full backlog with priorities |
-| iOS Game Wiki | [MyDay/GAME-WIKI.md](../Desktop/MyDay/GAME-WIKI.md) | Game design, progression, visual style, screens |
-| Local Wiki (HTML) | `wiki.html` (run `python3 -m http.server 8080`) | Interactive browser version |
+| iOS App Wiki | [ios-app/WIKI.md](ios-app/WIKI.md) | Architecture, auth, screens, models, theme — iOS-specific |
+| AI Integration | [docs/ai-integration-guide.md](docs/ai-integration-guide.md) | OpenAI usage patterns |
+| AWS Infrastructure | [docs/aws-infrastructure-and-deployment.md](docs/aws-infrastructure-and-deployment.md) | Lambda, API Gateway, RDS setup |
+| Database Schema | [docs/database-schema.md](docs/database-schema.md) | Full Postgres schema |
+| Local Wiki Server | `python3 serve_wiki.py` → http://localhost:8765/ | Live-rendered hub for both wikis |
 
 ---
 
 ## Changelog
+
+### 2026-05-07
+- **Pivot to mobile-only.** The web app was a validation prototype; the iOS app now has full feature parity and is the only shipping client.
+- Removed `packages/web-app/` (React/Vite frontend), the four legacy microservice packages (`user-service`, `chore-service`, `gamification-service`, `ai-service`), Lerna config, root `package.json` / `package-lock.json`, and `node_modules/`. All API logic lives in `lambda-backend/src/index.ts`.
+- Removed web-only docs: `docs/api-specifications.md`, `docs/project-structure-and-config.md`, `docs/quick-start-guide.md`.
+- Bumped iOS `MARKETING_VERSION` to 1.0.1 in the Xcode project (matches Build 4 on TestFlight).
+- Added `serve_wiki.py` — local wiki hub at http://localhost:8765/ that live-renders both this wiki and the iOS-specific wiki.
+- Renamed wiki title to **OMyDays** to match the app branding; updated `Tech Stack`, `Architecture`, `Deployment`, and `Related Docs` sections to reflect mobile-only scope.
 
 ### 2026-04-14
 - **OMyDay iOS app v1.0.1 (Build 4) on TestFlight**
