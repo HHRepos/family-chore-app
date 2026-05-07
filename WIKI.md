@@ -316,6 +316,9 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 
 ## Changelog
 
+### 2026-05-07 (later)
+- **Fix: Face ID login crash.** App was hard-terminated by iOS the first time the user tapped "Sign in with Face ID" on the Welcome Back screen. Root cause: `NSFaceIDUsageDescription` was missing from the Xcode-generated Info.plist (other privacy strings were present — Camera, Microphone, Speech — but not Face ID). Added `INFOPLIST_KEY_NSFaceIDUsageDescription` to both Debug and Release build configurations. No code changes — Keychain biometric flow in [`KeychainHelper.loadCredentialsWithBiometric`](ios-app/MyDay/Services/KeychainHelper.swift) was already correct.
+
 ### 2026-05-07
 - **Pivot to mobile-only.** The web app was a validation prototype; the iOS app now has full feature parity and is the only shipping client.
 - Removed `packages/web-app/` (React/Vite frontend), the four legacy microservice packages (`user-service`, `chore-service`, `gamification-service`, `ai-service`), Lerna config, root `package.json` / `package-lock.json`, and `node_modules/`. All API logic lives in `lambda-backend/src/index.ts`.
