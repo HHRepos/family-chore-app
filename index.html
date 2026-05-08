@@ -337,10 +337,10 @@ a:hover { text-decoration: underline; }
     <div class="section-marker">Project</div>
     <h1 id="omydays-project-wiki">OMyDays — Project Wiki</h1>
 <blockquote>
-<p><strong>Last updated:</strong> 2026-05-07
-<strong>Version:</strong> iOS 1.0.1 (Build 6) — TestFlight
-<strong>API:</strong> https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1
-<strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07)</p>
+<p><strong>Last updated:</strong> 2026-05-08
+<strong>Version:</strong> iOS 1.0.1 (Build 7) — TestFlight
+<strong>API:</strong> https://54-171-244-65.nip.io/v1
+<strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.</p>
 </blockquote>
 <hr />
 <h2 id="project-table-of-contents">Table of Contents</h2>
@@ -980,15 +980,19 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 </tr>
 <tr>
 <td>Backend</td>
-<td>Node.js 18 + TypeScript on AWS Lambda (consolidated, single function)</td>
+<td>Node.js 20 + TypeScript, Express wrapper around the original Lambda handler</td>
 </tr>
 <tr>
 <td>Database</td>
-<td>PostgreSQL 14+ on AWS RDS</td>
+<td>PostgreSQL 14 on the same VM, listening on <code>localhost</code> only</td>
+</tr>
+<tr>
+<td>Reverse proxy</td>
+<td>Caddy 2 (auto-HTTPS via Let's Encrypt, gzip, access logs)</td>
 </tr>
 <tr>
 <td>AI</td>
-<td>OpenAI GPT-4 Turbo (conversation), GPT-4o (vision), GPT-4o-mini (scheduling)</td>
+<td>OpenAI GPT-4o (voice + vision), GPT-4o-mini (scheduling), tts-1 (voice)</td>
 </tr>
 <tr>
 <td>Auth</td>
@@ -996,11 +1000,15 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 </tr>
 <tr>
 <td>Hosting</td>
-<td>API Gateway + Lambda (eu-west-1)</td>
+<td>AWS Lightsail <code>micro_3_0</code> (1 GB RAM, 2 vCPU, 40 GB SSD, 2 TB transfer) — eu-west-1, $7/mo</td>
+</tr>
+<tr>
+<td>DNS</td>
+<td><code>54-171-244-65.nip.io</code> — derived from the Lightsail static IP, no domain registration needed</td>
 </tr>
 <tr>
 <td>Build</td>
-<td>esbuild (Lambda), Xcode (iOS)</td>
+<td>esbuild (single 1.8 MB bundle for the server), Xcode (iOS)</td>
 </tr>
 </tbody>
 </table></div>
@@ -1405,43 +1413,76 @@ Mobile-only after the 2026-05-07 pivot. The legacy React web app was a validatio
 </ol>
 <hr />
 <h2 id="project-deployment">Deployment</h2>
-<h3 id="infrastructure-aws-eu-west-1">Infrastructure (AWS eu-west-1)</h3>
+<h3 id="infrastructure-aws-lightsail-eu-west-1">Infrastructure (AWS Lightsail, eu-west-1)</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
 <th>Component</th>
 <th>Resource</th>
+<th>Cost / mo</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>API</td>
-<td>API Gateway: <code>4aeyo9z2hf</code></td>
+<td>VM</td>
+<td>Lightsail <code>omyday-api</code> (<code>micro_3_0</code>, Ubuntu 22.04)</td>
+<td><strong>$7</strong></td>
 </tr>
 <tr>
-<td>Backend</td>
-<td>Lambda: <code>family-chore-api</code> (Node 18, 512MB, 60s timeout)</td>
+<td>Static IP</td>
+<td><code>omyday-api-ip</code> → <code>54.171.244.65</code> (free while attached)</td>
+<td>$0</td>
+</tr>
+<tr>
+<td>HTTPS hostname</td>
+<td><code>54-171-244-65.nip.io</code> (derived, free, no registration)</td>
+<td>$0</td>
 </tr>
 <tr>
 <td>Database</td>
-<td>RDS PostgreSQL: <code>family-chore-db.cxegq20iy20d.eu-west-1.rds.amazonaws.com</code></td>
+<td>PostgreSQL 14 self-hosted on the same VM, <code>localhost:5432</code> only</td>
+<td>included</td>
 </tr>
 <tr>
 <td>iOS distribution</td>
 <td>App Store Connect / TestFlight (bundle id <code>com.snow.omyday</code>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td></td>
+<td><strong>$7/mo</strong></td>
 </tr>
 </tbody>
 </table></div>
-<h3 id="deploy-commands">Deploy Commands</h3>
-<pre><code class="language-bash"># Backend (AWS Lambda)
-cd lambda-backend &amp;&amp; npm run build &amp;&amp; npm run package
-aws lambda update-function-code --function-name family-chore-api --zip-file fileb://function.zip --region eu-west-1 --profile claude-admin
+<p>This replaces the prior <strong>Lambda + RDS + API Gateway</strong> stack which ran ~$25-30/mo (RDS base cost dominated). 75% cost reduction.</p>
+<h3 id="architecture-on-the-vm">Architecture on the VM</h3>
+<ul>
+<li><code>/opt/omyday/current/server.js</code> — bundled Express server (~1.8 MB, esbuild)</li>
+<li><code>/opt/omyday/.env</code> — <code>DATABASE_URL</code>, <code>JWT_SECRET</code>, <code>OPENAI_API_KEY</code>, <code>PORT</code> (mode 600, owned by <code>omyday</code>)</li>
+<li>Runs as <code>omyday</code> user via <code>systemd</code> (<code>omyday.service</code>)</li>
+<li>Caddy 2 in front: HTTPS termination, gzip, reverse-proxy to <code>localhost:3000</code></li>
+<li>UFW firewall: only TCP 22 / 80 / 443 inbound</li>
+</ul>
+<h3 id="deploy-commands">Deploy commands</h3>
+<pre><code class="language-bash"># Backend — re-deploy to Lightsail
+./.lightsail/deploy.sh        # builds bundle, rsyncs, restarts systemd, hits /health
 
-# Database migration (run from lambda-backend with pg installed)
-cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
+# Database — apply a new migration to the live Postgres
+ssh -i .lightsail/key.pem ubuntu@54.171.244.65 \
+  &quot;sudo -u postgres psql -d familychoredb -f -&quot; &lt; database/migrations/0XX_new.sql
 
-# iOS — Archive in Xcode, upload via App Store Connect / Transporter
+# iOS — TestFlight upload (App Store Connect API, no manual Xcode click)
+cd ios-app &amp;&amp; fastlane beta
 </code></pre>
+<h3 id="operational-handles">Operational handles</h3>
+<ul>
+<li><strong>SSH key</strong>: <code>.lightsail/key.pem</code> (Lightsail default key, gitignored, mode 600)</li>
+<li><strong>Service status</strong>: <code>sudo systemctl status omyday</code> on the box</li>
+<li><strong>Live logs</strong>: <code>sudo journalctl -u omyday -f</code> (app) or <code>sudo journalctl -u caddy -f</code> (proxy)</li>
+<li><strong>DB shell</strong>: <code>sudo -u postgres psql familychoredb</code> on the box</li>
+<li><strong>Snapshots</strong>: Lightsail auto-snapshot enabled (free, retained 7 days)</li>
+</ul>
 <hr />
 <h2 id="project-roadmap">Roadmap</h2>
 <p>See <a href="ROADMAP.md">ROADMAP.md</a> for the full feature backlog. Highlights:</p>
@@ -1509,6 +1550,21 @@ cd lambda-backend &amp;&amp; node -e &quot;const {Pool}=require('pg'); ...&quot;
 </table></div>
 <hr />
 <h2 id="project-changelog">Changelog</h2>
+<h3 id="2026-05-08-build-7-infra-migration">2026-05-08 — Build 7 (infra migration)</h3>
+<p><strong>Migrated the backend off Lambda + RDS + API Gateway onto a single AWS Lightsail VM.</strong> New monthly cost ~$7 instead of ~$25-30 (75% reduction). Same code, no rewrite — the existing 2.5k-line Lambda handler runs unchanged inside a thin 50-line Express wrapper at <a href="lambda-backend/src/server.ts"><code>lambda-backend/src/server.ts</code></a>.</p>
+<p>What was done:</p>
+<ol>
+<li><strong>Lightsail VM</strong> (<code>omyday-api</code>, <code>micro_3_0</code>, eu-west-1a) provisioned with Ubuntu 22.04, Node 20, Postgres 14, Caddy 2 via cloud-init.</li>
+<li><strong>Static IP</strong> <code>54.171.244.65</code> allocated and attached. Free while attached.</li>
+<li><strong>HTTPS via <code>nip.io</code></strong> — <code>54-171-244-65.nip.io</code> resolves deterministically to the static IP, Let's Encrypt issues a real cert via Caddy. No domain registration needed. (First tried sslip.io but Let's Encrypt has a 250k-cert/week rate limit on that registered domain — switched to nip.io which works.)</li>
+<li><strong>DB migration</strong> — <code>pg_dump</code> from RDS → restored into local Postgres. 5 users, 1 family, 18 chores, 253 assigned_chores moved across.</li>
+<li><strong>Express wrapper</strong> at <a href="lambda-backend/src/server.ts:1"><code>src/server.ts</code></a> adapts Express requests into the APIGatewayProxyEvent shape the existing handler expects. Identical request/response semantics.</li>
+<li><strong>systemd unit</strong> runs the app as the <code>omyday</code> user, restarts on crash, depends on Postgres.</li>
+<li><strong>Caddy reverse proxy</strong> terminates TLS, redirects HTTP→HTTPS, gzips responses, logs access in JSON.</li>
+<li><strong>iOS APIClient</strong> baseURL pointed at <code>https://54-171-244-65.nip.io/v1</code>. Build 7 to TestFlight.</li>
+<li><strong>Deploy script</strong> at <a href=".lightsail/deploy.sh"><code>.lightsail/deploy.sh</code></a> — <code>npm run build:server</code> → rsync → <code>systemctl restart</code> → <code>/health</code> check. ~30 seconds end-to-end.</li>
+</ol>
+<p><strong>Pending decommission</strong> of old infra (Lambda <code>family-chore-api</code>, API Gateway <code>4aeyo9z2hf</code>, RDS <code>family-chore-db</code>) — leaving these running until Build 7 is verified on TestFlight, then teardown.</p>
 <h3 id="2026-05-07-later-build-6">2026-05-07 (later) — Build 6</h3>
 <p><strong>End-to-end review pass.</strong> Audited the data layer, the Lambda handlers, and the iOS persona flows; fixed every concrete bug found that wasn't a feature request. Highlights:</p>
 <p><strong>Backend (data integrity):</strong>

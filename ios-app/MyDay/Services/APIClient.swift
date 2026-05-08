@@ -25,7 +25,7 @@ enum APIError: LocalizedError {
 final class APIClient: Sendable {
     static let shared = APIClient()
 
-    private let baseURL = "https://4aeyo9z2hf.execute-api.eu-west-1.amazonaws.com/v1"
+    private let baseURL = "https://54-171-244-65.nip.io/v1"
     private let session = URLSession.shared
     private let decoder = JSONDecoder()
 

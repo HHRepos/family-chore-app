@@ -60,3 +60,7 @@ ios-app/fastlane/.env
 ios-app/fastlane/report.xml
 ios-app/fastlane/README.md
 ios-app/build/
+
+lambda-backend/.env
+lambda-backend/.env.production
+.lightsail/
