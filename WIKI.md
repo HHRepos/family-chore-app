@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
 > **Last updated:** 2026-05-08
-> **Version:** iOS 1.0.1 (Build 7) — TestFlight
+> **Version:** iOS 1.0.1 (Build 8) — TestFlight
 > **API:** https://54-171-244-65.nip.io/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.
 
@@ -517,6 +517,17 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ---
 
 ## Changelog
+
+### 2026-05-08 — Build 8 (auto-approve + live points)
+
+Acts on the first piece of TestFlight feedback against Build 7: *"the stars on top right don't reflect/count the actual stars awarded"*. Two changes drive a satisfying child-side experience:
+
+- **Auto-approve flag on chores.** New `chores.auto_approve` column (migration 014). Default `false`; set to `true` for every existing daily-habit chore so brushing teeth no longer needs a parent tap. The `PATCH /v1/chores/assigned/{id}` handler detects the flag, atomically transitions `pending → approved`, and awards points in one round trip — the iOS app gets the new total back in the same response, no second fetch needed.
+- **Live points pop on the home screen.** `QuestMapView` now watches `shop.points` and, when it jumps, shows a yellow `+N` burst above the counter, scales the pill, and fires a haptic. Triggered both by auto-approve completions AND by polled parent approvals.
+- **10-second polling on the child's home screen** (only while foregrounded; cancelled on background or view disappear). Catches parent approvals from another device without push notifications.
+- iOS `AssignedChore` model gains an `autoApprove: Bool?` field; `ChoreStatus` view logic stays unchanged (auto-approved chores skip straight to "Approved!" badge).
+
+Build 7 left the auto-approve concept un-implemented entirely — every chore awaited parent review, which surprised testers expecting daily habits to award immediately. Build 8 fixes that and adds live updates.
 
 ### 2026-05-08 — Build 7 (infra migration)
 

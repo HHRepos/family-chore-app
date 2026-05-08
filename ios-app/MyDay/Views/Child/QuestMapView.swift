@@ -11,6 +11,10 @@ struct QuestMapView: View {
     @State private var showLeaderboard = false
     @State private var showAllChores = false
     @State private var appeared = false
+    @State private var pointsBurst: Int? = nil
+    @State private var counterPulse = false
+    @State private var pollTask: Task<Void, Never>?
+    @State private var lastPointsSeen: Int? = nil
 
     var body: some View {
         ZStack {
@@ -33,20 +37,37 @@ struct QuestMapView: View {
                                     .foregroundStyle(.white)
                             }
                             Spacer()
-                            // Points coin
-                            HStack(spacing: 6) {
-                                Image(systemName: "star.fill")
-                                    .foregroundStyle(.neonYellow)
-                                Text("\(shop.points)")
-                                    .font(.system(size: 18, weight: .black, design: .rounded))
-                                    .foregroundStyle(.neonYellow)
+                            // Points coin (with +N burst overlay when shop.points jumps)
+                            ZStack(alignment: .top) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "star.fill")
+                                        .foregroundStyle(.neonYellow)
+                                    Text("\(shop.points)")
+                                        .font(.system(size: 18, weight: .black, design: .rounded))
+                                        .foregroundStyle(.neonYellow)
+                                        .contentTransition(.numericText(value: Double(shop.points)))
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .background(Color.neonYellow.opacity(0.1))
+                                .clipShape(Capsule())
+                                .overlay(Capsule().stroke(Color.neonYellow.opacity(0.3), lineWidth: 1))
+                                .scaleEffect(counterPulse ? 1.18 : 1)
+                                .bounceIn(delay: 0.2, appeared: appeared)
+
+                                if let burst = pointsBurst {
+                                    Text("+\(burst)")
+                                        .font(.system(size: 22, weight: .black, design: .rounded))
+                                        .foregroundStyle(.neonYellow)
+                                        .shadow(color: .neonYellow.opacity(0.7), radius: 12)
+                                        .offset(y: -42)
+                                        .transition(.asymmetric(
+                                            insertion: .scale(scale: 0.4).combined(with: .opacity),
+                                            removal: .move(edge: .top).combined(with: .opacity)
+                                        ))
+                                        .allowsHitTesting(false)
+                                }
                             }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(Color.neonYellow.opacity(0.1))
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(Color.neonYellow.opacity(0.3), lineWidth: 1))
-                            .bounceIn(delay: 0.2, appeared: appeared)
                         }
 
                         XPBar(points: shop.points)
@@ -209,10 +230,17 @@ struct QuestMapView: View {
         .task {
             await loadData()
             withAnimation { appeared = true }
+            startPolling()
         }
+        .onDisappear { stopPolling() }
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active {
+            switch newPhase {
+            case .active:
                 Task { await loadData() }
+                startPolling()
+            case .background, .inactive:
+                stopPolling()
+            @unknown default: break
             }
         }
         .onChange(of: showLeaderboard) { _, isPresented in
@@ -224,12 +252,67 @@ struct QuestMapView: View {
         .onChange(of: selectedChore?.assignedChoreId) { _, id in
             if id == nil { Task { await loadData() } }
         }
+        .onChange(of: shop.points) { oldValue, newValue in
+            handlePointsChange(from: oldValue, to: newValue)
+        }
     }
 
     private func loadData() async {
         guard let userId = auth.userId, let familyId = auth.familyId else { return }
         await choreStore.loadUserChores(userId: userId)
         await shop.loadAll(userId: userId, familyId: familyId)
+    }
+
+    /// Lightweight refresh-on-a-loop while the child is on the home screen.
+    /// Catches parent approvals from another device without requiring push.
+    /// Cancelled when app goes to background or view disappears.
+    private func startPolling() {
+        pollTask?.cancel()
+        pollTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(10))
+                if Task.isCancelled { return }
+                await loadData()
+            }
+        }
+    }
+
+    private func stopPolling() {
+        pollTask?.cancel()
+        pollTask = nil
+    }
+
+    /// When the points total jumps (auto-approve award OR poll picked up
+    /// a parent approval), pop a "+N" near the counter, pulse the pill,
+    /// and fire haptic feedback. This is the visual confirmation the child
+    /// was missing in Build 7.
+    private func handlePointsChange(from oldValue: Int, to newValue: Int) {
+        // Skip the very first set, which is the initial fetch (oldValue is the
+        // SwiftUI default 0). Only celebrate genuine increases.
+        if lastPointsSeen == nil {
+            lastPointsSeen = newValue
+            return
+        }
+        guard newValue > oldValue else {
+            lastPointsSeen = newValue
+            return
+        }
+        let delta = newValue - oldValue
+        lastPointsSeen = newValue
+
+        let haptic = UIImpactFeedbackGenerator(style: .medium)
+        haptic.impactOccurred()
+
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.55)) {
+            pointsBurst = delta
+            counterPulse = true
+        }
+        Task {
+            try? await Task.sleep(for: .seconds(0.25))
+            withAnimation(.easeOut(duration: 0.25)) { counterPulse = false }
+            try? await Task.sleep(for: .seconds(0.9))
+            withAnimation(.easeOut(duration: 0.4)) { pointsBurst = nil }
+        }
     }
 }
 

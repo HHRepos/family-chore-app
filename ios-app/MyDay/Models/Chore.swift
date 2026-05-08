@@ -17,9 +17,11 @@ struct AssignedChore: Decodable, Identifiable {
     var choreType: String?    // "daily_habit", "household", "routine", "personal_space", "laundry"
     var timeOfDay: String?    // "morning", "evening", "anytime"
     var minAge: Int?
+    var autoApprove: Bool?
 
     var id: String { assignedChoreId }
     var isDailyHabit: Bool { choreType == "daily_habit" }
+    var isAutoApprove: Bool { autoApprove == true }
     var isMorning: Bool { timeOfDay == "morning" || (isDailyHabit && (choreName.contains("(AM)") || choreName.contains("bed"))) }
     var isEvening: Bool { timeOfDay == "evening" || (isDailyHabit && (choreName.contains("(PM)") || choreName.contains("plate") || choreName.contains("laundry") || choreName.contains("Shower"))) }
 
@@ -31,11 +33,11 @@ struct AssignedChore: Decodable, Identifiable {
     enum CodingKeys: String, CodingKey {
         case assignedChoreId, choreId, userId, dueDate, status, choreName, description
         case points, difficulty, firstName, completedAt, transferredFrom, transferType
-        case choreType, timeOfDay, minAge
+        case choreType, timeOfDay, minAge, autoApprove
         // snake_case alternates
         case assigned_chore_id, chore_id, user_id, due_date, chore_name
         case first_name, completed_at, transferred_from, transfer_type
-        case chore_type, time_of_day, min_age
+        case chore_type, time_of_day, min_age, auto_approve
     }
 
     init(from decoder: Decoder) throws {
@@ -61,6 +63,7 @@ struct AssignedChore: Decodable, Identifiable {
         choreType = (try? c.decode(String.self, forKey: .choreType)) ?? (try? c.decode(String.self, forKey: .chore_type))
         timeOfDay = (try? c.decode(String.self, forKey: .timeOfDay)) ?? (try? c.decode(String.self, forKey: .time_of_day))
         minAge = (try? c.decode(Int.self, forKey: .minAge)) ?? (try? c.decode(Int.self, forKey: .min_age))
+        autoApprove = (try? c.decode(Bool.self, forKey: .autoApprove)) ?? (try? c.decode(Bool.self, forKey: .auto_approve))
     }
 
     var difficultyTier: DifficultyTier {

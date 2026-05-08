@@ -313,7 +313,7 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
 
       const userId = path.split('/')[3];
       const result = await pool.query(
-        `SELECT ac.*, c.chore_name, c.description, c.points, c.difficulty, c.chore_type, c.time_of_day, c.min_age
+        `SELECT ac.*, c.chore_name, c.description, c.points, c.difficulty, c.chore_type, c.time_of_day, c.min_age, c.auto_approve
          FROM assigned_chores ac
          JOIN chores c ON ac.chore_id = c.chore_id
          WHERE ac.user_id = $1
@@ -333,7 +333,8 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         difficulty: r.difficulty,
         choreType: r.chore_type || 'household',
         timeOfDay: r.time_of_day || 'anytime',
-        minAge: r.min_age || 3
+        minAge: r.min_age || 3,
+        autoApprove: !!r.auto_approve
       })));
     }
 
@@ -418,16 +419,50 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
 
       let query = 'UPDATE assigned_chores SET status = $1';
       const params: any[] = [status];
-
-      if (status === 'completed') {
-        query += ', completed_at = NOW()';
-      }
-
+      if (status === 'completed') query += ', completed_at = NOW()';
       query += ' WHERE assigned_chore_id = $' + (params.length + 1) + ' RETURNING *';
       params.push(assignedChoreId);
 
       const result = await pool.query(query, params);
-      return response(200, result.rows[0]);
+      const updated = result.rows[0];
+      if (!updated) return response(404, { error: 'Chore not found' });
+
+      // If the chore is auto-approve and the child just marked it complete,
+      // skip the parent-review step: flip to `approved` and award points
+      // atomically. Points come back in the response so the iOS app can
+      // animate the counter without a refresh round-trip.
+      if (status === 'completed') {
+        const choreMeta = await pool.query(
+          `SELECT c.auto_approve, c.points
+             FROM assigned_chores ac
+             JOIN chores c ON ac.chore_id = c.chore_id
+            WHERE ac.assigned_chore_id = $1`,
+          [assignedChoreId]
+        );
+        if (choreMeta.rows[0]?.auto_approve) {
+          const transition = await pool.query(
+            `UPDATE assigned_chores
+                SET status = 'approved', approved_at = NOW()
+              WHERE assigned_chore_id = $1 AND status <> 'approved'
+            RETURNING user_id, transferred_from, transfer_type, original_points`,
+            [assignedChoreId]
+          );
+          if (transition.rows.length > 0) {
+            const row = transition.rows[0];
+            const pointsValue = row.original_points ?? choreMeta.rows[0].points ?? 0;
+            if (row.transfer_type === 'support' && row.transferred_from) {
+              const half = Math.ceil(pointsValue / 2);
+              await pool.query('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', [half, row.user_id]);
+              await pool.query('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', [half, row.transferred_from]);
+              return response(200, { ...updated, status: 'approved', autoApproved: true, pointsAwarded: half, splitWith: row.transferred_from });
+            }
+            await pool.query('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', [pointsValue, row.user_id]);
+            return response(200, { ...updated, status: 'approved', autoApproved: true, pointsAwarded: pointsValue });
+          }
+        }
+      }
+
+      return response(200, updated);
     }
 
     if (path.match(/^\/v1\/chores\/assigned\/[^/]+\/approve$/) && httpMethod === 'POST') {
@@ -636,7 +671,7 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
 
       const familyId = path.split('/')[3];
       const result = await pool.query(
-        `SELECT ac.*, c.chore_name, c.description, c.points, c.difficulty, c.chore_type, c.time_of_day, c.min_age, u.first_name
+        `SELECT ac.*, c.chore_name, c.description, c.points, c.difficulty, c.chore_type, c.time_of_day, c.min_age, c.auto_approve, u.first_name
          FROM assigned_chores ac
          JOIN chores c ON ac.chore_id = c.chore_id
          JOIN users u ON ac.user_id = u.user_id
@@ -658,7 +693,8 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         firstName: r.first_name,
         completedAt: isoOrNull(r.completed_at),
         choreType: r.chore_type || 'household',
-        timeOfDay: r.time_of_day || 'anytime'
+        timeOfDay: r.time_of_day || 'anytime',
+        autoApprove: !!r.auto_approve
       })));
     }
 
