@@ -334,6 +334,15 @@ final class APIClient: Sendable {
         let _: [String: String] = try await request(.PATCH, "/users/\(userId)/participate", body: ["participate": participate ? "true" : "false"])
     }
 
+    struct AvatarUpdateBody: Encodable { let customizations: [String] }
+    func updateAvatar(_ userId: String, customizations: [String]) async throws {
+        let _: [String: [String]] = try await request(
+            .PATCH,
+            "/users/\(userId)/avatar",
+            body: AvatarUpdateBody(customizations: customizations)
+        )
+    }
+
     func updateFamily(_ familyId: String, name: String?, houseType: String?) async throws {
         var body: [String: String] = [:]
         if let name { body["family_name"] = name }

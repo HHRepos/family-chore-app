@@ -18,6 +18,7 @@ struct ParentSettingsView: View {
     @State private var showEditFamily = false
     @State private var participates = false
     @State private var participatesLoaded = false
+    @State private var showAvatarConfig = false
 
     var body: some View {
         ZStack {
@@ -26,9 +27,23 @@ struct ParentSettingsView: View {
                 VStack(spacing: 16) {
                     // Profile
                     VStack(spacing: 8) {
-                        AvatarView(seed: auth.userId ?? "parent", size: 80, fallbackInitial: auth.user?.firstName)
+                        Button { showAvatarConfig = true } label: {
+                            AvatarView(
+                                seed: auth.userId ?? "parent",
+                                size: 80,
+                                customizations: auth.user?.avatarCustomizations ?? [],
+                                fallbackInitial: auth.user?.firstName
+                            )
+                        }
+                        .buttonStyle(.plain)
                         Text(auth.user?.firstName ?? "").font(.system(size: 18, weight: .bold, design: .rounded)).foregroundStyle(.white)
                         Text(auth.user?.email ?? "").font(.system(size: 12, weight: .medium)).foregroundStyle(.white.opacity(0.4))
+                        Button("Customize avatar") { showAvatarConfig = true }
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundStyle(.neonPurple)
+                            .padding(.horizontal, 12).padding(.vertical, 5)
+                            .background(Color.neonPurple.opacity(0.12))
+                            .clipShape(Capsule())
                     }.padding(.top, 12)
 
                     // Family Management
@@ -165,6 +180,15 @@ struct ParentSettingsView: View {
         .sheet(isPresented: $showPetConfig) { PetConfigView() }
         .sheet(isPresented: $showGamingConfig) { GamingConfigView() }
         .sheet(isPresented: $showRoomScan) { RoomScanView() }
+        .sheet(isPresented: $showAvatarConfig) {
+            AvatarConfigView(
+                userId: auth.userId ?? "",
+                initialCustomizations: auth.user?.avatarCustomizations ?? [],
+                onSaved: { newConfig in
+                    auth.user?.avatarCustomizations = newConfig
+                }
+            )
+        }
     }
 }
 
@@ -310,7 +334,12 @@ struct ManageFamilyView: View {
                             .tracking(1).frame(maxWidth: .infinity, alignment: .leading)
                         ForEach(otherParents) { parent in
                             HStack(spacing: 12) {
-                                AvatarView(seed: parent.userId, size: 44, fallbackInitial: parent.firstName)
+                                AvatarView(
+                                    seed: parent.userId,
+                                    size: 44,
+                                    customizations: parent.avatarCustomizations,
+                                    fallbackInitial: parent.firstName
+                                )
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(parent.firstName).font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
                                     Text("Parent").font(.system(size: 12, weight: .medium)).foregroundStyle(.neonBlue)
@@ -346,7 +375,12 @@ struct ManageFamilyView: View {
                     ForEach(familyStore.children) { child in
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 12) {
-                                AvatarView(seed: child.userId, size: 44, fallbackInitial: child.firstName)
+                                AvatarView(
+                                    seed: child.userId,
+                                    size: 44,
+                                    customizations: child.avatarCustomizations,
+                                    fallbackInitial: child.firstName
+                                )
 
                                 // Name + Age
                                 VStack(alignment: .leading, spacing: 2) {

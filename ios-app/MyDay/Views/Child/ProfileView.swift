@@ -5,6 +5,7 @@ struct ProfileView: View {
     @Environment(ShopStore.self) private var shop
     @State private var showLogoutConfirm = false
     @State private var showPortfolio = false
+    @State private var showAvatarConfig = false
 
     var body: some View {
         ZStack {
@@ -14,11 +15,24 @@ struct ProfileView: View {
                 VStack(spacing: 20) {
                     // Avatar + Level
                     VStack(spacing: 12) {
-                        AvatarView.hero(
-                            seed: auth.userId ?? "fallback",
-                            fallback: auth.user?.firstName
-                        )
-                        .neonGlow(.neonPurple, radius: 16)
+                        Button { showAvatarConfig = true } label: {
+                            ZStack(alignment: .bottomTrailing) {
+                                AvatarView(
+                                    seed: auth.userId ?? "fallback",
+                                    size: 160,
+                                    customizations: auth.user?.avatarCustomizations ?? [],
+                                    fallbackInitial: auth.user?.firstName
+                                )
+                                .neonGlow(.neonPurple, radius: 16)
+
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.system(size: 32))
+                                    .foregroundStyle(.neonPurple)
+                                    .background(Circle().fill(Color.gameBackground).padding(2))
+                                    .offset(x: 4, y: 4)
+                            }
+                        }
+                        .buttonStyle(.plain)
 
                         Text(auth.user?.firstName ?? "Hero")
                             .font(.system(size: 22, weight: .black, design: .rounded))
@@ -27,8 +41,25 @@ struct ProfileView: View {
                         Text("Level \(shop.level) \(shop.levelTitle)")
                             .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundStyle(.neonPurple)
+
+                        Button("Customize avatar") { showAvatarConfig = true }
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundStyle(.neonPurple)
+                            .padding(.horizontal, 14).padding(.vertical, 6)
+                            .background(Color.neonPurple.opacity(0.12))
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(Color.neonPurple.opacity(0.3), lineWidth: 1))
                     }
                     .padding(.top, 20)
+                    .sheet(isPresented: $showAvatarConfig) {
+                        AvatarConfigView(
+                            userId: auth.userId ?? "",
+                            initialCustomizations: auth.user?.avatarCustomizations ?? [],
+                            onSaved: { newConfig in
+                                auth.user?.avatarCustomizations = newConfig
+                            }
+                        )
+                    }
 
                     // XP Bar
                     XPBar(points: shop.points)

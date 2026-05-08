@@ -145,7 +145,9 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
       if (!user) return response(401, { error: 'Unauthorized' });
 
       const result = await pool.query(
-        'SELECT user_id, email, first_name, last_name, role, family_id FROM users WHERE user_id = $1',
+        `SELECT user_id, email, first_name, last_name, role, family_id,
+                COALESCE(avatar_customizations, ARRAY[]::TEXT[]) AS avatar_customizations
+           FROM users WHERE user_id = $1`,
         [user.userId]
       );
 
@@ -157,8 +159,46 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         first_name: u.first_name,
         last_name: u.last_name,
         role: u.role,
-        family_id: u.family_id
+        family_id: u.family_id,
+        avatar_customizations: u.avatar_customizations
       });
+    }
+
+    // Avatar customization — `customizations` is an array of "key:value" pairs
+    // the iOS AvatarView appends to the DiceBear URL. Auth: the user can edit
+    // their own avatar; a parent in the same family can edit any child's.
+    if (path.match(/^\/v1\/users\/[^/]+\/avatar$/) && httpMethod === 'PATCH') {
+      const user = getUserFromToken(event);
+      if (!user) return response(401, { error: 'Unauthorized' });
+
+      const targetUserId = path.split('/')[3];
+      const { customizations } = data;
+      if (!Array.isArray(customizations)) {
+        return response(400, { error: 'customizations must be an array of strings' });
+      }
+      // Sanitize: each item must be `key:value`, no nasties.
+      const safe = customizations
+        .filter((c: unknown): c is string => typeof c === 'string' && /^[a-zA-Z0-9_]+:[a-zA-Z0-9_,#\-]+$/.test(c))
+        .slice(0, 20);
+
+      // Permission: self, or a parent in the same family.
+      if (targetUserId !== user.userId) {
+        const ok = await pool.query(
+          `SELECT 1
+             FROM users me
+             JOIN family_members mfm ON me.user_id = mfm.user_id
+             JOIN family_members tfm ON tfm.user_id = $1 AND tfm.family_id = mfm.family_id
+            WHERE me.user_id = $2 AND me.role = 'parent'`,
+          [targetUserId, user.userId]
+        );
+        if (ok.rows.length === 0) return response(403, { error: 'Not allowed to edit this avatar' });
+      }
+
+      await pool.query(
+        'UPDATE users SET avatar_customizations = $1 WHERE user_id = $2',
+        [safe, targetUserId]
+      );
+      return response(200, { user_id: targetUserId, avatar_customizations: safe });
     }
 
     // Family routes
@@ -235,6 +275,7 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
       const membersResult = await pool.query(
         `SELECT u.user_id, u.first_name, u.role, u.age, u.email,
                 COALESCE(u.participate_in_chores, false) AS participate_in_chores,
+                COALESCE(u.avatar_customizations, ARRAY[]::TEXT[]) AS avatar_customizations,
                 fm.nickname
          FROM users u JOIN family_members fm ON u.user_id = fm.user_id
          WHERE fm.family_id = $1`,
@@ -254,7 +295,8 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
           role: m.role,
           age: m.age,
           hasAccount: !!m.email,
-          participates: m.participate_in_chores
+          participates: m.participate_in_chores,
+          avatar_customizations: m.avatar_customizations
         }))
       });
     }
@@ -886,11 +928,12 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
 
       const familyId = path.split('/')[3];
       const result = await pool.query(
-        `SELECT u.user_id, u.first_name, fm.nickname, COALESCE(u.points, 0) as points
-         FROM users u
-         JOIN family_members fm ON u.user_id = fm.user_id
-         WHERE fm.family_id = $1 AND u.role = 'child'
-         ORDER BY u.points DESC`,
+        `SELECT u.user_id, u.first_name, fm.nickname, COALESCE(u.points, 0) as points,
+                COALESCE(u.avatar_customizations, ARRAY[]::TEXT[]) AS avatar_customizations
+           FROM users u
+           JOIN family_members fm ON u.user_id = fm.user_id
+          WHERE fm.family_id = $1 AND u.role = 'child'
+          ORDER BY u.points DESC`,
         [familyId]
       );
 
@@ -898,7 +941,8 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         rank: index + 1,
         userId: row.user_id,
         name: row.nickname || row.first_name,
-        points: row.points
+        points: row.points,
+        avatarCustomizations: row.avatar_customizations
       })));
     }
 

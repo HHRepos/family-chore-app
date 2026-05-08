@@ -43,7 +43,12 @@ struct LeaderboardView: View {
                                         .foregroundStyle(entry.rank <= 3 ? .black : .white.opacity(0.5))
                                 }
 
-                                AvatarView.small(seed: entry.userId, fallback: entry.name)
+                                AvatarView(
+                                    seed: entry.userId,
+                                    size: 36,
+                                    customizations: entry.avatarCustomizations,
+                                    fallbackInitial: entry.name
+                                )
 
                                 // Name
                                 VStack(alignment: .leading, spacing: 2) {

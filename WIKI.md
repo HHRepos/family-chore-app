@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
 > **Last updated:** 2026-05-08
-> **Version:** iOS 1.0.1 (Build 10) — TestFlight
+> **Version:** iOS 1.0.1 (Build 11) — TestFlight
 > **API:** https://54-171-244-65.nip.io/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.
 
@@ -517,6 +517,17 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ---
 
 ## Changelog
+
+### 2026-05-08 — Build 11 (auto-approve everything + avatar customization)
+
+Two pieces of feedback against Build 10 drove this:
+
+> "Still when I finish a task it doesn't count the stars on the top"
+> "Plus another feedback is the avatar and give me ability to change the [avatar]"
+
+- **Every chore now auto-approves on completion.** The Build 8 design only auto-approved daily habits, leaving 12 of 18 chores stuck in `completed → awaiting parent approval`, which surprised testers who expected any tap on "Mission Complete!" to award points instantly. Migration 015 flips the default to `TRUE` for new chores and backfills every existing row. Parent oversight can come back as a per-chore opt-out toggle when needed; for now, completion = points, immediate `+N` pop on the counter, no waiting.
+- **Avatar customization sheet** at [Components/AvatarConfigView.swift](ios-app/MyDay/Views/Components/AvatarConfigView.swift). Users tap their avatar (or the new "Customize avatar" button) on the Profile / Parent Settings page and get a free-tier picker for hair (16 options), accessories (8 options), clothing colour (7 swatches), and skin tone (5 swatches). Live preview updates as you tap. Save writes to the new `users.avatar_customizations` text-array column via `PATCH /v1/users/{id}/avatar` (auth: self, or a parent in the same family). Future shop unlocks just append more entries here — same data path, no view changes needed.
+- **All AvatarView call sites now read the user's customizations** end-to-end: profile / quest map / leaderboard rows / parent member list / settings header. Family member responses (and the leaderboard endpoint) all carry `avatar_customizations` so other family members' avatars render their saved looks too.
 
 ### 2026-05-08 — Build 10 (full-body avatars + auto compliance)
 

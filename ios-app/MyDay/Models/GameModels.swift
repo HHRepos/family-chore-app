@@ -27,11 +27,12 @@ struct LeaderboardEntry: Decodable, Identifiable {
     let userId: String
     let name: String
     let points: Int
+    let avatarCustomizations: [String]
 
     var id: String { userId }
 
     enum CodingKeys: String, CodingKey {
-        case rank, userId, name, points, user_id
+        case rank, userId, name, points, user_id, avatarCustomizations
     }
 
     init(from decoder: Decoder) throws {
@@ -42,6 +43,7 @@ struct LeaderboardEntry: Decodable, Identifiable {
         if let p = try? c.decode(Int.self, forKey: .points) { points = p }
         else if let s = try? c.decode(String.self, forKey: .points), let p = Int(s) { points = p }
         else { points = 0 }
+        avatarCustomizations = (try? c.decode([String].self, forKey: .avatarCustomizations)) ?? []
     }
 }
 

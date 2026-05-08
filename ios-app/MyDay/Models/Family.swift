@@ -38,6 +38,7 @@ struct FamilyMember: Decodable, Identifiable {
     var hasAccount: Bool?
     var emoji: String?
     var participates: Bool?
+    var avatarCustomizations: [String] = []
 
     var id: String { userId }
 
@@ -51,6 +52,7 @@ struct FamilyMember: Decodable, Identifiable {
     enum CodingKeys: String, CodingKey {
         case userId, firstName, nickname, role, age, hasAccount, emoji, participates
         case user_id, first_name, has_account
+        case avatarCustomizations = "avatar_customizations"
     }
 
     init(from decoder: Decoder) throws {
@@ -67,6 +69,7 @@ struct FamilyMember: Decodable, Identifiable {
         hasAccount = (try? c.decode(Bool.self, forKey: .hasAccount)) ?? (try? c.decode(Bool.self, forKey: .has_account))
         emoji = try? c.decode(String.self, forKey: .emoji)
         participates = try? c.decode(Bool.self, forKey: .participates)
+        avatarCustomizations = (try? c.decode([String].self, forKey: .avatarCustomizations)) ?? []
     }
 }
 

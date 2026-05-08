@@ -25,9 +25,11 @@ struct QuestMapView: View {
                     // Header with XP
                     VStack(spacing: 12) {
                         HStack(spacing: 12) {
-                            AvatarView.medium(
+                            AvatarView(
                                 seed: auth.userId ?? "hero",
-                                fallback: auth.user?.firstName
+                                size: 56,
+                                customizations: auth.user?.avatarCustomizations ?? [],
+                                fallbackInitial: auth.user?.firstName
                             )
                             VStack(alignment: .leading, spacing: 2) {
                                 Text({ let f = DateFormatter(); f.dateFormat = "EEEE, MMMM d"; return f.string(from: Date()) }())

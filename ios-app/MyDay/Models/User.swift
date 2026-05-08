@@ -82,6 +82,7 @@ struct ProfileResponse: Codable {
     let lastName: String?
     let role: String
     let familyId: String?
+    var avatarCustomizations: [String]
 
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
@@ -90,6 +91,7 @@ struct ProfileResponse: Codable {
         case lastName = "last_name"
         case role
         case familyId = "family_id"
+        case avatarCustomizations = "avatar_customizations"
     }
 
     init(from decoder: Decoder) throws {
@@ -108,5 +110,6 @@ struct ProfileResponse: Codable {
         } else if let i = try? c.decode(Int.self, forKey: .familyId) {
             familyId = String(i)
         } else { familyId = nil }
+        avatarCustomizations = (try? c.decode([String].self, forKey: .avatarCustomizations)) ?? []
     }
 }
