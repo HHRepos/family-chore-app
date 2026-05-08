@@ -1159,6 +1159,19 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
               );
             }
           }
+          // Weekly feeder refill — top up the auto-feeder hopper. Distinct from
+          // the daily "feed" task (bowl top-up). Uses 'household' type so the
+          // AI distributor handles weekly rotation rather than the pet-rotation
+          // path which expects daily cadence.
+          const refillName = `Refill ${pet.name}'s feeder`;
+          const refillExists = await pool.query('SELECT 1 FROM chores WHERE family_id = $1 AND chore_name = $2', [familyId, refillName]);
+          if (refillExists.rows.length === 0) {
+            await pool.query(
+              `INSERT INTO chores (chore_id, family_id, chore_name, description, frequency, difficulty, points, chore_type, time_of_day, min_age)
+               VALUES ($1, $2, $3, $4, 'weekly', 'easy', 15, 'household', 'anytime', 6)`,
+              [uuidv4(), familyId, refillName, `Top up ${pet.name}'s auto-feeder hopper for the week`]
+            );
+          }
         }
       }
 
@@ -1224,6 +1237,12 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
            AND chore_id IN (SELECT chore_id FROM chores WHERE family_id = $1 AND chore_type = 'routine')`,
         [familyId, days[0]]
       );
+      // Fallback rotation = every child in the family. Used when the parent
+      // hasn't configured a per-task rotation (so the chore still gets done
+      // instead of silently going unassigned, which is the bug Hossam hit
+      // with Fifi's litter on 2026-05-08).
+      const allChildIds = childrenResult.rows.map((c: any) => c.user_id);
+
       for (const routine of routineChores) {
         const choreName = routine.chore_name;
         // Find matching pet rotation
@@ -1231,20 +1250,24 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         if (familyHouseDetails.pets) {
           for (const pet of familyHouseDetails.pets) {
             if (choreName.includes(pet.name)) {
-              if (choreName.toLowerCase().includes('walk') && pet.walk_rotation_children) {
-                rotationChildren = pet.walk_rotation_children;
-              } else if (choreName.toLowerCase().includes('litter') && pet.litter_rotation_children) {
-                rotationChildren = pet.litter_rotation_children;
-              } else if (choreName.toLowerCase().includes('feed')) {
-                // Feed goes to all kids in any rotation
-                rotationChildren = pet.walk_rotation_children || pet.litter_rotation_children || [];
+              if (choreName.toLowerCase().includes('walk')) {
+                rotationChildren = pet.walk_rotation_children || [];
+              } else if (choreName.toLowerCase().includes('litter')) {
+                rotationChildren = pet.litter_rotation_children || [];
+              } else if (choreName.toLowerCase().includes('feed') || choreName.toLowerCase().includes('refill')) {
+                // Feeding (daily) and feeder refill (weekly) — anyone in any rotation
+                rotationChildren = (pet.walk_rotation_children || []).concat(pet.litter_rotation_children || []);
+                // Dedupe
+                rotationChildren = Array.from(new Set(rotationChildren));
               }
             }
           }
         }
+        // Fall back to all children if config is empty.
+        if (rotationChildren.length === 0) rotationChildren = allChildIds;
 
         if (rotationChildren.length > 0) {
-          // Assign with daily rotation among the specified children
+          // Assign with daily rotation among the rotation children
           for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
             const assignedChild = rotationChildren[dayIdx % rotationChildren.length];
             try {

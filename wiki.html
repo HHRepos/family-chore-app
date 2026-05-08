@@ -20,7 +20,7 @@ hr { border: none; border-top: 1px solid #21262d; margin: 30px 0; }
 </style></head><body><div class="crumb"><a href="index.html">← Wiki home</a></div><h1 id="omydays-project-wiki">OMyDays — Project Wiki</h1>
 <blockquote>
 <p><strong>Last updated:</strong> 2026-05-08
-<strong>Version:</strong> iOS 1.0.1 (Build 8) — TestFlight
+<strong>Version:</strong> iOS 1.0.1 (Build 9) — TestFlight
 <strong>API:</strong> https://54-171-244-65.nip.io/v1
 <strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.</p>
 </blockquote>
@@ -1232,6 +1232,13 @@ cd ios-app &amp;&amp; fastlane beta
 </table></div>
 <hr />
 <h2 id="project-changelog">Changelog</h2>
+<h3 id="2026-05-08-build-9-testflight-feedback-round-2">2026-05-08 — Build 9 (TestFlight feedback round 2)</h3>
+<p>Acts on the second wave of feedback against Build 7. Two new bugs and one feature gap:</p>
+<ul>
+<li><strong>Pet chores were silently going unassigned</strong> when the rotation children list was empty. The user's Fifi's-litter chore was created in the catalogue but never made it onto any kid's daily list because <code>litter_rotation_children: []</code> skipped the rotation loop. Now falls back to <strong>every child in the family</strong> when no per-pet rotation is configured. (Live data was patched too: existing <code>Feed Fifi</code> and <code>Clean Fifi's litter</code> were re-tagged from <code>household</code> → <code>routine</code> so the rotation logic finds them.)</li>
+<li><strong>Weekly cat feeder refill</strong> — separate "weekly auto-feeder hopper" chore is now auto-generated for every pet (in addition to the daily feed/litter chores). Distinct task: top up the feeder, not feed the bowl.</li>
+<li><strong>Kid view in Family Rules was leaking parent-only info.</strong> Children no longer see the "Scanned Rooms" section (with full asset lists from the house scan). Bin and pet sections now filter by rotation membership: a kid sees a pet's rotation only if they're in it (or if no rotation is configured yet, since that's a parent action that hasn't happened).</li>
+</ul>
 <h3 id="2026-05-08-build-8-auto-approve-live-points">2026-05-08 — Build 8 (auto-approve + live points)</h3>
 <p>Acts on the first piece of TestFlight feedback against Build 7: <em>"the stars on top right don't reflect/count the actual stars awarded"</em>. Two changes drive a satisfying child-side experience:</p>
 <ul>

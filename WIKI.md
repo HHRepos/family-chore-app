@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
 > **Last updated:** 2026-05-08
-> **Version:** iOS 1.0.1 (Build 8) — TestFlight
+> **Version:** iOS 1.0.1 (Build 9) — TestFlight
 > **API:** https://54-171-244-65.nip.io/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.
 
@@ -517,6 +517,14 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ---
 
 ## Changelog
+
+### 2026-05-08 — Build 9 (TestFlight feedback round 2)
+
+Acts on the second wave of feedback against Build 7. Two new bugs and one feature gap:
+
+- **Pet chores were silently going unassigned** when the rotation children list was empty. The user's Fifi's-litter chore was created in the catalogue but never made it onto any kid's daily list because `litter_rotation_children: []` skipped the rotation loop. Now falls back to **every child in the family** when no per-pet rotation is configured. (Live data was patched too: existing `Feed Fifi` and `Clean Fifi's litter` were re-tagged from `household` → `routine` so the rotation logic finds them.)
+- **Weekly cat feeder refill** — separate "weekly auto-feeder hopper" chore is now auto-generated for every pet (in addition to the daily feed/litter chores). Distinct task: top up the feeder, not feed the bowl.
+- **Kid view in Family Rules was leaking parent-only info.** Children no longer see the "Scanned Rooms" section (with full asset lists from the house scan). Bin and pet sections now filter by rotation membership: a kid sees a pet's rotation only if they're in it (or if no rotation is configured yet, since that's a parent action that hasn't happened).
 
 ### 2026-05-08 — Build 8 (auto-approve + live points)
 

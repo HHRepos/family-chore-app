@@ -54,8 +54,9 @@ struct FamilyRulesView: View {
                             todaySummary(d)
                         }
 
-                        // Rooms (visible to all — read only)
-                        if let rooms = d.scannedRooms, !rooms.isEmpty {
+                        // Rooms — parent view only. Kids don't need the
+                        // house-wide asset list.
+                        if auth.isParent, let rooms = d.scannedRooms, !rooms.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
                                 Label("Scanned Rooms", systemImage: "house.fill").font(.system(size: 14, weight: .bold, design: .rounded)).foregroundStyle(.neonBlue)
                                 ForEach(rooms, id: \.name) { room in
@@ -86,14 +87,32 @@ struct FamilyRulesView: View {
                             }.gameCard(glow: .neonBlue.opacity(0.3))
                         }
 
-                        // Bins
+                        // Bins — parents see everything; kids only see if they're in
+                        // the rotation OR if the rotation is empty (so the family
+                        // hasn't decided yet).
                         if let bin = d.binSchedule, !bin.collectionDays.isEmpty {
-                            binSection(bin)
+                            let myId = auth.userId ?? ""
+                            let kidVisible = bin.rotationChildren.isEmpty || bin.rotationChildren.contains(myId)
+                            if auth.isParent || kidVisible {
+                                binSection(bin)
+                            }
                         }
 
-                        // Pets
+                        // Pets — parents see all, kids see only pets they're rotated in.
                         if let pets = d.pets, !pets.isEmpty {
-                            petSection(pets)
+                            let myId = auth.userId ?? ""
+                            let visible = auth.isChild
+                                ? pets.filter { p in
+                                    (p.walkRotationChildren?.contains(myId) ?? false) ||
+                                    (p.litterRotationChildren?.contains(myId) ?? false) ||
+                                    // No rotation set up at all → still show so the
+                                    // child knows the pet exists and which chores
+                                    // their family hasn't assigned yet.
+                                    (p.walkRotationChildren?.isEmpty ?? true) &&
+                                    (p.litterRotationChildren?.isEmpty ?? true)
+                                }
+                                : pets
+                            if !visible.isEmpty { petSection(visible) }
                         }
 
                         // Gaming — children see only their own, parents see all
