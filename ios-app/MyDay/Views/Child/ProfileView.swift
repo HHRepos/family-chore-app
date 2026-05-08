@@ -14,18 +14,11 @@ struct ProfileView: View {
                 VStack(spacing: 20) {
                     // Avatar + Level
                     VStack(spacing: 12) {
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    LinearGradient(colors: [.neonPurple, .neonBlue], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                )
-                                .frame(width: 90, height: 90)
-                                .neonGlow(.neonPurple, radius: 16)
-
-                            Text(auth.user?.firstName.prefix(1).uppercased() ?? "?")
-                                .font(.system(size: 36, weight: .black, design: .rounded))
-                                .foregroundStyle(.white)
-                        }
+                        AvatarView.hero(
+                            seed: auth.userId ?? "fallback",
+                            fallback: auth.user?.firstName
+                        )
+                        .neonGlow(.neonPurple, radius: 16)
 
                         Text(auth.user?.firstName ?? "Hero")
                             .font(.system(size: 22, weight: .black, design: .rounded))

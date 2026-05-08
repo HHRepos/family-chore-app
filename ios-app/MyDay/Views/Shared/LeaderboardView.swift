@@ -37,11 +37,13 @@ struct LeaderboardView: View {
                                         .fill(entry.rank == 1 ? Color.neonYellow :
                                                 entry.rank == 2 ? Color.gray :
                                                 entry.rank == 3 ? Color.neonOrange : Color.gameCardLight)
-                                        .frame(width: 36, height: 36)
+                                        .frame(width: 32, height: 32)
                                     Text("\(entry.rank)")
-                                        .font(.system(size: 16, weight: .black, design: .rounded))
+                                        .font(.system(size: 14, weight: .black, design: .rounded))
                                         .foregroundStyle(entry.rank <= 3 ? .black : .white.opacity(0.5))
                                 }
+
+                                AvatarView.small(seed: entry.userId, fallback: entry.name)
 
                                 // Name
                                 VStack(alignment: .leading, spacing: 2) {

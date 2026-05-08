@@ -26,11 +26,7 @@ struct ParentSettingsView: View {
                 VStack(spacing: 16) {
                     // Profile
                     VStack(spacing: 8) {
-                        ZStack {
-                            Circle().fill(Color.neonBlue.opacity(0.15)).frame(width: 64, height: 64)
-                            Text(auth.user?.firstName.prefix(1).uppercased() ?? "?")
-                                .font(.system(size: 28, weight: .bold, design: .rounded)).foregroundStyle(.neonBlue)
-                        }
+                        AvatarView(seed: auth.userId ?? "parent", size: 80, fallbackInitial: auth.user?.firstName)
                         Text(auth.user?.firstName ?? "").font(.system(size: 18, weight: .bold, design: .rounded)).foregroundStyle(.white)
                         Text(auth.user?.email ?? "").font(.system(size: 12, weight: .medium)).foregroundStyle(.white.opacity(0.4))
                     }.padding(.top, 12)
@@ -314,10 +310,7 @@ struct ManageFamilyView: View {
                             .tracking(1).frame(maxWidth: .infinity, alignment: .leading)
                         ForEach(otherParents) { parent in
                             HStack(spacing: 12) {
-                                ZStack {
-                                    Circle().fill(Color.neonBlue.opacity(0.2)).frame(width: 44, height: 44)
-                                    Text(parent.firstName.prefix(1).uppercased()).font(.system(size: 18, weight: .bold, design: .rounded)).foregroundStyle(.neonBlue)
-                                }
+                                AvatarView(seed: parent.userId, size: 44, fallbackInitial: parent.firstName)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(parent.firstName).font(.system(size: 15, weight: .bold, design: .rounded)).foregroundStyle(.white)
                                     Text("Parent").font(.system(size: 12, weight: .medium)).foregroundStyle(.neonBlue)
@@ -353,12 +346,7 @@ struct ManageFamilyView: View {
                     ForEach(familyStore.children) { child in
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 12) {
-                                // Avatar
-                                ZStack {
-                                    Circle().fill(Color.neonPurple.opacity(0.2)).frame(width: 44, height: 44)
-                                    Text(child.firstName.prefix(1).uppercased())
-                                        .font(.system(size: 18, weight: .bold, design: .rounded)).foregroundStyle(.neonPurple)
-                                }
+                                AvatarView(seed: child.userId, size: 44, fallbackInitial: child.firstName)
 
                                 // Name + Age
                                 VStack(alignment: .leading, spacing: 2) {
