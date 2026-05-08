@@ -253,6 +253,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = OMyDay;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "MyDay uses the camera to scan rooms and detect chores";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "OMyDay uses Face ID to sign you back in securely.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "MyDay uses the microphone for voice-based family setup";
@@ -303,6 +304,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = OMyDay;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "MyDay uses the camera to scan rooms and detect chores";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "OMyDay uses Face ID to sign you back in securely.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "MyDay uses the microphone for voice-based family setup";
