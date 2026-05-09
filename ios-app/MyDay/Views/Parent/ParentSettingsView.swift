@@ -982,7 +982,11 @@ struct PetConfigView: View {
     @State private var petType = "dog"
     @State private var walkChildren: [String] = []
     @State private var litterChildren: [String] = []
+    @State private var careDays: Set<String> = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"]
     @State private var isSaving = false
+
+    private let weekdays = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"]
+    private let weekdayLabels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
 
     var body: some View {
         ZStack {
@@ -1081,6 +1085,33 @@ struct PetConfigView: View {
                             }
                         }
 
+                        // Days of the week the pet care happens. Defaults to all
+                        // 7 — let parents trim it down for cats whose litter
+                        // gets done every other day, dogs that don't walk on
+                        // weekdays, etc.
+                        VStack(alignment: .leading, spacing: 6) {
+                            Label("Care days", systemImage: "calendar")
+                                .font(.system(size: 12, weight: .bold)).foregroundStyle(.neonOrange)
+                            Text("Pet chores will only land on the days you tick.")
+                                .font(.system(size: 10, weight: .medium)).foregroundStyle(.white.opacity(0.4))
+                            HStack(spacing: 4) {
+                                ForEach(0..<7, id: \.self) { i in
+                                    let day = weekdays[i]
+                                    let isOn = careDays.contains(day)
+                                    Button {
+                                        if isOn { careDays.remove(day) } else { careDays.insert(day) }
+                                    } label: {
+                                        Text(weekdayLabels[i])
+                                            .font(.system(size: 10, weight: .black))
+                                            .foregroundStyle(isOn ? .black : .white.opacity(0.4))
+                                            .frame(width: 36, height: 36)
+                                            .background(isOn ? Color.neonOrange : Color.gameCardLight)
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    }
+                                }
+                            }
+                        }
+
                         Button("Add Pet") {
                             isSaving = true
                             Task {
@@ -1088,11 +1119,21 @@ struct PetConfigView: View {
                                     var p: [String: Any] = ["id": pet.id, "name": pet.name, "type": pet.type]
                                     if let wc = pet.walkRotationChildren { p["walk_rotation_children"] = wc }
                                     if let lc = pet.litterRotationChildren { p["litter_rotation_children"] = lc }
+                                    if let wd = pet.walkDays { p["walk_days"] = wd }
+                                    if let ld = pet.litterDays { p["litter_days"] = ld }
                                     return p
                                 }
                                 var newPet: [String: Any] = ["id": UUID().uuidString, "name": petName, "type": petType]
                                 if !walkChildren.isEmpty { newPet["walk_rotation_children"] = walkChildren }
                                 if !litterChildren.isEmpty { newPet["litter_rotation_children"] = litterChildren }
+                                // Only persist `*_days` when the parent has ticked
+                                // a custom subset; full-week or empty sets fall
+                                // back to "every day" on the server.
+                                let dayList = Array(careDays).sorted { weekdays.firstIndex(of: $0) ?? 0 < weekdays.firstIndex(of: $1) ?? 0 }
+                                if !dayList.isEmpty && dayList.count < 7 {
+                                    newPet["walk_days"] = dayList
+                                    newPet["litter_days"] = dayList
+                                }
                                 existingPets.append(newPet)
                                 try? await APIClient.shared.updateFamilyConfig(auth.familyId ?? "", config: ["pets": existingPets])
                                 if let fid = auth.familyId { await familyStore.load(familyId: fid) }

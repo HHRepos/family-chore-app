@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
 > **Last updated:** 2026-05-09
-> **Version:** iOS 1.0.1 (Build 13) — TestFlight
+> **Version:** iOS 1.0.1 (Build 14) — TestFlight
 > **API:** https://54-171-244-65.nip.io/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.
 
@@ -517,6 +517,25 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ---
 
 ## Changelog
+
+### 2026-05-09 — Build 14 (skills profile + pet day schedule)
+
+Closes the last two items from the deferred list:
+
+**Skills & qualities profile.** New `GET /v1/users/{id}/skills` endpoint computes six derived skills from existing chore + job data — no new tables, recomputed on every fetch. Each skill has six tiers (Novice → Apprentice → Skilled → Expert → Master → Legendary) with thresholds tuned per skill so reaching the next tier feels achievable for short-cycle skills (Discipline, Reliability) and meaningful for rare-event ones (Entrepreneurship).
+
+| Skill | Source | What raises it |
+| --- | --- | --- |
+| **Discipline** | `daily_habit` chores approved | Brushing teeth, bed, etc — high cap (365) |
+| **Responsibility** | `routine` chores approved | Pet care, bins on the day they're due |
+| **Initiative** | `household / personal_space / laundry` chores approved | Taking your share of the load |
+| **Reliability** | `% approved / assigned` (lifetime) | Following through on what you take on |
+| **Teamwork** | Support chores approved (given or received) | Helping a sibling |
+| **Entrepreneurship** | Pitched contracts approved | Proposing your own jobs |
+
+iOS shows them as a 2-column `LazyVGrid` of `SkillCard`s on `ProfileView` — each card has icon, level name, current value, progress bar to next threshold, and a one-line description. ShopStore's `loadAll` fetches them alongside everything else so they refresh on the same cycle as points.
+
+**Pet care day-of-week schedule.** Pets gain optional `walk_days` / `litter_days` arrays in the `house_details` JSON. The distribution loop now walks all 7 days and only assigns a routine chore if the parent ticked that weekday — useful for cats whose litter gets cleaned every other day, dogs that don't walk on weekdays, etc. The rotation index advances per *assigned* day (not per calendar day) so an alternating-day schedule still alternates kids correctly. PetConfigView gets a 7-chip Mon–Sun selector that defaults to all days; only persisted when the parent has trimmed the set.
 
 ### 2026-05-09 — Build 13 (deferred items from round 3)
 

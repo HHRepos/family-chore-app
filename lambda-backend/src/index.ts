@@ -479,6 +479,141 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
       });
     }
 
+    // Skills profile — derived from existing chore + job data, no new tables.
+    // Six skills, each with a value (count or %) and a threshold-based level.
+    if (path.match(/^\/v1\/users\/[^/]+\/skills$/) && httpMethod === 'GET') {
+      const user = getUserFromToken(event);
+      if (!user) return response(401, { error: 'Unauthorized' });
+      const userId = path.split('/')[3];
+
+      const [habits, routine, household, totals, leadership, jobsPitched] = await Promise.all([
+        pool.query(
+          `SELECT COUNT(*) AS n FROM assigned_chores ac JOIN chores c USING (chore_id)
+            WHERE ac.user_id=$1 AND c.chore_type='daily_habit' AND ac.status='approved'`,
+          [userId]
+        ),
+        pool.query(
+          `SELECT COUNT(*) AS n FROM assigned_chores ac JOIN chores c USING (chore_id)
+            WHERE ac.user_id=$1 AND c.chore_type='routine' AND ac.status='approved'`,
+          [userId]
+        ),
+        pool.query(
+          `SELECT COUNT(*) AS n FROM assigned_chores ac JOIN chores c USING (chore_id)
+            WHERE ac.user_id=$1
+              AND (c.chore_type IS NULL OR c.chore_type IN ('household','laundry','personal_space'))
+              AND ac.status='approved'`,
+          [userId]
+        ),
+        pool.query(
+          `SELECT COUNT(*) AS total,
+                  COUNT(*) FILTER (WHERE status='approved') AS approved
+             FROM assigned_chores WHERE user_id=$1`,
+          [userId]
+        ),
+        pool.query(
+          `SELECT COUNT(*) AS n FROM assigned_chores
+            WHERE (user_id=$1 OR transferred_from=$1) AND transfer_type='support' AND status='approved'`,
+          [userId]
+        ),
+        pool.query(
+          `SELECT COUNT(*) AS total,
+                  COUNT(*) FILTER (WHERE status IN ('open','assigned','completed','confirmed')) AS approved
+             FROM jobs WHERE posted_by=$1`,
+          [userId]
+        ),
+      ]);
+
+      const totalAssigned = parseInt(totals.rows[0].total);
+      const totalApproved = parseInt(totals.rows[0].approved);
+      const reliabilityPct = totalAssigned > 0
+        ? Math.round((totalApproved / totalAssigned) * 100)
+        : 0;
+
+      // Threshold tables: each skill levels at the index where value crosses
+      // the threshold. 6 levels: Novice → Apprentice → Skilled → Expert →
+      // Master → Legendary. Different scales per skill — short-cycle skills
+      // like "Discipline" need many entries to feel achievable; rare-event
+      // skills like "Entrepreneurship" need a small ladder.
+      const levelNames = ['Novice', 'Apprentice', 'Skilled', 'Expert', 'Master', 'Legendary'];
+      const compute = (value: number, thresholds: number[]) => {
+        let level = 0;
+        for (let i = thresholds.length - 1; i >= 0; i--) {
+          if (value >= thresholds[i]) { level = i; break; }
+        }
+        const next = thresholds[Math.min(level + 1, thresholds.length - 1)];
+        const base = thresholds[level];
+        const progress = level >= thresholds.length - 1
+          ? 1
+          : (next === base ? 1 : Math.min(1, (value - base) / (next - base)));
+        return {
+          level,
+          levelName: levelNames[level],
+          nextThreshold: next,
+          progress: Number(progress.toFixed(2)),
+        };
+      };
+
+      const skills = [
+        {
+          id: 'discipline',
+          name: 'Discipline',
+          icon: 'flame.fill',
+          color: 'neonOrange',
+          description: 'Daily habits completed (brushing teeth, making the bed)',
+          value: parseInt(habits.rows[0].n),
+          ...compute(parseInt(habits.rows[0].n), [0, 7, 30, 90, 180, 365]),
+        },
+        {
+          id: 'responsibility',
+          name: 'Responsibility',
+          icon: 'pawprint.fill',
+          color: 'neonGreen',
+          description: 'Pet care, bins, and other routine duties on the day they are due',
+          value: parseInt(routine.rows[0].n),
+          ...compute(parseInt(routine.rows[0].n), [0, 5, 20, 50, 100, 200]),
+        },
+        {
+          id: 'initiative',
+          name: 'Initiative',
+          icon: 'bolt.heart.fill',
+          color: 'neonBlue',
+          description: 'Household chores tackled — taking your share of the load',
+          value: parseInt(household.rows[0].n),
+          ...compute(parseInt(household.rows[0].n), [0, 10, 30, 80, 200, 400]),
+        },
+        {
+          id: 'reliability',
+          name: 'Reliability',
+          icon: 'checkmark.shield.fill',
+          color: 'neonPurple',
+          description: 'Share of all your assigned chores that get approved',
+          value: reliabilityPct,
+          unit: '%',
+          ...compute(reliabilityPct, [0, 50, 70, 85, 95, 99]),
+        },
+        {
+          id: 'leadership',
+          name: 'Teamwork',
+          icon: 'heart.fill',
+          color: 'neonPink',
+          description: 'Helping a sibling — receiving or offering support on a chore',
+          value: parseInt(leadership.rows[0].n),
+          ...compute(parseInt(leadership.rows[0].n), [0, 3, 10, 25, 50, 100]),
+        },
+        {
+          id: 'entrepreneurship',
+          name: 'Entrepreneurship',
+          icon: 'lightbulb.fill',
+          color: 'neonYellow',
+          description: 'Contracts you have pitched and got approved',
+          value: parseInt(jobsPitched.rows[0].approved),
+          ...compute(parseInt(jobsPitched.rows[0].approved), [0, 1, 3, 7, 15, 30]),
+        },
+      ];
+
+      return response(200, { skills });
+    }
+
     if (path.match(/^\/v1\/chores\/assigned\/[^/]+$/) && httpMethod === 'PATCH') {
       const user = getUserFromToken(event);
       if (!user) return response(401, { error: 'Unauthorized' });
@@ -1314,22 +1449,34 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
       // with Fifi's litter on 2026-05-08).
       const allChildIds = childrenResult.rows.map((c: any) => c.user_id);
 
+      const weekdayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+      const dayNameForDate = (iso: string) => {
+        // Force UTC parse so TZ doesn't shift the weekday off-by-one
+        const d = new Date(iso + 'T00:00:00Z');
+        return weekdayNames[d.getUTCDay()];
+      };
+
       for (const routine of routineChores) {
         const choreName = routine.chore_name;
         // Find matching pet rotation
         let rotationChildren: string[] = [];
+        let activeDays: string[] | null = null; // null = every day
         if (familyHouseDetails.pets) {
           for (const pet of familyHouseDetails.pets) {
             if (choreName.includes(pet.name)) {
               if (choreName.toLowerCase().includes('walk')) {
                 rotationChildren = pet.walk_rotation_children || [];
+                activeDays = Array.isArray(pet.walk_days) && pet.walk_days.length > 0 ? pet.walk_days : null;
               } else if (choreName.toLowerCase().includes('litter')) {
                 rotationChildren = pet.litter_rotation_children || [];
+                activeDays = Array.isArray(pet.litter_days) && pet.litter_days.length > 0 ? pet.litter_days : null;
               } else if (choreName.toLowerCase().includes('feed') || choreName.toLowerCase().includes('refill')) {
                 // Feeding (daily) and feeder refill (weekly) — anyone in any rotation
                 rotationChildren = (pet.walk_rotation_children || []).concat(pet.litter_rotation_children || []);
-                // Dedupe
                 rotationChildren = Array.from(new Set(rotationChildren));
+                // Feed days inherit from whichever care window is set; if none, daily
+                const feedSet = (pet.walk_days || []).concat(pet.litter_days || []);
+                activeDays = feedSet.length > 0 ? Array.from(new Set(feedSet.map((d: string) => d.toLowerCase()))) : null;
               }
             }
           }
@@ -1338,9 +1485,16 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         if (rotationChildren.length === 0) rotationChildren = allChildIds;
 
         if (rotationChildren.length > 0) {
-          // Assign with daily rotation among the rotation children
+          // Walk through all 7 days, but only assign on `activeDays` if the
+          // parent set a specific schedule. Rotate through children per
+          // assigned day (not per calendar day) so an every-other-day walk
+          // alternates kids correctly.
+          let rotIdx = 0;
           for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
-            const assignedChild = rotationChildren[dayIdx % rotationChildren.length];
+            const dayName = dayNameForDate(days[dayIdx]);
+            if (activeDays && !activeDays.includes(dayName)) continue;
+            const assignedChild = rotationChildren[rotIdx % rotationChildren.length];
+            rotIdx++;
             try {
               await pool.query(
                 `INSERT INTO assigned_chores (assigned_chore_id, chore_id, user_id, due_date, status)

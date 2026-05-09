@@ -20,7 +20,7 @@ hr { border: none; border-top: 1px solid #21262d; margin: 30px 0; }
 </style></head><body><div class="crumb"><a href="index.html">← Wiki home</a></div><h1 id="omydays-project-wiki">OMyDays — Project Wiki</h1>
 <blockquote>
 <p><strong>Last updated:</strong> 2026-05-09
-<strong>Version:</strong> iOS 1.0.1 (Build 13) — TestFlight
+<strong>Version:</strong> iOS 1.0.1 (Build 14) — TestFlight
 <strong>API:</strong> https://54-171-244-65.nip.io/v1
 <strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.</p>
 </blockquote>
@@ -1232,6 +1232,52 @@ cd ios-app &amp;&amp; fastlane beta
 </table></div>
 <hr />
 <h2 id="project-changelog">Changelog</h2>
+<h3 id="2026-05-09-build-14-skills-profile-pet-day-schedule">2026-05-09 — Build 14 (skills profile + pet day schedule)</h3>
+<p>Closes the last two items from the deferred list:</p>
+<p><strong>Skills &amp; qualities profile.</strong> New <code>GET /v1/users/{id}/skills</code> endpoint computes six derived skills from existing chore + job data — no new tables, recomputed on every fetch. Each skill has six tiers (Novice → Apprentice → Skilled → Expert → Master → Legendary) with thresholds tuned per skill so reaching the next tier feels achievable for short-cycle skills (Discipline, Reliability) and meaningful for rare-event ones (Entrepreneurship).</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Source</th>
+<th>What raises it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Discipline</strong></td>
+<td><code>daily_habit</code> chores approved</td>
+<td>Brushing teeth, bed, etc — high cap (365)</td>
+</tr>
+<tr>
+<td><strong>Responsibility</strong></td>
+<td><code>routine</code> chores approved</td>
+<td>Pet care, bins on the day they're due</td>
+</tr>
+<tr>
+<td><strong>Initiative</strong></td>
+<td><code>household / personal_space / laundry</code> chores approved</td>
+<td>Taking your share of the load</td>
+</tr>
+<tr>
+<td><strong>Reliability</strong></td>
+<td><code>% approved / assigned</code> (lifetime)</td>
+<td>Following through on what you take on</td>
+</tr>
+<tr>
+<td><strong>Teamwork</strong></td>
+<td>Support chores approved (given or received)</td>
+<td>Helping a sibling</td>
+</tr>
+<tr>
+<td><strong>Entrepreneurship</strong></td>
+<td>Pitched contracts approved</td>
+<td>Proposing your own jobs</td>
+</tr>
+</tbody>
+</table></div>
+<p>iOS shows them as a 2-column <code>LazyVGrid</code> of <code>SkillCard</code>s on <code>ProfileView</code> — each card has icon, level name, current value, progress bar to next threshold, and a one-line description. ShopStore's <code>loadAll</code> fetches them alongside everything else so they refresh on the same cycle as points.</p>
+<p><strong>Pet care day-of-week schedule.</strong> Pets gain optional <code>walk_days</code> / <code>litter_days</code> arrays in the <code>house_details</code> JSON. The distribution loop now walks all 7 days and only assigns a routine chore if the parent ticked that weekday — useful for cats whose litter gets cleaned every other day, dogs that don't walk on weekdays, etc. The rotation index advances per <em>assigned</em> day (not per calendar day) so an alternating-day schedule still alternates kids correctly. PetConfigView gets a 7-chip Mon–Sun selector that defaults to all days; only persisted when the parent has trimmed the set.</p>
 <h3 id="2026-05-09-build-13-deferred-items-from-round-3">2026-05-09 — Build 13 (deferred items from round 3)</h3>
 <p>Working through the deferred list from yesterday's feedback:</p>
 <ul>

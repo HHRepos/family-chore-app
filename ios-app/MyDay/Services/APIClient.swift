@@ -347,6 +347,11 @@ final class APIClient: Sendable {
         )
     }
 
+    func getSkills(_ userId: String) async throws -> [Skill] {
+        let resp: SkillsResponse = try await request(.GET, "/users/\(userId)/skills")
+        return resp.skills
+    }
+
     func updateFamily(_ familyId: String, name: String?, houseType: String?) async throws {
         var body: [String: String] = [:]
         if let name { body["family_name"] = name }

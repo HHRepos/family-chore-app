@@ -134,12 +134,16 @@ struct Pet: Codable, Identifiable {
     let type: String
     var walkRotationChildren: [String]?
     var litterRotationChildren: [String]?
+    var walkDays: [String]?
+    var litterDays: [String]?
     var minWalkAge: Int?
 
     enum CodingKeys: String, CodingKey {
         case id, name, type
         case walkRotationChildren = "walk_rotation_children"
         case litterRotationChildren = "litter_rotation_children"
+        case walkDays = "walk_days"
+        case litterDays = "litter_days"
         case minWalkAge = "min_walk_age"
     }
 
@@ -165,6 +169,8 @@ struct Pet: Codable, Identifiable {
             litterRotationChildren = ints.map { String($0) }
         }
 
+        walkDays = try? c.decode([String].self, forKey: .walkDays)
+        litterDays = try? c.decode([String].self, forKey: .litterDays)
         minWalkAge = try? c.decode(Int.self, forKey: .minWalkAge)
     }
 }

@@ -90,6 +90,30 @@ struct ProfileView: View {
                     }
                     .gameCard(glow: .neonOrange)
 
+                    // Skills & qualities — derived from chore + job activity.
+                    // Six skills laid out 2-up: Discipline, Responsibility,
+                    // Initiative, Reliability, Teamwork, Entrepreneurship.
+                    if !shop.skills.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Image(systemName: "sparkles")
+                                    .foregroundStyle(.neonPurple)
+                                Text("Skills & qualities")
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white)
+                                Spacer()
+                            }
+                            LazyVGrid(
+                                columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
+                                spacing: 8
+                            ) {
+                                ForEach(shop.skills) { skill in
+                                    SkillCard(skill: skill)
+                                }
+                            }
+                        }
+                    }
+
                     // Weekly Progress Badges
                     WeeklyBadgesSection(weekCompleted: shop.stats?.weekCompleted ?? 0)
 

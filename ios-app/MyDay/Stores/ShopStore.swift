@@ -8,6 +8,7 @@ class ShopStore {
     var badges: [Badge] = []
     var stats: UserStats?
     var points: Int = 0
+    var skills: [Skill] = []
     var isLoading = false
 
     var level: Int { GameLevel.level(for: points) }
@@ -21,6 +22,7 @@ class ShopStore {
         async let b = APIClient.shared.getBadges(familyId)
         async let s = APIClient.shared.getUserStats(userId)
         async let p = APIClient.shared.getUserPoints(userId)
+        async let sk = APIClient.shared.getSkills(userId)
 
         do {
             rewards = try await r
@@ -29,6 +31,7 @@ class ShopStore {
             stats = try await s
             let pts = try await p
             points = pts["points"] ?? 0
+            skills = (try? await sk) ?? []
         } catch {
             print("Failed to load shop data: \(error)")
         }
