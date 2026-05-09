@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
-> **Last updated:** 2026-05-08
-> **Version:** iOS 1.0.1 (Build 12) — TestFlight
+> **Last updated:** 2026-05-09
+> **Version:** iOS 1.0.1 (Build 13) — TestFlight
 > **API:** https://54-171-244-65.nip.io/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.
 
@@ -517,6 +517,22 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ---
 
 ## Changelog
+
+### 2026-05-09 — Build 13 (deferred items from round 3)
+
+Working through the deferred list from yesterday's feedback:
+
+- **Kid-explore "Invite Parent" was throwing.** Migration 016 drops the NOT NULL on `child_invitations.family_id` so the kid-generates-link-code flow can insert a row before any family exists. The Lambda has been writing NULL there since Build 4 — every "Invite Parent" tap got a constraint violation that surfaced as the red error banner.
+- **ClaimInviteView no longer asks for email/password twice.** When `auth.isAuthenticated == true` (the exploring-kid case) it skips the registration fields and just calls `POST /v1/families/join` on the existing token. Backend `families/join` was extended to accept either `families.family_code` or `child_invitations.invite_code` so users don't have to know which kind of code they have.
+- **Single invite-code input** with paste support. The visual letter-boxes are now the canonical UI; the text field is overlaid invisibly to capture keystrokes. Long-press the boxes for a Paste menu.
+- **"4 little squares" mystery solved**: a non-interactive `square.grid.2x2.fill` icon decorating the top-right of the parent's Command Center. Removed and replaced with the parent's own avatar so the header is functional, not ornamental.
+- **My chores today** section on the parent dashboard, shown when the parent has any chores assigned (i.e. they opted into the rotation in Settings). Lists today's chores with status icons, point values, and a `done / total` counter.
+- **Pet rotation picker** on add-pet. Shows for every pet type now (was dog-only walk + cat-only litter). Empty state explains rotation falls back to all kids when nothing's set.
+- **Family Rules → House Schedule.** Tab renamed; calendar icon. The duplicate "Today's Duties" section (already on Quest Map) is gone. Pet section now shows a 7-day rotation strip with each day's assignee initial, today highlighted, "your turn" in green — same visual language as the bin-collection schedule.
+
+**Still open**:
+- Skills/qualities profile redesign — needs your sign-off on the framing I sketched yesterday.
+- Pet care **time-of-day** schedule (specific days only, like bins) — could layer on top of the rotation strip if you want it.
 
 ### 2026-05-09 — Build 12 (TestFlight feedback round 3)
 

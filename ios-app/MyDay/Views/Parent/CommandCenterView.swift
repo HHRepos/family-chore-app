@@ -27,8 +27,15 @@ struct CommandCenterView: View {
 
             ScrollView {
                 VStack(spacing: 20) {
-                    // Header
-                    HStack {
+                    // Header — the decorative 2x2 grid icon was removed in
+                    // Build 13 ("4 squares" testers tapped expecting an action).
+                    HStack(spacing: 12) {
+                        AvatarView(
+                            seed: auth.userId ?? "parent",
+                            size: 56,
+                            customizations: auth.user?.avatarCustomizations ?? [],
+                            fallbackInitial: auth.user?.firstName
+                        )
                         VStack(alignment: .leading, spacing: 2) {
                             Text(formattedDate)
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
@@ -41,9 +48,6 @@ struct CommandCenterView: View {
                                 .foregroundStyle(.white.opacity(0.5))
                         }
                         Spacer()
-                        Image(systemName: "square.grid.2x2.fill")
-                            .font(.system(size: 28))
-                            .foregroundStyle(.neonBlue)
                     }
                     .padding(.top, 8)
 
@@ -101,6 +105,46 @@ struct CommandCenterView: View {
                             .clipShape(Capsule())
                             .overlay(Capsule().stroke(Color.neonGreen.opacity(0.3), lineWidth: 1))
                         }
+                    }
+
+                    // My chores today — shown when this parent participates in
+                    // the rotation. Filters family chores to the parent's own
+                    // user_id so they can see and complete their slice without
+                    // leaving the dashboard.
+                    let myChoresToday = choreStore.chores.filter {
+                        $0.userId == auth.userId && String($0.dueDate.prefix(10)) == todayString
+                    }
+                    if !myChoresToday.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Label("My chores today", systemImage: "person.badge.shield.checkmark.fill")
+                                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.neonPurple)
+                                Spacer()
+                                Text("\(myChoresToday.filter { $0.status == .approved || $0.status == .completed }.count) / \(myChoresToday.count) done")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundStyle(.white.opacity(0.5))
+                            }
+                            ForEach(myChoresToday) { chore in
+                                HStack(spacing: 10) {
+                                    Image(systemName: chore.status == .approved ? "checkmark.seal.fill" :
+                                          chore.status == .completed ? "hourglass" : "circle")
+                                        .foregroundStyle(chore.status == .approved ? .neonGreen :
+                                                         chore.status == .completed ? .neonBlue : .white.opacity(0.3))
+                                    Text(chore.choreName)
+                                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                                        .foregroundStyle(.white)
+                                        .strikethrough(chore.status == .approved)
+                                    Spacer()
+                                    Text("\(chore.points) pts")
+                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.neonYellow.opacity(0.7))
+                                }
+                                .padding(10)
+                                .background(Color.gameCardLight)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                        }.gameCard(glow: .neonPurple.opacity(0.3))
                     }
 
                     // Invite children card (if children exist without accounts)

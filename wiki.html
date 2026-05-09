@@ -19,8 +19,8 @@ hr { border: none; border-top: 1px solid #21262d; margin: 30px 0; }
 .crumb a { color: #6e7681; }
 </style></head><body><div class="crumb"><a href="index.html">← Wiki home</a></div><h1 id="omydays-project-wiki">OMyDays — Project Wiki</h1>
 <blockquote>
-<p><strong>Last updated:</strong> 2026-05-08
-<strong>Version:</strong> iOS 1.0.1 (Build 12) — TestFlight
+<p><strong>Last updated:</strong> 2026-05-09
+<strong>Version:</strong> iOS 1.0.1 (Build 13) — TestFlight
 <strong>API:</strong> https://54-171-244-65.nip.io/v1
 <strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.</p>
 </blockquote>
@@ -1232,6 +1232,20 @@ cd ios-app &amp;&amp; fastlane beta
 </table></div>
 <hr />
 <h2 id="project-changelog">Changelog</h2>
+<h3 id="2026-05-09-build-13-deferred-items-from-round-3">2026-05-09 — Build 13 (deferred items from round 3)</h3>
+<p>Working through the deferred list from yesterday's feedback:</p>
+<ul>
+<li><strong>Kid-explore "Invite Parent" was throwing.</strong> Migration 016 drops the NOT NULL on <code>child_invitations.family_id</code> so the kid-generates-link-code flow can insert a row before any family exists. The Lambda has been writing NULL there since Build 4 — every "Invite Parent" tap got a constraint violation that surfaced as the red error banner.</li>
+<li><strong>ClaimInviteView no longer asks for email/password twice.</strong> When <code>auth.isAuthenticated == true</code> (the exploring-kid case) it skips the registration fields and just calls <code>POST /v1/families/join</code> on the existing token. Backend <code>families/join</code> was extended to accept either <code>families.family_code</code> or <code>child_invitations.invite_code</code> so users don't have to know which kind of code they have.</li>
+<li><strong>Single invite-code input</strong> with paste support. The visual letter-boxes are now the canonical UI; the text field is overlaid invisibly to capture keystrokes. Long-press the boxes for a Paste menu.</li>
+<li><strong>"4 little squares" mystery solved</strong>: a non-interactive <code>square.grid.2x2.fill</code> icon decorating the top-right of the parent's Command Center. Removed and replaced with the parent's own avatar so the header is functional, not ornamental.</li>
+<li><strong>My chores today</strong> section on the parent dashboard, shown when the parent has any chores assigned (i.e. they opted into the rotation in Settings). Lists today's chores with status icons, point values, and a <code>done / total</code> counter.</li>
+<li><strong>Pet rotation picker</strong> on add-pet. Shows for every pet type now (was dog-only walk + cat-only litter). Empty state explains rotation falls back to all kids when nothing's set.</li>
+<li><strong>Family Rules → House Schedule.</strong> Tab renamed; calendar icon. The duplicate "Today's Duties" section (already on Quest Map) is gone. Pet section now shows a 7-day rotation strip with each day's assignee initial, today highlighted, "your turn" in green — same visual language as the bin-collection schedule.</li>
+</ul>
+<p><strong>Still open</strong>:
+- Skills/qualities profile redesign — needs your sign-off on the framing I sketched yesterday.
+- Pet care <strong>time-of-day</strong> schedule (specific days only, like bins) — could layer on top of the rotation strip if you want it.</p>
 <h3 id="2026-05-09-build-12-testflight-feedback-round-3">2026-05-09 — Build 12 (TestFlight feedback round 3)</h3>
 <p>Eight items shipped from the overnight feedback batch on Build 11:</p>
 <ul>

@@ -8,7 +8,7 @@ enum ChildTab: String, CaseIterable {
         case .quests: return "scroll.fill"
         case .shop: return "storefront.fill"
         case .contracts: return "target"
-        case .rules: return "book.closed.fill"
+        case .rules: return "calendar"
         case .profile: return "person.fill"
         }
     }
@@ -18,7 +18,7 @@ enum ChildTab: String, CaseIterable {
         case .quests: return "Quests"
         case .shop: return "Shop"
         case .contracts: return "Contracts"
-        case .rules: return "Rules"
+        case .rules: return "Schedule"
         case .profile: return "Profile"
         }
     }

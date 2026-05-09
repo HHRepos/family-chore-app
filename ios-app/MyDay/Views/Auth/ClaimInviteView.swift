@@ -32,10 +32,11 @@ struct ClaimInviteView: View {
                             .font(.system(size: 13, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.4))
                     }
 
-                    // Code input boxes
-                    // Code input
-                    VStack(spacing: 12) {
-                        // Visual boxes (tap to focus the real field)
+                    // Single consolidated input: visual letter boxes act as
+                    // the input — a hidden TextField underneath captures keystrokes
+                    // and Paste. Long-press the boxes to paste a 6-char code from
+                    // the clipboard.
+                    ZStack {
                         HStack(spacing: 8) {
                             ForEach(0..<6, id: \.self) { i in
                                 let char = i < code.count ? String(code[code.index(code.startIndex, offsetBy: i)]) : ""
@@ -51,24 +52,36 @@ struct ClaimInviteView: View {
                                                 Color.white.opacity(0.1), lineWidth: 1))
                             }
                         }
-                        .onTapGesture { codeFocused = true }
-
-                        // Real text field (visible, styled to blend in)
-                        TextField("Enter 6-letter code", text: $code)
+                        // Invisible text field overlays the boxes — keyboard input
+                        // routes through it, but the visual is the boxes.
+                        TextField("", text: $code)
                             .focused($codeFocused)
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.characters)
                             .keyboardType(.asciiCapable)
-                            .font(.system(size: 16, weight: .bold, design: .monospaced))
-                            .foregroundStyle(.neonGreen)
-                            .multilineTextAlignment(.center)
-                            .padding(12)
-                            .background(Color.gameCardLight)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .foregroundStyle(.clear)
+                            .accentColor(.clear)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .opacity(0.01) // basically invisible but still tappable
                             .onChange(of: code) { _, new in
                                 code = String(new.prefix(6)).uppercased()
                                 if code.count == 6 && validation == nil { validateCode() }
                             }
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture { codeFocused = true }
+                    .contextMenu {
+                        Button {
+                            #if os(iOS)
+                            if let pasted = UIPasteboard.general.string {
+                                code = String(pasted.prefix(6)).uppercased()
+                                if code.count == 6 { validateCode() }
+                            }
+                            #endif
+                        } label: {
+                            Label("Paste", systemImage: "doc.on.clipboard")
+                        }
                     }
                     .onAppear { codeFocused = true }
 
@@ -92,30 +105,45 @@ struct ClaimInviteView: View {
                             }
                         }.gameCard(glow: .neonGreen.opacity(0.4))
 
-                        // Registration fields
-                        VStack(spacing: 12) {
-                            Text("Set up your login").font(.system(size: 14, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.5))
-                            if v.childName == nil {
-                                // Parent invite — need name
-                                GameTextField(icon: "person.fill", placeholder: "Your name", text: $name)
+                        if auth.isAuthenticated {
+                            // User is already signed in (e.g. exploring kid). Skip
+                            // the email/password setup — just join the family on
+                            // their existing account.
+                            if success {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                    Text("Joined! Welcome!")
+                                }.font(.system(size: 16, weight: .bold)).foregroundStyle(.neonGreen)
                             }
-                            GameTextField(icon: "envelope.fill", placeholder: "Email", text: $email)
-                            GameTextField(icon: "lock.fill", placeholder: "Password (6+ characters)", text: $password, isSecure: true)
+                            Button(isClaiming ? "Joining…" : "Join Family") {
+                                joinExisting()
+                            }
+                            .buttonStyle(NeonButtonStyle(color: .neonGreen))
+                            .disabled(isClaiming)
+                        } else {
+                            // Fresh signup path: parent pre-created a child placeholder
+                            // and shared the code; the child sets up their login here.
+                            VStack(spacing: 12) {
+                                Text("Set up your login").font(.system(size: 14, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.5))
+                                if v.childName == nil {
+                                    GameTextField(icon: "person.fill", placeholder: "Your name", text: $name)
+                                }
+                                GameTextField(icon: "envelope.fill", placeholder: "Email", text: $email)
+                                GameTextField(icon: "lock.fill", placeholder: "Password (6+ characters)", text: $password, isSecure: true)
+                            }
+                            if success {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                    Text("Account activated! Welcome!")
+                                }.font(.system(size: 16, weight: .bold)).foregroundStyle(.neonGreen)
+                            }
+                            Button(isClaiming ? "Setting up..." : "Join Family") {
+                                claimCode()
+                            }
+                            .buttonStyle(NeonButtonStyle(color: .neonGreen))
+                            .disabled(email.isEmpty || password.count < 6 || isClaiming)
+                            .opacity(email.isEmpty || password.count < 6 ? 0.5 : 1)
                         }
-
-                        if success {
-                            HStack(spacing: 6) {
-                                Image(systemName: "checkmark.circle.fill")
-                                Text("Account activated! Welcome!")
-                            }.font(.system(size: 16, weight: .bold)).foregroundStyle(.neonGreen)
-                        }
-
-                        Button(isClaiming ? "Setting up..." : "Join Family") {
-                            claimCode()
-                        }
-                        .buttonStyle(NeonButtonStyle(color: .neonGreen))
-                        .disabled(email.isEmpty || password.count < 6 || isClaiming)
-                        .opacity(email.isEmpty || password.count < 6 ? 0.5 : 1)
                     }
 
                     if let error {
@@ -151,6 +179,28 @@ struct ClaimInviteView: View {
             do {
                 let result = try await APIClient.shared.claimInviteCode(code, email: email, password: password)
                 KeychainHelper.saveToken(result.token)
+                success = true
+                try? await Task.sleep(for: .seconds(1))
+                await auth.restoreSession()
+            } catch let err as APIError {
+                error = err.errorDescription
+            } catch {
+                self.error = error.localizedDescription
+            }
+            isClaiming = false
+        }
+    }
+
+    /// Already-authenticated path (exploring kid joining a family). Uses the
+    /// auth token already in keychain — no email/password re-entry — and
+    /// hits POST /v1/families/join which handles both family_code and the
+    /// kid-specific invite_code now.
+    private func joinExisting() {
+        isClaiming = true; error = nil
+        Task {
+            do {
+                let role = auth.user?.role ?? "child"
+                _ = try await APIClient.shared.joinFamily(code: code, role: role)
                 success = true
                 try? await Task.sleep(for: .seconds(1))
                 await auth.restoreSession()

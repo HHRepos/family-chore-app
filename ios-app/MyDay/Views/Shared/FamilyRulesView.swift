@@ -39,20 +39,16 @@ struct FamilyRulesView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     VStack(spacing: 8) {
-                        Image(systemName: "book.closed.fill").font(.system(size: 40)).foregroundStyle(.neonBlue).neonGlow(.neonBlue, radius: 12)
-                        Text("Family Rules").font(.system(size: 24, weight: .black, design: .rounded)).foregroundStyle(.white)
+                        Image(systemName: "calendar").font(.system(size: 40)).foregroundStyle(.neonBlue).neonGlow(.neonBlue, radius: 12)
+                        Text("House Schedule").font(.system(size: 24, weight: .black, design: .rounded)).foregroundStyle(.white)
                         if auth.isChild {
-                            Text("Here's what's happening today")
+                            Text("Bins, pet care and play time")
                                 .font(.system(size: 13, weight: .medium, design: .rounded))
                                 .foregroundStyle(.white.opacity(0.4))
                         }
                     }.padding(.top, 12)
 
                     if let d = details {
-                        // Today's Summary (child-focused)
-                        if auth.isChild {
-                            todaySummary(d)
-                        }
 
                         // Rooms — parent view only. Kids don't need the
                         // house-wide asset list.
@@ -227,26 +223,77 @@ struct FamilyRulesView: View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Pet Care", systemImage: "pawprint.fill").font(.system(size: 14, weight: .bold, design: .rounded)).foregroundStyle(.neonOrange)
             ForEach(pets) { pet in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(pet.name) (\(pet.type))").font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(.white)
-                    if let wc = pet.walkRotationChildren, !wc.isEmpty, let current = rotationChild(wc) {
-                        HStack(spacing: 4) {
-                            Text("Walk today:").font(.system(size: 12, weight: .medium)).foregroundStyle(.white.opacity(0.5))
-                            Text(memberName(current)).font(.system(size: 12, weight: .bold)).foregroundStyle(isMyTurn(current) ? .neonGreen : .neonOrange)
-                            if isMyTurn(current) { Text("(You!)").font(.system(size: 10, weight: .bold)).foregroundStyle(.neonGreen) }
-                        }
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 6) {
+                        Image(systemName: pet.type == "dog" ? "dog.fill" : pet.type == "cat" ? "cat.fill" : "pawprint.fill")
+                            .foregroundStyle(.neonOrange)
+                        Text(pet.name)
+                            .font(.system(size: 14, weight: .black, design: .rounded))
+                            .foregroundStyle(.white)
+                        Text(pet.type.capitalized)
+                            .font(.system(size: 10, weight: .bold)).foregroundStyle(.white.opacity(0.4))
+                            .padding(.horizontal, 6).padding(.vertical, 2)
+                            .background(Color.neonOrange.opacity(0.15)).clipShape(Capsule())
                     }
-                    if let lc = pet.litterRotationChildren, !lc.isEmpty, let current = rotationChild(lc) {
-                        HStack(spacing: 4) {
-                            Text("Litter today:").font(.system(size: 12, weight: .medium)).foregroundStyle(.white.opacity(0.5))
-                            Text(memberName(current)).font(.system(size: 12, weight: .bold)).foregroundStyle(isMyTurn(current) ? .neonGreen : .neonOrange)
-                            if isMyTurn(current) { Text("(You!)").font(.system(size: 10, weight: .bold)).foregroundStyle(.neonGreen) }
+                    // 7-day rotation strip — same visual language as bin
+                    // collection. Today is highlighted. "You!" tag on the
+                    // child's own day.
+                    let walk = pet.walkRotationChildren ?? []
+                    let litter = pet.litterRotationChildren ?? []
+                    if !walk.isEmpty || !litter.isEmpty {
+                        if !walk.isEmpty {
+                            rotationStrip(label: pet.type == "cat" ? "Feed" : "Walk", rotation: walk)
                         }
+                        if !litter.isEmpty && pet.type == "cat" {
+                            rotationStrip(label: "Litter", rotation: litter)
+                        }
+                    } else {
+                        Text("No rotation set yet — falls back to all kids")
+                            .font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.3))
                     }
                 }
-                .padding(10).background(Color.gameCardLight).clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(12).background(Color.gameCardLight).clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }.gameCard(glow: .neonOrange.opacity(0.3))
+    }
+
+    /// Draws a 7-day strip Mon–Sun where each day shows the rotated child's
+    /// initial. Today is highlighted; the user's own day shows in green.
+    @ViewBuilder
+    private func rotationStrip(label: String, rotation: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(label).font(.system(size: 11, weight: .bold)).foregroundStyle(.white.opacity(0.5))
+                Spacer()
+            }
+            HStack(spacing: 3) {
+                ForEach(0..<7, id: \.self) { offset in
+                    let date = Calendar.current.date(byAdding: .day, value: offset, to: Date()) ?? Date()
+                    let dayIdx = Calendar.current.ordinality(of: .day, in: .year, for: date) ?? 0
+                    let assignee = rotation.isEmpty ? "" : rotation[dayIdx % rotation.count]
+                    let initials = String(memberName(assignee).prefix(1)).uppercased()
+                    let mine = isMyTurn(assignee)
+                    let isToday = offset == 0
+                    VStack(spacing: 2) {
+                        Text(shortWeekday(for: date))
+                            .font(.system(size: 9, weight: .bold)).foregroundStyle(.white.opacity(isToday ? 0.7 : 0.3))
+                        Text(initials.isEmpty ? "—" : initials)
+                            .font(.system(size: 13, weight: .black, design: .rounded))
+                            .foregroundStyle(mine ? .black : (isToday ? .white : .white.opacity(0.6)))
+                            .frame(width: 28, height: 28)
+                            .background(mine ? Color.neonGreen :
+                                        (isToday ? Color.neonOrange.opacity(0.4) : Color.gameCard))
+                            .clipShape(Circle())
+                    }
+                }
+            }
+        }
+    }
+
+    private func shortWeekday(for date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "EEE"
+        return String(f.string(from: date).prefix(3))
     }
 
     // MARK: - Play Time & Gaming (role-filtered)

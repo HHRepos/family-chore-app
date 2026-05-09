@@ -234,14 +234,38 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
 
       const { family_code, role } = data;
       if (!family_code) return response(400, { error: 'family_code is required' });
+      const code = String(family_code).toUpperCase();
 
-      const familyResult = await pool.query(
-        'SELECT family_id, family_name, family_code FROM families WHERE UPPER(family_code) = UPPER($1)',
-        [family_code]
+      // Look up by families.family_code first (the generic family code), then
+      // fall back to child_invitations.invite_code (a specific invite a parent
+      // generated for a child). Both flows land in the same join logic, which
+      // is the point — the user shouldn't have to know which kind of code it
+      // is, they just type 6 letters.
+      let family: any = null;
+      let invitationToClaim: string | null = null;
+      const fr = await pool.query(
+        'SELECT family_id, family_name FROM families WHERE UPPER(family_code) = $1',
+        [code]
       );
-      if (familyResult.rows.length === 0) return response(404, { error: 'Family not found. Check the code and try again.' });
-
-      const family = familyResult.rows[0];
+      if (fr.rows.length > 0) {
+        family = fr.rows[0];
+      } else {
+        const inv = await pool.query(
+          `SELECT ci.invitation_id, ci.family_id, f.family_name, ci.claimed_at, ci.expires_at
+             FROM child_invitations ci
+             JOIN families f ON ci.family_id = f.family_id
+            WHERE ci.invite_code = $1 AND ci.family_id IS NOT NULL`,
+          [code]
+        );
+        if (inv.rows.length > 0) {
+          const row = inv.rows[0];
+          if (row.claimed_at) return response(400, { error: 'This invite code has already been used' });
+          if (new Date(row.expires_at) < new Date()) return response(400, { error: 'This invite code has expired' });
+          family = { family_id: row.family_id, family_name: row.family_name };
+          invitationToClaim = row.invitation_id;
+        }
+      }
+      if (!family) return response(404, { error: 'Family not found. Check the code and try again.' });
 
       // Check not already a member
       const existing = await pool.query(
@@ -256,6 +280,9 @@ export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
         'INSERT INTO family_members (family_id, user_id, role) VALUES ($1, $2, $3)',
         [family.family_id, user.userId, memberRole]
       );
+      if (invitationToClaim) {
+        await pool.query('UPDATE child_invitations SET claimed_at = NOW() WHERE invitation_id = $1', [invitationToClaim]);
+      }
 
       return response(200, { message: 'Joined family!', family_id: family.family_id, family_name: family.family_name });
     }

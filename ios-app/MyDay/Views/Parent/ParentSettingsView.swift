@@ -1034,36 +1034,45 @@ struct PetConfigView: View {
                             Text("Dog").tag("dog"); Text("Cat").tag("cat"); Text("Other").tag("other")
                         }.pickerStyle(.segmented)
 
-                        if petType == "dog" || petType == "other" {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Walk Rotation").font(.system(size: 11, weight: .bold)).foregroundStyle(.white.opacity(0.4))
+                        // Always-shown daily care rotation. Whoever's checked here
+                        // gets feeding (and walk for dogs / litter for cats)
+                        // assigned in a daily round-robin. Empty = falls back to
+                        // every child in the family per the Build 9 backend logic.
+                        VStack(alignment: .leading, spacing: 6) {
+                            Label(petType == "dog" ? "Walk + feed rotation" :
+                                  petType == "cat" ? "Litter + feed rotation" :
+                                  "Care rotation",
+                                  systemImage: "calendar.badge.clock")
+                                .font(.system(size: 12, weight: .bold)).foregroundStyle(.neonOrange)
+                            Text("Selected kids rotate one-per-day. Leave empty to share between everyone.")
+                                .font(.system(size: 10, weight: .medium)).foregroundStyle(.white.opacity(0.4))
+                            if familyStore.children.isEmpty {
+                                Text("Add some kids first to set up rotation.")
+                                    .font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.3))
+                                    .padding(8).frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Color.gameCardLight).clipShape(RoundedRectangle(cornerRadius: 8))
+                            } else {
                                 ForEach(familyStore.children) { child in
-                                    let included = walkChildren.contains(child.userId)
+                                    // Walk and litter share the same selection set
+                                    // for this simplified flow — power users can
+                                    // split them later by editing the saved pet.
+                                    let isCat = petType == "cat"
+                                    let arr = isCat ? litterChildren : walkChildren
+                                    let included = arr.contains(child.userId)
                                     Button {
-                                        if included { walkChildren.removeAll { $0 == child.userId } }
-                                        else { walkChildren.append(child.userId) }
+                                        if isCat {
+                                            if included { litterChildren.removeAll { $0 == child.userId } }
+                                            else { litterChildren.append(child.userId) }
+                                        } else {
+                                            if included { walkChildren.removeAll { $0 == child.userId } }
+                                            else { walkChildren.append(child.userId) }
+                                        }
                                     } label: {
                                         HStack {
                                             Text(child.firstName).font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
-                                            Spacer()
-                                            Image(systemName: included ? "checkmark.circle.fill" : "circle").foregroundStyle(included ? .neonGreen : .white.opacity(0.3))
-                                        }.padding(8).background(Color.gameCardLight).clipShape(RoundedRectangle(cornerRadius: 8))
-                                    }
-                                }
-                            }
-                        }
-
-                        if petType == "cat" {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Litter Rotation").font(.system(size: 11, weight: .bold)).foregroundStyle(.white.opacity(0.4))
-                                ForEach(familyStore.children) { child in
-                                    let included = litterChildren.contains(child.userId)
-                                    Button {
-                                        if included { litterChildren.removeAll { $0 == child.userId } }
-                                        else { litterChildren.append(child.userId) }
-                                    } label: {
-                                        HStack {
-                                            Text(child.firstName).font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
+                                            if let age = child.age {
+                                                Text("\(age)").font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.4))
+                                            }
                                             Spacer()
                                             Image(systemName: included ? "checkmark.circle.fill" : "circle").foregroundStyle(included ? .neonGreen : .white.opacity(0.3))
                                         }.padding(8).background(Color.gameCardLight).clipShape(RoundedRectangle(cornerRadius: 8))
