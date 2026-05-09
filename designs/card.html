@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept 03 — The Card</title>
+<style>
+  :root { --ink:#111315; --ink-soft:#4b525a; --ink-mute:#8b929b; --paper:#fafaf7; --rule:#e7e7e1; --accent:#ff5d3a; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,"SF Pro Text","Inter",system-ui,sans-serif; line-height:1.55; font-size:16px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 24px 96px; }
+  .crumb { font-size: 13px; color: var(--ink-mute); margin-bottom: 32px; }
+  .eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); }
+  h1 { font-size: clamp(40px,7vw,72px); font-weight: 700; letter-spacing: -0.03em; margin: 8px 0 16px; }
+  h2 { font-size: clamp(26px,3.4vw,38px); font-weight: 700; letter-spacing: -0.02em; margin: 64px 0 12px; }
+  h3 { font-size: 18px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin: 0 0 12px; max-width: 65ch; color: var(--ink-soft); }
+  .lede { font-size: 19px; color: var(--ink); max-width: 60ch; }
+  hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 56px 0; }
+  blockquote { margin: 16px 0; padding: 0 0 0 16px; border-left: 3px solid var(--accent);
+    font-style: italic; color: var(--ink-soft); font-size: 17px; }
+  .principle { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin: 20px 0 4px; }
+  .cut-list { font-size: 14px; color: var(--ink-soft); margin: 6px 0 0; padding-left: 20px; }
+  .cut-list li { margin: 4px 0; }
+  .pair { display: grid; grid-template-columns: 360px 1fr; gap: 56px; align-items: start; margin-top: 32px; }
+  @media (max-width: 880px) { .pair { grid-template-columns: 1fr; gap: 24px; } }
+  .pair .copy h3 { margin-top: 0; }
+  .caption { font-size: 12px; color: var(--ink-mute); text-align: center; margin-top: 12px; }
+
+  /* Phone */
+  .phone { width: 320px; height: 660px; border-radius: 50px; background: #111; padding: 14px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.18), 0 8px 18px rgba(0,0,0,0.10),
+      inset 0 0 0 1.5px rgba(255,255,255,0.05); position: relative; margin: 0 auto; }
+  .phone::before { content:""; position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 28px; background: #000; border-radius: 14px; z-index: 10; }
+  .screen { width: 100%; height: 100%; border-radius: 38px; overflow: hidden; position: relative; isolation: isolate; }
+
+  /* ===== Card visual language ===== */
+  .screen.card {
+    background: #f4f4f0;
+    font-family: -apple-system, "SF Pro Display", "Inter", sans-serif;
+    color: #111;
+  }
+  .topstrip { padding: 60px 26px 0;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    color: #66675c; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; }
+  .topstrip .left .small { font-size: 10px; opacity: 0.55; }
+  .topstrip .stack-counter { font-size: 14px; font-weight: 700; color: #111; }
+  .topstrip .stack-counter .div { color: #c0c1ba; font-weight: 400; }
+
+  /* — Screen 1: Stack home — */
+  .scr-stack .floating { position: absolute; left: 24px; right: 24px; top: 130px; bottom: 200px; perspective: 1200px; }
+  .scr-stack .stack { position: absolute; inset: 0; }
+  .scr-stack .stack .c { position: absolute; left: 0; right: 0; background: #fff; border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.10), 0 4px 14px rgba(0,0,0,0.06); }
+  .scr-stack .stack .c.back2 { top: 18px; height: 100%; transform: scale(0.9); opacity: 0.5; background: #ebebe5; }
+  .scr-stack .stack .c.back1 { top: 9px; height: 100%; transform: scale(0.95); opacity: 0.85; background: #f6f6f0; }
+  .scr-stack .stack .c.front { top: 0; height: 100%; }
+  .front-content { position: absolute; inset: 0; padding: 28px 26px;
+    display: flex; flex-direction: column; justify-content: space-between; }
+  .front-content .meta { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #888881; }
+  .front-content .icon { font-size: 56px; line-height: 1; margin: 4px 0 12px; }
+  .front-content .title { font-size: 36px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; }
+  .front-content .reward { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: #b8761e;
+    background: #fef2dc; padding: 5px 11px; border-radius: 999px; align-self: flex-start; }
+  .swipe-hint { margin-top: auto; text-align: center; font-size: 11px; color: #b3b4ad; letter-spacing: 0.04em; }
+  .home-bar-zone { position: absolute; left: 0; right: 0; bottom: 0; height: 180px; background: #f4f4f0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 32px; }
+  .home-bar-zone .done-btn { width: 80px; height: 80px; border-radius: 50%; background: #111;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 16px 30px rgba(0,0,0,0.20); font-size: 32px; color: #fff; }
+  .home-bar-zone .done-btn-label { margin-top: 12px; font-size: 13px; font-weight: 600; color: #444; }
+
+  /* — Screen 2: Pet card variant — */
+  .scr-pet .floating { position: absolute; left: 24px; right: 24px; top: 130px; bottom: 200px; }
+  .scr-pet .pet-card {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, #fef9ed 0%, #fff 30%);
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.10), 0 4px 14px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+  .scr-pet .portrait {
+    height: 160px;
+    background: linear-gradient(135deg, #fde7c2 0%, #f5cf94 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 88px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+  .scr-pet .pet-content { padding: 22px 24px; }
+  .scr-pet .pet-content .meta {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em;
+    color: #b8761e;
+  }
+  .scr-pet .pet-content .name {
+    font-size: 30px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; margin-top: 6px;
+  }
+  .scr-pet .pet-content .mood {
+    font-size: 14px; color: #66675c; margin-top: 8px; line-height: 1.4;
+  }
+  .scr-pet .pet-content .stats {
+    margin-top: 18px; display: flex; gap: 14px;
+  }
+  .scr-pet .pet-content .stat {
+    flex: 1;
+  }
+  .scr-pet .pet-content .stat .label {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: #b3b4ad; font-weight: 700;
+  }
+  .scr-pet .pet-content .stat .ring {
+    margin-top: 4px; width: 100%; height: 6px; background: #f0ede2; border-radius: 3px; overflow: hidden;
+  }
+  .scr-pet .pet-content .stat .ring > span { display: block; height: 100%; background: #b8761e; border-radius: 3px; }
+  .scr-pet .pet-content .reward {
+    margin-top: 16px; display: inline-flex; gap: 6px;
+    font-size: 13px; font-weight: 600; color: #b8761e;
+    background: #fef2dc; padding: 5px 11px; border-radius: 999px;
+  }
+
+  /* — Screen 3: Screen-time card with progress ring — */
+  .scr-screen .floating { position: absolute; left: 24px; right: 24px; top: 130px; bottom: 200px; }
+  .scr-screen .frame {
+    position: absolute; inset: 0; background: #fff; border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.10), 0 4px 14px rgba(0,0,0,0.06);
+    padding: 28px 26px;
+    display: flex; flex-direction: column;
+  }
+  .scr-screen .meta {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em;
+    color: #888881;
+  }
+  .scr-screen .ring-wrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    margin: 8px 0 12px;
+  }
+  .scr-screen .ring-wrap svg { width: 200px; height: 200px; }
+  .scr-screen .ring-wrap .center {
+    position: absolute; text-align: center;
+  }
+  .scr-screen .ring-wrap .center .h {
+    font-size: 44px; font-weight: 600; letter-spacing: -0.04em; line-height: 1;
+  }
+  .scr-screen .ring-wrap .center .l {
+    font-size: 11px; color: #b3b4ad; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-top: 4px;
+  }
+  .scr-screen .nudge {
+    text-align: center; font-size: 12px; color: #888881; line-height: 1.4;
+  }
+  .scr-screen .nudge strong { color: #111; font-weight: 600; }
+
+  /* Device buckets row */
+  .scr-screen .buckets {
+    position: absolute; left: 24px; right: 24px; bottom: 80px;
+    background: #fff; border-radius: 18px;
+    padding: 12px 16px;
+    box-shadow: 0 16px 30px rgba(0,0,0,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .scr-screen .bucket { text-align: center; }
+  .scr-screen .bucket .icon { font-size: 22px; }
+  .scr-screen .bucket .qty {
+    font-size: 11px; font-weight: 700; color: #111; margin-top: 4px; letter-spacing: 0.02em;
+  }
+  .scr-screen .bucket.locked .qty { color: #c0c1ba; }
+  .scr-screen .bucket .name {
+    font-size: 9px; color: #b3b4ad; margin-top: 2px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+
+  /* — Screen 4: Family deck rack (parent) — */
+  .scr-family { background: #f4f4f0; }
+  .scr-family .header {
+    padding: 60px 26px 8px;
+  }
+  .scr-family .header .h {
+    font-size: 28px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.05;
+  }
+  .scr-family .header .sub {
+    font-size: 12px; color: #888881; margin-top: 4px;
+  }
+  .scr-family .approval-strip {
+    margin: 24px 26px 0;
+    background: #111; color: #fff; border-radius: 16px;
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .scr-family .approval-strip .badge {
+    width: 36px; height: 36px; border-radius: 50%; background: #ff5d3a;
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+  .scr-family .approval-strip .body { flex: 1; }
+  .scr-family .approval-strip .l1 { font-size: 13px; font-weight: 600; }
+  .scr-family .approval-strip .l2 { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+  .scr-family .approval-strip .arrow { color: rgba(255,255,255,0.55); font-size: 18px; }
+
+  .scr-family .decks {
+    margin: 24px 26px 0;
+  }
+  .scr-family .deck {
+    background: #fff; border-radius: 18px;
+    padding: 18px 18px 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .scr-family .deck .spine {
+    width: 50px; height: 70px; border-radius: 8px;
+    background: linear-gradient(135deg, #fde7c2, #f5cf94);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 10px; color: #b8761e; font-weight: 700;
+  }
+  .scr-family .deck .spine.green {
+    background: linear-gradient(135deg, #dceacb, #b3cf8a);
+    color: #4a6b25;
+  }
+  .scr-family .deck .spine.purple {
+    background: linear-gradient(135deg, #e3d4f1, #c0a4dd);
+    color: #5e3d8e;
+  }
+  .scr-family .deck .body { flex: 1; }
+  .scr-family .deck .name {
+    font-size: 16px; font-weight: 600; letter-spacing: -0.01em;
+  }
+  .scr-family .deck .progress {
+    font-size: 11px; color: #888881; margin-top: 2px;
+  }
+  .scr-family .deck .bar {
+    margin-top: 8px; height: 4px; background: #f0ede2; border-radius: 2px; overflow: hidden;
+  }
+  .scr-family .deck .bar > span {
+    display: block; height: 100%; background: #111;
+  }
+  .scr-family .deck .count {
+    font-size: 24px; font-weight: 600; color: #111;
+  }
+  .scr-family .deck .count .div { color: #c0c1ba; font-weight: 400; }
+  .scr-family .footer-help {
+    position: absolute; bottom: 60px; left: 26px; right: 26px;
+    font-size: 11px; color: #b3b4ad; text-align: center; line-height: 1.5;
+  }
+</style>
+</head><body>
+
+<div class="wrap">
+  <div class="crumb"><a href="./">← Back to overview</a></div>
+  <p class="eyebrow">Concept 03</p>
+  <h1>The Card.</h1>
+  <p class="lede">
+    Your day is a stack of cards. The top card is the only thing that matters.
+    Do the thing. Swipe up. The next card slides into place. The whole app is
+    one screen, one card, one tap. Every other surface — pets, screen time,
+    rewards, family — uses the same primitive: <em>a card to act on, then the
+    next.</em>
+  </p>
+
+  <blockquote>
+    Things 3 sold half a million copies of a to-do app at $9.99 because it
+    respects you. iA Writer became a category on the strength of typography
+    alone. The Card concept asks: what if a chore app was actually a tool,
+    not a game? Premium. Calm. Adult-feeling. And quietly aspirational for
+    older kids — they want to be treated like adults, not like preschoolers.
+  </blockquote>
+
+  <p>
+    Below: four screens covering the full app surface. Today's chores
+    (the stack), pet management (a pet card), screen time (a budget card
+    with progress ring), and the parent's family view (deck rack).
+  </p>
+
+  <hr class="rule">
+
+  <!-- Screen 1: Stack home -->
+  <h2>1 — Today's stack</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen card scr-stack">
+        <div class="topstrip">
+          <div class="left">
+            <div>Tuesday morning</div>
+            <div class="small">Yusuf · 8:14</div>
+          </div>
+          <div class="stack-counter">3<span class="div"> / </span>5</div>
+        </div>
+        <div class="floating">
+          <div class="stack">
+            <div class="c back2"></div>
+            <div class="c back1"></div>
+            <div class="c front">
+              <div class="front-content">
+                <div>
+                  <div class="meta">Daily habit</div>
+                  <div class="icon">🪥</div>
+                  <div class="title">Brush your teeth.</div>
+                  <div class="reward">+ 1 star</div>
+                </div>
+                <div class="swipe-hint">⌃ swipe up when done</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="home-bar-zone">
+          <div class="done-btn">✓</div>
+          <div class="done-btn-label">Done</div>
+        </div>
+      </div></div>
+      <p class="caption">One thing at a time.</p>
+    </div>
+    <div class="copy">
+      <h3>The whole interface is one card</h3>
+      <p>The kid never sees more than one chore at a time. The stack
+        underneath signals "there's more"; the counter top-right tells the
+        truth ("3 / 5 today"). Nothing else lives on this screen. No tabs,
+        no leaderboard, no XP, no level, no badges, no streak. The only
+        rendered number is "3 / 5".</p>
+
+      <div class="principle">Two ways to complete</div>
+      <p>Either swipe the card up (gesture, fast, satisfying) or tap the
+        big black "Done" button at the bottom (deliberate, accessible).
+        Either fires a heavy haptic, a single warm "ting" sound, and slides
+        the next card up. <strong>The whole app is one button.</strong></p>
+
+      <div class="principle">Cards are typed by colour</div>
+      <ul class="cut-list">
+        <li>Daily habit cards = warm yellow accent (the toothbrush card above).</li>
+        <li>Routine cards (pets, bins) = green accent.</li>
+        <li>Household cards = neutral white.</li>
+        <li>Pitched / contract cards = purple accent.</li>
+      </ul>
+      <p>The kid learns the language fast — they see colour and know what
+        category they're about. No icons in the corner. No tags. The card
+        IS the category.</p>
+
+      <div class="principle">Empty stack</div>
+      <p>When the kid completes their last card, the screen goes blank
+        cream paper with one line in the centre: <em>"That's all today.
+        Well done."</em> And then, intentionally, nothing. No dashboard
+        appears. No "what's next" pop-up. The app respectfully closes
+        the door — the kid puts down the phone, which is the entire
+        point.</p>
+
+      <div class="principle">Long-press to peek</div>
+      <p>Long-press the card → a peek modal slides up showing the full
+        stack of today's cards as a spread (like Apple Wallet). Tap any to
+        do it out of order; the front-of-stack reorders. Hold-and-drag to
+        re-prioritize. Power user gesture; doesn't clutter the default.</p>
+
+      <div class="principle">What we cut</div>
+      <ul class="cut-list">
+        <li>Tabs (now 0)</li>
+        <li>Numbers, except "3 / 5"</li>
+        <li>Colour palette: cream paper, ink black, three accent hues. That's it.</li>
+        <li>The shop, leaderboard, schedule, profile screens — all reachable, never visible by default.</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Screen 2: Pet card -->
+  <h2>2 — A card for Fifi: pet management</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen card scr-pet">
+        <div class="topstrip">
+          <div class="left">
+            <div>Pet care</div>
+            <div class="small">Fifi · house cat</div>
+          </div>
+          <div class="stack-counter">2<span class="div"> / </span>3</div>
+        </div>
+        <div class="floating">
+          <div class="pet-card">
+            <div class="portrait">🐱</div>
+            <div class="pet-content">
+              <div class="meta">Routine · today</div>
+              <div class="name">Feed Fifi.</div>
+              <div class="mood">She's been waiting by her bowl for 20 minutes. Last fed by Sara at 7:42 yesterday evening.</div>
+              <div class="stats">
+                <div class="stat">
+                  <div class="label">Hunger</div>
+                  <div class="ring"><span style="width:30%; background:#ff5d3a"></span></div>
+                </div>
+                <div class="stat">
+                  <div class="label">Litter</div>
+                  <div class="ring"><span style="width:55%"></span></div>
+                </div>
+                <div class="stat">
+                  <div class="label">Water</div>
+                  <div class="ring"><span style="width:90%; background:#3fb950"></span></div>
+                </div>
+              </div>
+              <div class="reward">+ 1 star</div>
+            </div>
+          </div>
+        </div>
+        <div class="home-bar-zone">
+          <div class="done-btn">✓</div>
+          <div class="done-btn-label">Done</div>
+        </div>
+      </div></div>
+      <p class="caption">Pet care reuses the card primitive.</p>
+    </div>
+    <div class="copy">
+      <h3>Pets are cards too</h3>
+      <p>When it's the kid's turn to care for Fifi, a green-accented card
+        rises to the front of the stack. Same gesture, same haptic, same
+        button — the pet card just has additional context: a pet
+        portrait, a "mood" line in plain English, and three thin status
+        rings showing her current Hunger / Litter / Water levels.</p>
+
+      <div class="principle">Plain English, not stat bars</div>
+      <p>"She's been waiting by her bowl for 20 minutes" is the headline.
+        The status rings are secondary, almost decorative — they exist for
+        kids who like detail. Most kids will read the sentence and tap
+        Done. The data is there if they care; not in their face if they
+        don't.</p>
+
+      <div class="principle">Last fed by Sara at 7:42</div>
+      <p>The card surfaces who in the family last did each pet task. This
+        creates ambient awareness without a "rotation schedule" UI.
+        The current `walk_rotation_children: []` array still drives the
+        "whose turn" assignment under the hood, but the kid never sees
+        a checkbox grid.</p>
+
+      <div class="principle">The pet itself isn't a screen</div>
+      <p>There's no separate "Fifi profile" page. Fifi shows up <em>as
+        a card</em> when she needs you. When she doesn't, she's not on
+        screen. The pet exists in the moments when she matters.</p>
+
+      <div class="principle">Multi-pet</div>
+      <p>If the family has Fifi (cat) and Pickle (dog), each gets its own
+        portrait when its card surfaces. Stat rings adapt: dogs have
+        Walk / Food / Water; cats have Hunger / Litter / Water. The
+        category is "routine"; the surface adapts.</p>
+
+      <div class="principle">Setup (parent)</div>
+      <p>Same as elsewhere: "Add a pet" → name + species + which kids
+        look after them. Behind the cards, this drives the same
+        `house_details.pets[]` data we already have. The schedule is
+        just a daily card; complex day-of-week schedules become a
+        small "Cadence" toggle: Daily / Every other / Weekends only.
+        Three options collapse the current 7-day matrix.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Screen 3: Screen time card -->
+  <h2>3 — Screen time: a budget you can see</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen card scr-screen">
+        <div class="topstrip">
+          <div class="left">
+            <div>Screen time</div>
+            <div class="small">Today's budget</div>
+          </div>
+          <div class="stack-counter">2h 15m</div>
+        </div>
+        <div class="floating">
+          <div class="frame">
+            <div class="meta">Earned today</div>
+            <div class="ring-wrap">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#f0ede2" stroke-width="8"/>
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#111" stroke-width="8"
+                  stroke-dasharray="263.9" stroke-dashoffset="79"
+                  transform="rotate(-90 50 50)" stroke-linecap="round"/>
+              </svg>
+              <div class="center">
+                <div class="h">2h 15m</div>
+                <div class="l">remaining</div>
+              </div>
+            </div>
+            <div class="nudge">
+              <strong>Earn 30 min more</strong> by finishing the next 3 cards.
+              <br>Resets at midnight.
+            </div>
+          </div>
+        </div>
+        <div class="buckets">
+          <div class="bucket">
+            <div class="icon">📺</div>
+            <div class="qty">Free</div>
+            <div class="name">TV</div>
+          </div>
+          <div class="bucket">
+            <div class="icon">🎮</div>
+            <div class="qty">1h</div>
+            <div class="name">Console</div>
+          </div>
+          <div class="bucket">
+            <div class="icon">📱</div>
+            <div class="qty">30m</div>
+            <div class="name">Tablet</div>
+          </div>
+          <div class="bucket locked">
+            <div class="icon">🥽</div>
+            <div class="qty">Sat</div>
+            <div class="name">VR</div>
+          </div>
+        </div>
+      </div></div>
+      <p class="caption">A ring. A nudge. Four device chips.</p>
+    </div>
+    <div class="copy">
+      <h3>The ring is the rules</h3>
+      <p>Screen time is the most rules-laden surface in the current app —
+        device × day × hours × chore-gate × age. Here it's one ring and
+        four chips. The ring shows total minutes earned today. The chips
+        show how much is left in each device bucket. <strong>That's the
+        rules.</strong></p>
+
+      <div class="principle">The ring fills as cards complete</div>
+      <p>Each chore card swiped done adds minutes to the ring (rate
+        configurable per family — 15 min / chore by default). The kid
+        sees the ring fill in real time as they complete cards. The
+        bridge from "did chores" → "earned time" is felt as a continuous
+        animation, not announced as a rule.</p>
+
+      <div class="principle">VR is a chip with a day-of-week label</div>
+      <p>The VR chip is greyed out and reads "Sat" — meaning weekends only.
+        On Saturday and Sunday it lights up with minutes available. No
+        nested settings; the chip's state IS the rule. Similar pattern for
+        any restricted device (school nights = console locked, etc).</p>
+
+      <div class="principle">Tap a chip = launch the device</div>
+      <p>Tap the Console chip → iOS Screen Time unlocks the games on the
+        kid's iPad / paired Apple TV. The minutes count down in the chip
+        live. When 0:00, the chip greys out and a card slides into the
+        main stack: <em>"Time's up. Earn 30 min more by finishing 2
+        cards."</em></p>
+
+      <div class="principle">Chore-gate, made gentle</div>
+      <p>The current "must complete chores before screen time" toggle
+        becomes a card that reads "Three more cards before the ring
+        unlocks." The kid sees the locked ring greyed; chores fill it
+        in. No dialog says "you can't" — the ring just shows you can't,
+        which is a much softer no.</p>
+
+      <div class="principle">Settings (parent)</div>
+      <p>One screen, four toggles per kid:
+      </p>
+      <ul class="cut-list">
+        <li>Earn rate (default 15m / chore — can dial up or down).</li>
+        <li>Daily cap (default 2h weekday, 3h weekend).</li>
+        <li>VR cadence (None / Weekends / Daily).</li>
+        <li>Chore-gate on or off (defaults: on).</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Screen 4: Family deck rack -->
+  <h2>4 — Family deck rack: parent view</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen card scr-family">
+        <div class="header">
+          <div class="h">The Haridys.</div>
+          <div class="sub">Tuesday · 3 cards waiting on you</div>
+        </div>
+        <div class="approval-strip">
+          <div class="badge">3</div>
+          <div class="body">
+            <div class="l1">Pending approvals</div>
+            <div class="l2">Yusuf walked Fifi · Sara tidied · 1 more</div>
+          </div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="decks">
+          <div class="deck">
+            <div class="spine">
+              <div>YUS</div>
+              <div style="font-size:18px; margin-top:6px">3<span style="color:#d8a955">/5</span></div>
+            </div>
+            <div class="body">
+              <div class="name">Yusuf, 8</div>
+              <div class="progress">3 of 5 done · 2 ripe to approve</div>
+              <div class="bar"><span style="width:60%"></span></div>
+            </div>
+          </div>
+          <div class="deck">
+            <div class="spine green">
+              <div>SAR</div>
+              <div style="font-size:18px; margin-top:6px">4<span style="color:#7ea64e">/4</span></div>
+            </div>
+            <div class="body">
+              <div class="name">Sara, 6</div>
+              <div class="progress">All done · 1 ripe to approve</div>
+              <div class="bar"><span style="width:100%; background:#3fb950"></span></div>
+            </div>
+          </div>
+          <div class="deck">
+            <div class="spine purple">
+              <div>YOU</div>
+              <div style="font-size:18px; margin-top:6px">1<span style="color:#a47ec5">/2</span></div>
+            </div>
+            <div class="body">
+              <div class="name">You · participating</div>
+              <div class="progress">1 of 2 done · self-approved</div>
+              <div class="bar"><span style="width:50%; background:#7e57b8"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="footer-help">Tap a deck to see the cards. Long-press to issue a one-off task.</div>
+      </div></div>
+      <p class="caption">The whole family on one calm screen.</p>
+    </div>
+    <div class="copy">
+      <h3>One deck per family member</h3>
+      <p>The parent's home screen is a small rack of decks. One row per kid,
+        plus the parent's own row at the bottom if they participate. Each
+        row shows: the kid's "spine" (a coloured card-edge), name, today's
+        ratio, and a single thin progress bar. <strong>The whole family
+        in 5 seconds.</strong></p>
+
+      <div class="principle">Approvals as a single black strip</div>
+      <p>The pending approvals queue is one black strip at the top with a
+        red badge count and a one-line summary of what's waiting. Tap →
+        slide-up sheet of approval cards (same card primitive: each pending
+        approval is a card, swipe right = approve, swipe left = needs redo).</p>
+
+      <div class="principle">No tabs</div>
+      <p>The whole parent app is the rack. Tap a deck → see that kid's
+        cards. Tap "The Haridys" header → family settings. Long-press
+        a deck → quick action: issue a one-off chore for that kid.
+        Five gestures cover everything that's currently spread across
+        Command Center / Approvals / Contracts / Shop / Settings.</p>
+
+      <div class="principle">Trust over surveillance</div>
+      <p>The parent's deck view is intentionally <em>shallow</em>. They
+        see ratio + bar. They don't see exactly which chore each kid
+        skipped without drilling. The design assumption is that the
+        kid is doing fine unless a deck is conspicuously low. Healthy
+        defaults; healthy surface.</p>
+
+      <div class="principle">Multi-parent</div>
+      <p>Both parents see the same rack. Approvals are first-come — once
+        one parent approves a card, it disappears from the other's strip.
+        No "who claimed this" question; the approval just lands. Soft
+        co-parenting baked in.</p>
+
+      <div class="principle">Settings, hidden but findable</div>
+      <p>Tap the family name at the very top → a small settings sheet:
+        invite codes, screen-time defaults, contracts, billing. Nothing
+        in the main interface advertises itself.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>What's still on the table</h2>
+  <ul class="cut-list">
+    <li><strong>Rewards / shop</strong> → a separate "spend" gesture: pull down on the home stack and the shop card slides in as a peek. Items rendered as small minimal cards with point cost. Buying = tap, with confirmation.</li>
+    <li><strong>Pitched contracts</strong> → the kid composes a card. "Title. Description. Asking 50 stars." The card lands in the parent's approvals strip. Same primitive, sender different.</li>
+    <li><strong>Skills profile</strong> → six small numbers in a settings sheet on the kid's profile. The Card concept consciously de-emphasizes gamification — skills are present for the kids who want them, invisible to those who don't.</li>
+    <li><strong>Streaks / badges</strong> → mostly cut. The Card concept's calm aesthetic is at odds with badge-collecting. A single line of "12 day streak" appears at the top of the stack on day milestones (7, 30, 90), then disappears.</li>
+  </ul>
+
+  <p style="margin-top: 32px;">
+    <a href="garden.html">← Back to Concept 01 — The Garden</a><br>
+    <a href="quest.html">← Back to Concept 02 — The Quest</a><br>
+    <a href="./">↑ Back to overview</a>
+  </p>
+</div>
+</body></html>

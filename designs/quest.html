@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept 02 — The Quest</title>
+<style>
+  :root { --ink:#111315; --ink-soft:#4b525a; --ink-mute:#8b929b; --paper:#fafaf7; --rule:#e7e7e1; --accent:#ff5d3a; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,"SF Pro Text","Inter",system-ui,sans-serif; line-height:1.55; font-size:16px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 24px 96px; }
+  .crumb { font-size: 13px; color: var(--ink-mute); margin-bottom: 32px; }
+  .eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); }
+  h1 { font-size: clamp(40px,7vw,72px); font-weight: 700; letter-spacing: -0.03em; margin: 8px 0 16px; }
+  h2 { font-size: clamp(26px,3.4vw,38px); font-weight: 700; letter-spacing: -0.02em; margin: 64px 0 12px; }
+  h3 { font-size: 18px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin: 0 0 12px; max-width: 65ch; color: var(--ink-soft); }
+  .lede { font-size: 19px; color: var(--ink); max-width: 60ch; }
+  hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 56px 0; }
+  blockquote { margin: 16px 0; padding: 0 0 0 16px; border-left: 3px solid var(--accent);
+    font-style: italic; color: var(--ink-soft); font-size: 17px; }
+
+  .principle { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin: 20px 0 4px; }
+  .cut-list { font-size: 14px; color: var(--ink-soft); margin: 6px 0 0; padding-left: 20px; }
+  .cut-list li { margin: 4px 0; }
+
+  .pair { display: grid; grid-template-columns: 360px 1fr; gap: 56px; align-items: start; margin-top: 32px; }
+  @media (max-width: 880px) { .pair { grid-template-columns: 1fr; gap: 24px; } }
+  .pair .copy h3 { margin-top: 0; }
+  .caption { font-size: 12px; color: var(--ink-mute); text-align: center; margin-top: 12px; }
+
+  /* Phone */
+  .phone { width: 320px; height: 660px; border-radius: 50px; background: #111; padding: 14px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.18), 0 8px 18px rgba(0,0,0,0.10),
+      inset 0 0 0 1.5px rgba(255,255,255,0.05); position: relative; margin: 0 auto; }
+  .phone::before { content:""; position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 28px; background: #000; border-radius: 14px; z-index: 10; }
+  .screen { width: 100%; height: 100%; border-radius: 38px; overflow: hidden; position: relative; isolation: isolate; }
+
+  /* ===== Quest visual language ===== */
+  .screen.quest {
+    background: radial-gradient(ellipse at 50% 100%, #1a3a5e 0%, #0a1a2e 70%);
+    font-family: "Press Start 2P", "Courier New", monospace;
+    color: #fff; image-rendering: pixelated;
+  }
+
+  /* — Screen 1: Map/home (refresh, slightly different from index for variety) — */
+  .scr-map .map {
+    position: absolute; inset: 50px 0 200px;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 4px, transparent 4px 8px),
+      radial-gradient(ellipse at 30% 30%, rgba(120, 200, 255, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 60%, rgba(255, 180, 120, 0.12) 0%, transparent 50%);
+    background-color: #15324c;
+  }
+  .scr-map .hud { position: absolute; top: 50px; left: 0; right: 0; padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+  .hud .hero { display: flex; align-items: center; gap: 10px; }
+  .hud .avatar { width: 44px; height: 44px; border-radius: 8px; background: #ffd35a;
+    border: 3px solid #000; box-shadow: 4px 4px 0 #000;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .hud .stats { font-size: 9px; line-height: 1.6; }
+  .hud .stats .lv { color: #ffd35a; }
+  .hud .xp-bar { width: 100px; height: 8px; background: #000; border: 2px solid #000;
+    margin-top: 4px; box-shadow: 2px 2px 0 #000; }
+  .hud .xp-bar > span { display: block; height: 100%; width: 65%;
+    background: linear-gradient(90deg, #6dff8b, #c7ff52); }
+  .hud .coins { font-size: 11px; color: #ffd35a; }
+
+  .scr-map .character { position: absolute; bottom: 220px; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 60px; background: #ff5d3a; border: 3px solid #000;
+    box-shadow: 4px 4px 0 #000; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; font-size: 28px; z-index: 4; }
+  .scr-map .pin { position: absolute; width: 36px; height: 36px;
+    background: #ffd35a; border: 3px solid #000; box-shadow: 3px 3px 0 #000;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #000; font-weight: bold; }
+  .scr-map .pin.exclaim { background: #ff5d3a; color: #fff; transform: rotate(-3deg); }
+  .scr-map .p1 { top: 130px; left: 50px; }
+  .scr-map .p2 { top: 200px; right: 40px; }
+  .scr-map .p3 { top: 290px; left: 70px; }
+  .scr-map .panel { position: absolute; bottom: 0; left: 0; right: 0;
+    background: #000; border-top: 4px solid #fff; padding: 16px; z-index: 5; }
+  .scr-map .panel .title { font-size: 9px; color: #ffd35a; margin-bottom: 6px; }
+  .scr-map .panel .text { font-size: 10px; line-height: 1.6; color: #fff; }
+  .scr-map .panel .next {
+    margin-top: 10px; display: inline-block; background: #ff5d3a; color: #fff;
+    padding: 6px 14px; border: 3px solid #fff; box-shadow: 3px 3px 0 #fff;
+    font-size: 9px; font-weight: 700; }
+
+  /* — Screen 2: Companion menu (pets) — */
+  .scr-pet { background: linear-gradient(180deg, #5a1a3a 0%, #2a0a1a 100%); }
+  .scr-pet .header { padding: 50px 16px 12px; display: flex; justify-content: space-between; }
+  .scr-pet .header .label { font-size: 10px; color: #ffb3d1; }
+  .scr-pet .header .x { font-size: 14px; color: #fff; }
+  .scr-pet .portrait {
+    margin: 8px 30px 0; height: 220px; background: #1a3a5e;
+    border: 4px solid #fff; box-shadow: 6px 6px 0 #000;
+    display: flex; align-items: center; justify-content: center;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);
+    font-size: 90px;
+    text-shadow: 4px 4px 0 #000;
+  }
+  .scr-pet .name {
+    text-align: center; margin: 14px 0 4px; font-size: 14px; color: #ffd35a;
+  }
+  .scr-pet .meta {
+    text-align: center; font-size: 9px; color: #ffb3d1; margin-bottom: 14px;
+  }
+  .scr-pet .stats-grid {
+    margin: 0 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px;
+  }
+  .scr-pet .stat {
+    font-size: 9px; color: #fff;
+  }
+  .scr-pet .stat .label { color: #ffb3d1; }
+  .scr-pet .stat .bar {
+    width: 100%; height: 8px; background: #000; border: 2px solid #000;
+    margin-top: 4px; box-shadow: 2px 2px 0 #000;
+  }
+  .scr-pet .stat .bar > span {
+    display: block; height: 100%;
+  }
+  .scr-pet .actions {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    border-top: 4px solid #fff; background: #000;
+    padding: 14px 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  .scr-pet .actions .btn {
+    background: #ffd35a; color: #000; border: 3px solid #fff;
+    box-shadow: 3px 3px 0 #fff; padding: 10px 4px; text-align: center;
+    font-size: 9px; font-weight: 700;
+  }
+  .scr-pet .actions .btn.primary { background: #ff5d3a; color: #fff; }
+
+  /* — Screen 3: Tavern (gaming / VR / screen time) — */
+  .scr-tavern { background: linear-gradient(180deg, #3a2410 0%, #1f1408 100%); }
+  .scr-tavern::after {
+    content: ""; position: absolute; top: 50px; bottom: 0; left: 0; right: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 24px, rgba(255,200,100,0.04) 24px 25px);
+    pointer-events: none;
+  }
+  .scr-tavern .sign {
+    margin: 50px auto 0; width: 80%; padding: 10px;
+    background: #000; border: 4px solid #fff; box-shadow: 4px 4px 0 #fff;
+    text-align: center; position: relative; z-index: 2;
+  }
+  .scr-tavern .sign .label { font-size: 8px; color: #ffd35a; }
+  .scr-tavern .sign .name { font-size: 14px; color: #fff; margin-top: 4px; }
+  .scr-tavern .innkeeper {
+    margin: 20px auto 0; width: 90px; height: 90px;
+    background: #ffd35a; border: 4px solid #000; box-shadow: 4px 4px 0 #000;
+    display: flex; align-items: center; justify-content: center; font-size: 56px;
+    position: relative; z-index: 2;
+  }
+  .scr-tavern .speech {
+    margin: 16px 22px 0; padding: 10px;
+    background: #fff; color: #000; font-size: 9px; line-height: 1.6;
+    box-shadow: 4px 4px 0 #000; border: 3px solid #000;
+    position: relative; z-index: 2;
+  }
+  .scr-tavern .speech .you-have { color: #5a1a3a; }
+  .scr-tavern .rooms {
+    margin: 18px 16px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    position: relative; z-index: 2;
+  }
+  .scr-tavern .room {
+    background: #2a1a0a; border: 3px solid #ffd35a; padding: 10px;
+    text-align: center; font-size: 9px; color: #fff;
+  }
+  .scr-tavern .room.locked {
+    background: #000; border-color: #555; color: #888;
+  }
+  .scr-tavern .room.portal {
+    background: linear-gradient(135deg, #5e1a8a, #2a0a3a);
+    border-color: #c25aff;
+    box-shadow: 0 0 12px rgba(194,90,255,0.5);
+  }
+  .scr-tavern .room .icon { font-size: 24px; margin-bottom: 6px; }
+  .scr-tavern .room .name { font-weight: 700; }
+  .scr-tavern .room .meta { color: #ffd35a; margin-top: 4px; font-size: 8px; }
+  .scr-tavern .room.locked .meta { color: #888; }
+  .scr-tavern .room.portal .meta { color: #ff9aff; }
+
+  /* — Screen 4: Quest Master (parent) — */
+  .scr-master { background: #0a1a2e; }
+  .scr-master .topbar {
+    padding: 50px 16px 12px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 3px solid #ffd35a;
+  }
+  .scr-master .topbar .title { font-size: 11px; color: #ffd35a; }
+  .scr-master .topbar .role { font-size: 8px; color: #6dff8b; margin-top: 2px; }
+  .scr-master .topbar .badge {
+    background: #ff5d3a; color: #fff; padding: 4px 10px; font-size: 9px;
+    border: 2px solid #000; box-shadow: 2px 2px 0 #000;
+  }
+  .scr-master .scroll {
+    padding: 12px 16px;
+  }
+  .scr-master .section-h {
+    font-size: 9px; color: #ffd35a; margin: 8px 0 6px;
+  }
+  .scr-master .pending {
+    background: #1a2a4a; border: 3px solid #fff; box-shadow: 3px 3px 0 #fff;
+    padding: 10px; margin-bottom: 8px;
+    font-size: 9px; color: #fff;
+  }
+  .scr-master .pending .name { color: #ffd35a; font-size: 10px; margin-bottom: 4px; }
+  .scr-master .pending .quest { line-height: 1.6; }
+  .scr-master .pending .actions { margin-top: 8px; display: flex; gap: 6px; }
+  .scr-master .pending .ok {
+    background: #6dff8b; color: #000; padding: 4px 8px; font-size: 8px;
+    border: 2px solid #000; box-shadow: 2px 2px 0 #000;
+  }
+  .scr-master .pending .nope {
+    background: #ff5d3a; color: #fff; padding: 4px 8px; font-size: 8px;
+    border: 2px solid #000; box-shadow: 2px 2px 0 #000;
+  }
+  .scr-master .heroes {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-bottom: 12px;
+  }
+  .scr-master .hero-card {
+    background: #1a2a4a; border: 3px solid #fff; padding: 8px 4px;
+    text-align: center; font-size: 8px; color: #fff;
+  }
+  .scr-master .hero-card .ava { font-size: 24px; }
+  .scr-master .hero-card .name { color: #ffd35a; margin-top: 4px; }
+  .scr-master .hero-card .lv { color: #6dff8b; margin-top: 2px; font-size: 7px; }
+  .scr-master .actions-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;
+  }
+  .scr-master .action-btn {
+    background: #ffd35a; color: #000; border: 3px solid #fff;
+    box-shadow: 3px 3px 0 #fff; padding: 10px 4px; text-align: center;
+    font-size: 8px; font-weight: 700;
+  }
+  .scr-master .action-btn.alt { background: #c25aff; color: #fff; }
+</style>
+</head><body>
+
+<div class="wrap">
+  <div class="crumb"><a href="./">← Back to overview</a></div>
+  <p class="eyebrow">Concept 02</p>
+  <h1>The Quest.</h1>
+  <p class="lede">
+    Your child is the hero of their own RPG. Today's chores are quest pins
+    on a map. Their pet is a leveling companion with stats. Screen time is
+    rest tokens earned at the tavern. Parents are the dungeon master, posting
+    side quests and dropping rare loot. Sibling rivalry becomes a co-op
+    party. Identity is the engine: <em>who am I?</em> instead of <em>what
+    do I have to do?</em>
+  </p>
+
+  <blockquote>
+    Children spend hundreds of hours leveling up Pokémon, Animal Crossing
+    villagers, and Stardew Valley farms. They are not allergic to chores —
+    they are allergic to chores presented as paperwork. The Quest is what
+    happens when you treat the family as a guild.
+  </blockquote>
+
+  <p>
+    Below: four screens covering the full app surface. Today's quests
+    (overworld map), pet management (companion menu), gaming/VR/screen-time
+    (the tavern), and the parent's command center (Quest Master HQ).
+  </p>
+
+  <hr class="rule">
+
+  <!-- Screen 1: Overworld -->
+  <h2>1 — Overworld: today's quests</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen quest scr-map">
+        <div class="map"></div>
+        <div class="hud">
+          <div class="hero">
+            <div class="avatar">🦸</div>
+            <div class="stats">
+              <div>YUSUF</div>
+              <div class="lv">LV 4 SCOUT</div>
+              <div class="xp-bar"><span></span></div>
+            </div>
+          </div>
+          <div class="coins">★ 142</div>
+        </div>
+        <div class="pin p1">!</div>
+        <div class="pin p2">?</div>
+        <div class="pin exclaim p3">!</div>
+        <div class="character">🧒</div>
+        <div class="panel">
+          <div class="title">QUEST UNLOCKED</div>
+          <div class="text">Walk to the kitchen and brush your teeth.<br>Earn ★8 + 10 XP. Last quest in your morning chain!</div>
+          <div class="next">▶ ACCEPT</div>
+        </div>
+      </div></div>
+      <p class="caption">A map. A hero. Three pins. Identity over admin.</p>
+    </div>
+    <div class="copy">
+      <h3>The map is the home screen</h3>
+      <p>Drop the kid into a pixel-art overworld where their character stands
+        in the centre. Quest pins represent today's chores — yellow pins are
+        side quests, red are urgent (overdue), blue are story chains. The
+        character literally walks across the screen toward whatever the kid
+        taps.</p>
+
+      <div class="principle">Class system</div>
+      <p>Each kid picks a "class" at signup: Scout (mobility/initiative),
+        Cleric (helping siblings), Mage (academics), Bard (creativity).
+        Class colors their HUD and unlocks specific quest types. It's
+        cosmetic + a tiny stat boost — the point is identity, not balance.
+        A 5-year-old who chooses Scout will introduce themselves as a Scout
+        for weeks.</p>
+
+      <div class="principle">Quest chains</div>
+      <p>The "morning routine" is no longer a category — it's a multi-step
+        quest with a story. "Wake the dragon (brush teeth) → tame the beast
+        (make bed) → break your fast." Each step is one of the existing
+        daily habits, but the kid sees a chain that wants finishing.</p>
+
+      <div class="principle">Edge cases</div>
+      <ul class="cut-list">
+        <li>Empty day = the map shows the hero relaxing at camp. Idle animation. No urgent state.</li>
+        <li>Lots of quests = the camera zooms out. The map gets bigger as the day gets busier; never a list.</li>
+        <li>Quest declined = the pin stays on the map but greys out. Not gone, just not done. Becomes available the next day for a small coin penalty.</li>
+      </ul>
+
+      <div class="principle">What we cut</div>
+      <ul class="cut-list">
+        <li>Tabs (replaced by zones on the map: Home / Pet / Tavern / Shop / Profile)</li>
+        <li>The word "chore"</li>
+        <li>The "Quests" tab name (it's the whole app now)</li>
+        <li>Streak meters (replaced by the kid's XP bar — the same thing, named better)</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Screen 2: Companion -->
+  <h2>2 — Companion menu: pets as RPG party members</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen quest scr-pet">
+        <div class="header">
+          <div class="label">YOUR COMPANION</div>
+          <div class="x">✕</div>
+        </div>
+        <div class="portrait">🐱</div>
+        <div class="name">FIFI</div>
+        <div class="meta">LV 6 ROYAL CAT · BONDED FOR 12 DAYS</div>
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="label">HUNGER</div>
+            <div class="bar"><span style="width:30%; background:#ff5d3a"></span></div>
+          </div>
+          <div class="stat">
+            <div class="label">HAPPINESS</div>
+            <div class="bar"><span style="width:80%; background:#6dff8b"></span></div>
+          </div>
+          <div class="stat">
+            <div class="label">CLEANLINESS</div>
+            <div class="bar"><span style="width:55%; background:#ffd35a"></span></div>
+          </div>
+          <div class="stat">
+            <div class="label">BOND XP</div>
+            <div class="bar"><span style="width:65%; background:#c25aff"></span></div>
+          </div>
+        </div>
+        <div class="actions">
+          <div class="btn primary">▶ FEED</div>
+          <div class="btn">▶ LITTER</div>
+          <div class="btn">▶ PLAY</div>
+        </div>
+      </div></div>
+      <p class="caption">Your pet has stats. Your pet levels up.</p>
+    </div>
+    <div class="copy">
+      <h3>The pet is a party member</h3>
+      <p>Tap your pet on the map and you enter the Companion menu. Fifi has
+        Hunger, Happiness, Cleanliness, and Bond XP. Her stats decay slowly
+        when she's not cared for; spike up when you tap Feed / Litter / Play.
+        She levels up alongside you. After 30 days she becomes a "Royal Cat"
+        with new portrait art.</p>
+
+      <div class="principle">Why this is a fundamentally different feature</div>
+      <p>The current "Feed Fifi" chore is a row in a list. Here, Fifi
+        <em>changes</em>. Her hunger bar visibly drops over the day. The kid
+        pulls up the menu mid-afternoon and sees Fifi at 30% hunger and
+        <em>feels something</em>. That's the shift from compliance to care.</p>
+
+      <div class="principle">Multi-pet, multi-kid</div>
+      <p>Each kid has bond XP with each pet. Whoever feeds Fifi today gets
+        bond XP with her — so Fifi's bond level is per-kid, not global. Over
+        time, kids develop a "main pet". The 8-year-old loves Fifi and is
+        Bond Lv 12; the 6-year-old is Bond Lv 4. Pet picks favourites based
+        on who feeds them.</p>
+
+      <div class="principle">Rotation, made of consequence</div>
+      <p>The current rotation_children array becomes invisible mechanics.
+        Whoever's turn it is gets the "FEED FIFI" quest pin on their map.
+        If they skip, hunger drops further and tomorrow's pin is "FIFI
+        IS HUNGRY!" — louder, redder, urgent. No nagging UI; the pet
+        does the nagging by being hungry.</p>
+
+      <div class="principle">Setup (parent)</div>
+      <p>"Add a companion" → name, species, art (cat/dog/bird/dragon for
+        kids who want fantasy). Pick which kids are bonded. That's all the
+        configuration. Days-of-week schedules disappear — the pet is
+        always there, the rotation rotates itself.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Screen 3: Tavern -->
+  <h2>3 — Tavern: rest tokens, gaming, VR portal</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen quest scr-tavern">
+        <div class="sign">
+          <div class="label">★ THE TAVERN ★</div>
+          <div class="name">REST + REWARDS</div>
+        </div>
+        <div class="innkeeper">🧙</div>
+        <div class="speech">
+          Welcome back, hero. <span class="you-have">You've earned 4h of rest today.</span>
+          Take a chamber and recover.
+        </div>
+        <div class="rooms">
+          <div class="room">
+            <div class="icon">📺</div>
+            <div class="name">SITTING ROOM</div>
+            <div class="meta">FREE</div>
+          </div>
+          <div class="room">
+            <div class="icon">🎮</div>
+            <div class="name">GAMES ROOM</div>
+            <div class="meta">1H LEFT</div>
+          </div>
+          <div class="room">
+            <div class="icon">📱</div>
+            <div class="name">SCROLLING NOOK</div>
+            <div class="meta">30M LEFT</div>
+          </div>
+          <div class="room portal">
+            <div class="icon">🌀</div>
+            <div class="name">VR PORTAL</div>
+            <div class="meta">WEEKEND</div>
+          </div>
+        </div>
+      </div></div>
+      <p class="caption">Screen time, framed as adventurer's rest.</p>
+    </div>
+    <div class="copy">
+      <h3>Rest is earned, not given</h3>
+      <p>The tavern is the kid's screen-time hub. The innkeeper greets them,
+        announces rest tokens earned today, and points to four chambers —
+        each a device category. Tap a chamber → real iOS Screen Time
+        unlocks the relevant app on the device.</p>
+
+      <div class="principle">VR is the portal</div>
+      <p>VR isn't a "hours" toggle in a settings screen. It's a swirling
+        purple portal at the back of the tavern, gated behind weekend
+        days, after morning chores. Visually distinct, narratively
+        special. Kids will look forward to it.</p>
+
+      <div class="principle">Per-device buckets</div>
+      <p>The current parental rule is a multi-axis matrix (kid × device ×
+        days × hours). Here it's four chambers. Each shows minutes
+        remaining. Buckets refill nightly. <strong>Rules collapse into
+        defaults</strong>:
+      </p>
+      <ul class="cut-list">
+        <li>Sitting room (TV) = free, no quota — TV doesn't go into a kid's pocket.</li>
+        <li>Games room (console) = 1h weekday / 2h weekend default.</li>
+        <li>Scrolling nook (tablet) = strictest, 30m weekday default.</li>
+        <li>VR portal = weekends only, locked behind morning quest chain.</li>
+      </ul>
+      <p>Parents tap defaults to override per kid. Five toggles instead of
+        the current 6×7 grid. Most families will keep defaults.</p>
+
+      <div class="principle">Earning the tokens</div>
+      <p>"Rest tokens" map directly to chore points (the existing data
+        layer). 1 chore ≈ 15 minutes of rest. The kid sees this on the
+        innkeeper's chalkboard so the bridge from "did chores → earned
+        screens" is loud and obvious.</p>
+
+      <div class="principle">Empty tavern state</div>
+      <p>If the kid hasn't earned any rest, the rooms show "LOCKED" and
+        the innkeeper says <em>"Hero, return after some quests. Rest is
+        earned."</em> Friction with a smile, not a lecture.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Screen 4: Quest Master HQ -->
+  <h2>4 — Quest Master HQ: parent view</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen quest scr-master">
+        <div class="topbar">
+          <div>
+            <div class="title">QUEST MASTER HQ</div>
+            <div class="role">DM · TUE MORNING</div>
+          </div>
+          <div class="badge">3 NEW</div>
+        </div>
+        <div class="scroll">
+          <div class="section-h">★ YOUR PARTY</div>
+          <div class="heroes">
+            <div class="hero-card">
+              <div class="ava">🦸</div>
+              <div class="name">YUSUF</div>
+              <div class="lv">LV 4 SCOUT</div>
+            </div>
+            <div class="hero-card">
+              <div class="ava">🧙‍♀️</div>
+              <div class="name">SARA</div>
+              <div class="lv">LV 6 MAGE</div>
+            </div>
+            <div class="hero-card">
+              <div class="ava">🥷</div>
+              <div class="name">YOU</div>
+              <div class="lv">DM</div>
+            </div>
+          </div>
+          <div class="section-h">! QUEST COMPLETIONS PENDING</div>
+          <div class="pending">
+            <div class="name">YUSUF · WALKED FIFI</div>
+            <div class="quest">"Took her round the block, she met a labrador" · ★8</div>
+            <div class="actions">
+              <div class="ok">✓ APPROVE</div>
+              <div class="nope">✕ REDO</div>
+            </div>
+          </div>
+          <div class="pending">
+            <div class="name">SARA · TIDIED ROOM</div>
+            <div class="quest">Photo evidence attached · ★15</div>
+            <div class="actions">
+              <div class="ok">✓ APPROVE</div>
+              <div class="nope">✕ REDO</div>
+            </div>
+          </div>
+          <div class="actions-row">
+            <div class="action-btn">+ ISSUE SIDE QUEST</div>
+            <div class="action-btn alt">★ DROP RARE LOOT</div>
+          </div>
+        </div>
+      </div></div>
+      <p class="caption">Parents are dungeon masters, not auditors.</p>
+    </div>
+    <div class="copy">
+      <h3>You are the DM</h3>
+      <p>The parent's interface looks like a board-game master's command
+        panel. Top: your party of heroes. Middle: pending quest completions
+        (the approval queue). Bottom: action buttons to issue new quests
+        or drop rare loot.</p>
+
+      <div class="principle">"Issue side quest" replaces "post contract"</div>
+      <p>The current Contracts board becomes "Side quests" — a parent
+        posts an unscheduled task ("Vacuum the car for ★50"), kids see it
+        as a glowing pin on their map. The economy is the same; the
+        framing is RPG.</p>
+
+      <div class="principle">"Drop rare loot" is the gift mechanic</div>
+      <p>Parent can drop a rare item into a kid's map at any time — a
+        new avatar item, an XP boost, a "skip a chore" token. This is
+        the digital equivalent of a parent slipping a kid a fiver for
+        being helpful. Discretionary, parent-discretionary, magical.</p>
+
+      <div class="principle">Multi-kid at-a-glance</div>
+      <p>The party row at the top shows every kid's level + class.
+        Tap to drill into their map. Three taps deep instead of seven.</p>
+
+      <div class="principle">Co-op moments</div>
+      <p>If the parent participates (rotation toggle), they appear in the
+        party as the DM with a separate "DM quest" line. They can also
+        join a kid's quest as an ally — turns chores into "co-op missions"
+        for kids who'd rather not do it alone. The shared support feature
+        from the existing app, restyled.</p>
+
+      <div class="principle">Settings, hidden</div>
+      <p>No settings tab. Everything family-wide goes in a small "DM
+        Codex" icon at the top corner: invite codes, role changes, screen-
+        time defaults, family code, Stripe billing eventually. Three taps
+        deep, where settings belong.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>What's still on the table</h2>
+  <ul class="cut-list">
+    <li><strong>Rewards / shop</strong> → "blacksmith + armory". Spend coins on avatar gear (helmets, capes, mounts), consumable potions (small XP boosts), or real-world rewards posted by the parent.</li>
+    <li><strong>Skills profile</strong> → already RPG-natural. Six skills become six stat lines on the character sheet — Discipline, Bond, Initiative, Reliability, Teamwork, Innovation. Visible on the Profile zone.</li>
+    <li><strong>Bin collection rotation</strong> → a "village errand" with a wheelbarrow icon — appears as a rotating side quest, given to whoever's turn.</li>
+    <li><strong>Streak / weekly badges</strong> → guild ranks. Stay 7 days streaking → "Initiate" rank. 30 days → "Veteran". Annual → "Champion of the Guild".</li>
+  </ul>
+
+  <p style="margin-top: 32px;">
+    <a href="garden.html">← Back to Concept 01 — The Garden</a><br>
+    <a href="card.html">Continue to Concept 03 — The Card →</a><br>
+    <a href="./">↑ Back to overview</a>
+  </p>
+</div>
+</body></html>
