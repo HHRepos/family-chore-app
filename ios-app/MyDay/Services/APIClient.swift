@@ -335,8 +335,12 @@ final class APIClient: Sendable {
     }
 
     struct AvatarUpdateBody: Encodable { let customizations: [String] }
+    struct AvatarUpdateResponse: Decodable {
+        let user_id: String
+        let avatar_customizations: [String]
+    }
     func updateAvatar(_ userId: String, customizations: [String]) async throws {
-        let _: [String: [String]] = try await request(
+        let _: AvatarUpdateResponse = try await request(
             .PATCH,
             "/users/\(userId)/avatar",
             body: AvatarUpdateBody(customizations: customizations)
@@ -370,12 +374,14 @@ final class APIClient: Sendable {
 
     // MARK: - Contract Proposals (Kid-Initiated)
 
-    func pitchContract(_ familyId: String, title: String, description: String, rewardType: String, proposedPrice: Double, pitchReason: String) async throws {
-        let _: [String: String] = try await request(.POST, "/jobs", body: [
+    func pitchContract(_ familyId: String, title: String, description: String, rewardType: String, proposedPrice: Double, pitchReason: String, dueDate: String? = nil) async throws {
+        var body: [String: String] = [
             "family_id": familyId, "title": title, "description": description,
             "reward_type": rewardType, "reward_amount": String(proposedPrice),
             "job_type": "open", "pitch_reason": pitchReason, "proposed_price": String(proposedPrice)
-        ])
+        ]
+        if let dueDate, !dueDate.isEmpty { body["due_date"] = dueDate }
+        let _: [String: String] = try await request(.POST, "/jobs", body: body)
     }
 
     func approveProposal(_ jobId: String, adjustedAmount: Double? = nil) async throws {

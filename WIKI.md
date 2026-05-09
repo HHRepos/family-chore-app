@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
 > **Last updated:** 2026-05-08
-> **Version:** iOS 1.0.1 (Build 11) — TestFlight
+> **Version:** iOS 1.0.1 (Build 12) — TestFlight
 > **API:** https://54-171-244-65.nip.io/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.
 
@@ -517,6 +517,28 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ---
 
 ## Changelog
+
+### 2026-05-09 — Build 12 (TestFlight feedback round 3)
+
+Eight items shipped from the overnight feedback batch on Build 11:
+
+- **Avatar save bug fixed.** `updateAvatar` was decoding the response as `[String: [String]]` but the JSON has a String `user_id` field — the decode threw and surfaced as "not working there is error below". Now decodes via a typed `AvatarUpdateResponse` struct.
+- **Avatar style switched to pixel-art** ("the avatar is creepy, make it Minecraft-style"). Same DiceBear hosting, different style. The customization sheet now offers 11 hairstyles, 6 glasses, 7 hats, 7 mouths, 8 hair colours, 8 clothing colours, 5 skin tones — all driven by pixel-art's parameter set.
+- **One-button completion**: removed the `Accept` → then `Complete` two-step. Pending and in_progress chores both now show a single "Mission Complete!" button. With auto-approve on by default since Build 11, this is one tap from chore card to points awarded.
+- **Daily habits + pet routines aren't transferable**: the Transfer / Ask Help buttons are hidden when `choreType == "daily_habit" || choreType == "routine"` ("morning and evening routine shouldn't be transferable").
+- **Cash uses regional currency** via `NumberFormatter` + `Locale.current` — £ in the UK, € in EU locales, $ in US, etc. Replaces the hardcoded `$` across [ContractBoardView](ios-app/MyDay/Views/Shared/ContractBoardView.swift) and [PitchContractView](ios-app/MyDay/Views/Child/PitchContractView.swift). New helper at [Components/RewardFormat.swift](ios-app/MyDay/Views/Components/RewardFormat.swift).
+- **Pitch contract now has a due date**: optional toggle + native iOS DatePicker, defaults to one week out. Sent to the backend as `due_date` on `POST /v1/jobs`.
+- **Pitch icon is no longer a lightbulb.** The contract board's child-side action is now an explicit `□+ Propose` capsule button, much clearer than the lightbulb that testers said didn't read as "tap to propose".
+- **Keyboard dismisses after Add Reward / Add Chore**: `@FocusState` plus an explicit `addFieldFocused = false` on the action button.
+
+**Deferred** to subsequent builds (need more design / clarification):
+- Kid-exploring sign-up flow (asks for email twice; "invite parents" errors)
+- Pet rotation children picker on add-pet
+- Single invite-code input (vs. dual letter-boxes + text field)
+- Parent-participating: dedicated view of own chores
+- "Family Rules" section rename + pet schedule + duplicate "Today's Duty"
+- Skills/qualities profile system (substantial product+research work)
+- Mystery "four squares top-right not interactive" — needs a screenshot to identify
 
 ### 2026-05-08 — Build 11 (auto-approve everything + avatar customization)
 

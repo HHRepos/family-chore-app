@@ -732,6 +732,8 @@ struct ManageRewardsView: View {
     @State private var name = ""; @State private var desc = ""; @State private var cost = "50"
     @State private var isAdding = false
 
+    @FocusState private var addFieldFocused: Bool
+
     var body: some View {
         ZStack {
             Color.gameBackground.ignoresSafeArea()
@@ -745,10 +747,14 @@ struct ManageRewardsView: View {
 
                     VStack(spacing: 10) {
                         GameTextField(icon: "gift.fill", placeholder: "Reward name", text: $name)
+                            .focused($addFieldFocused)
                         GameTextField(icon: "text.alignleft", placeholder: "Description", text: $desc)
+                            .focused($addFieldFocused)
                         GameTextField(icon: "star.fill", placeholder: "Point cost", text: $cost)
+                            .focused($addFieldFocused)
                         Button("Add Reward") {
                             isAdding = true
+                            addFieldFocused = false  // dismiss the keyboard immediately
                             Task {
                                 try? await APIClient.shared.createReward(auth.familyId ?? "", name: name, description: desc, pointCost: Int(cost) ?? 50, childId: nil)
                                 name = ""; desc = ""; cost = "50"
@@ -796,6 +802,8 @@ struct ManageChoresView: View {
     @State private var frequency = "daily"; @State private var difficulty = "easy"; @State private var points = "10"
     @State private var isAdding = false; @State private var success = false
 
+    @FocusState private var addFieldFocused: Bool
+
     var body: some View {
         ZStack {
             Color.gameBackground.ignoresSafeArea()
@@ -808,7 +816,9 @@ struct ManageChoresView: View {
                     }.padding(.top, 16)
 
                     GameTextField(icon: "scroll.fill", placeholder: "Chore name", text: $name)
+                        .focused($addFieldFocused)
                     GameTextField(icon: "text.alignleft", placeholder: "Description", text: $desc)
+                        .focused($addFieldFocused)
 
                     HStack(spacing: 12) {
                         VStack(alignment: .leading) {
@@ -826,6 +836,7 @@ struct ManageChoresView: View {
                     }
 
                     GameTextField(icon: "star.fill", placeholder: "Points", text: $points)
+                        .focused($addFieldFocused)
 
                     if success {
                         HStack { Image(systemName: "checkmark.circle.fill"); Text("Added!") }
@@ -834,6 +845,7 @@ struct ManageChoresView: View {
 
                     Button("Add Chore") {
                         isAdding = true
+                        addFieldFocused = false
                         Task {
                             try? await APIClient.shared.createChore(auth.familyId ?? "", name: name, description: desc, frequency: frequency, difficulty: difficulty, points: Int(points) ?? 10)
                             name = ""; desc = ""; success = true; isAdding = false

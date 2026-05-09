@@ -26,8 +26,19 @@ struct ContractBoardView: View {
                                 Image(systemName: "plus.circle.fill").font(.system(size: 32)).foregroundStyle(.neonOrange)
                             }
                         } else {
+                            // Pitch your own contract — clearer affordance than the
+                            // old lightbulb icon (testers said it didn't read as
+                            // "tap to propose").
                             Button { showPitchContract = true } label: {
-                                Image(systemName: "lightbulb.circle.fill").font(.system(size: 32)).foregroundStyle(.neonYellow)
+                                HStack(spacing: 6) {
+                                    Image(systemName: "square.and.pencil.circle.fill").font(.system(size: 24))
+                                    Text("Propose").font(.system(size: 13, weight: .black, design: .rounded))
+                                }
+                                .foregroundStyle(.neonYellow)
+                                .padding(.horizontal, 12).padding(.vertical, 6)
+                                .background(Color.neonYellow.opacity(0.12))
+                                .clipShape(Capsule())
+                                .overlay(Capsule().stroke(Color.neonYellow.opacity(0.3), lineWidth: 1))
                             }
                         }
                     }.padding(.top, 8)
@@ -62,9 +73,9 @@ struct ContractBoardView: View {
                                     Text("\"\(pitch)\"").font(.system(size: 13, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.5)).italic()
                                 }
                                 HStack(spacing: 4) {
-                                    Image(systemName: proposal.rewardType == "cash" ? "dollarsign.circle.fill" : "star.fill")
+                                    Image(systemName: proposal.rewardType == "cash" ? "banknote.fill" : "star.fill")
                                         .foregroundStyle(proposal.rewardType == "cash" ? .neonGreen : .neonYellow)
-                                    Text("Asking: \(proposal.rewardType == "cash" ? "$" : "")\(Int(proposal.proposedPrice ?? proposal.rewardAmount))\(proposal.rewardType == "points" ? " pts" : "")")
+                                    Text("Asking: \(RewardFormat.format(amount: proposal.proposedPrice ?? proposal.rewardAmount, type: proposal.rewardType))")
                                         .font(.system(size: 14, weight: .black, design: .rounded)).foregroundStyle(.neonYellow)
                                 }
                                 HStack(spacing: 10) {
@@ -233,9 +244,9 @@ struct ContractCard: View {
             HStack(spacing: 12) {
                 // Reward
                 HStack(spacing: 4) {
-                    Image(systemName: job.rewardType == "cash" ? "dollarsign.circle.fill" : "star.fill")
+                    Image(systemName: job.rewardType == "cash" ? "banknote.fill" : "star.fill")
                         .foregroundStyle(job.rewardType == "cash" ? .neonGreen : .neonYellow)
-                    Text(job.rewardType == "cash" ? "$\(Int(job.rewardAmount))" : "\(Int(job.rewardAmount)) pts")
+                    Text(RewardFormat.format(amount: job.rewardAmount, type: job.rewardType))
                         .font(.system(size: 14, weight: .black, design: .rounded))
                         .foregroundStyle(job.rewardType == "cash" ? .neonGreen : .neonYellow)
                 }
@@ -299,7 +310,7 @@ struct ContractCard: View {
                 if isAssignedToMe && job.status == "confirmed" {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill").font(.system(size: 14))
-                        Text(job.rewardType == "cash" ? "$\(Int(job.rewardAmount)) cash confirmed! Ask your parent to hand it over." : "\(Int(job.rewardAmount)) points earned!")
+                        Text(job.rewardType == "cash" ? "\(RewardFormat.cash(job.rewardAmount)) confirmed! Ask your parent to hand it over." : "\(Int(job.rewardAmount)) points earned!")
                     }
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundStyle(.neonGreen)

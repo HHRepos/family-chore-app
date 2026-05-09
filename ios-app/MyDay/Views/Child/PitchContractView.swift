@@ -9,8 +9,16 @@ struct PitchContractView: View {
     @State private var rewardType = "points"
     @State private var price = "50"
     @State private var pitch = ""
+    @State private var dueDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+    @State private var hasDueDate = true
     @State private var isSubmitting = false
     @State private var error: String?
+
+    private static let dueDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f
+    }()
 
     var body: some View {
         ZStack {
@@ -58,12 +66,26 @@ struct PitchContractView: View {
                         GameTextField(icon: "megaphone.fill", placeholder: "I'll do an amazing job because...", text: $pitch)
                     }
 
+                    // Due date
+                    VStack(alignment: .leading, spacing: 6) {
+                        Toggle(isOn: $hasDueDate) {
+                            Text("Set a due date").font(.system(size: 13, weight: .bold, design: .rounded)).foregroundStyle(.white.opacity(0.6))
+                        }
+                        .toggleStyle(.switch)
+                        .tint(.neonYellow)
+                        if hasDueDate {
+                            DatePicker("Due", selection: $dueDate, in: Date()..., displayedComponents: .date)
+                                .datePickerStyle(.compact)
+                                .tint(.neonYellow)
+                        }
+                    }.gameCard(glow: .neonYellow.opacity(0.15))
+
                     // Economics preview
                     VStack(spacing: 6) {
                         HStack {
                             Text("You'll earn:").font(.system(size: 13, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.5))
                             Spacer()
-                            Text(rewardType == "cash" ? "$\(price)" : "\(price) pts")
+                            Text(RewardFormat.format(amount: Double(price) ?? 0, type: rewardType))
                                 .font(.system(size: 16, weight: .black, design: .rounded))
                                 .foregroundStyle(rewardType == "cash" ? .neonGreen : .neonYellow)
                         }
@@ -81,7 +103,9 @@ struct PitchContractView: View {
                             do {
                                 try await APIClient.shared.pitchContract(
                                     auth.familyId ?? "", title: title, description: desc,
-                                    rewardType: rewardType, proposedPrice: Double(price) ?? 50, pitchReason: pitch
+                                    rewardType: rewardType, proposedPrice: Double(price) ?? 50,
+                                    pitchReason: pitch,
+                                    dueDate: hasDueDate ? Self.dueDateFormatter.string(from: dueDate) : nil
                                 )
                                 await onCreated()
                                 dismiss()

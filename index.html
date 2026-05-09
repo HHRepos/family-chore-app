@@ -338,7 +338,7 @@ a:hover { text-decoration: underline; }
     <h1 id="omydays-project-wiki">OMyDays — Project Wiki</h1>
 <blockquote>
 <p><strong>Last updated:</strong> 2026-05-08
-<strong>Version:</strong> iOS 1.0.1 (Build 11) — TestFlight
+<strong>Version:</strong> iOS 1.0.1 (Build 12) — TestFlight
 <strong>API:</strong> https://54-171-244-65.nip.io/v1
 <strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.</p>
 </blockquote>
@@ -1550,6 +1550,26 @@ cd ios-app &amp;&amp; fastlane beta
 </table></div>
 <hr />
 <h2 id="project-changelog">Changelog</h2>
+<h3 id="2026-05-09-build-12-testflight-feedback-round-3">2026-05-09 — Build 12 (TestFlight feedback round 3)</h3>
+<p>Eight items shipped from the overnight feedback batch on Build 11:</p>
+<ul>
+<li><strong>Avatar save bug fixed.</strong> <code>updateAvatar</code> was decoding the response as <code>[String: [String]]</code> but the JSON has a String <code>user_id</code> field — the decode threw and surfaced as "not working there is error below". Now decodes via a typed <code>AvatarUpdateResponse</code> struct.</li>
+<li><strong>Avatar style switched to pixel-art</strong> ("the avatar is creepy, make it Minecraft-style"). Same DiceBear hosting, different style. The customization sheet now offers 11 hairstyles, 6 glasses, 7 hats, 7 mouths, 8 hair colours, 8 clothing colours, 5 skin tones — all driven by pixel-art's parameter set.</li>
+<li><strong>One-button completion</strong>: removed the <code>Accept</code> → then <code>Complete</code> two-step. Pending and in_progress chores both now show a single "Mission Complete!" button. With auto-approve on by default since Build 11, this is one tap from chore card to points awarded.</li>
+<li><strong>Daily habits + pet routines aren't transferable</strong>: the Transfer / Ask Help buttons are hidden when <code>choreType == "daily_habit" || choreType == "routine"</code> ("morning and evening routine shouldn't be transferable").</li>
+<li><strong>Cash uses regional currency</strong> via <code>NumberFormatter</code> + <code>Locale.current</code> — £ in the UK, € in EU locales, $ in US, etc. Replaces the hardcoded <code>$</code> across <a href="ios-app/MyDay/Views/Shared/ContractBoardView.swift">ContractBoardView</a> and <a href="ios-app/MyDay/Views/Child/PitchContractView.swift">PitchContractView</a>. New helper at <a href="ios-app/MyDay/Views/Components/RewardFormat.swift">Components/RewardFormat.swift</a>.</li>
+<li><strong>Pitch contract now has a due date</strong>: optional toggle + native iOS DatePicker, defaults to one week out. Sent to the backend as <code>due_date</code> on <code>POST /v1/jobs</code>.</li>
+<li><strong>Pitch icon is no longer a lightbulb.</strong> The contract board's child-side action is now an explicit <code>□+ Propose</code> capsule button, much clearer than the lightbulb that testers said didn't read as "tap to propose".</li>
+<li><strong>Keyboard dismisses after Add Reward / Add Chore</strong>: <code>@FocusState</code> plus an explicit <code>addFieldFocused = false</code> on the action button.</li>
+</ul>
+<p><strong>Deferred</strong> to subsequent builds (need more design / clarification):
+- Kid-exploring sign-up flow (asks for email twice; "invite parents" errors)
+- Pet rotation children picker on add-pet
+- Single invite-code input (vs. dual letter-boxes + text field)
+- Parent-participating: dedicated view of own chores
+- "Family Rules" section rename + pet schedule + duplicate "Today's Duty"
+- Skills/qualities profile system (substantial product+research work)
+- Mystery "four squares top-right not interactive" — needs a screenshot to identify</p>
 <h3 id="2026-05-08-build-11-auto-approve-everything-avatar-customization">2026-05-08 — Build 11 (auto-approve everything + avatar customization)</h3>
 <p>Two pieces of feedback against Build 10 drove this:</p>
 <blockquote>

@@ -55,14 +55,32 @@ struct AvatarConfigView: View {
                         section(
                             title: "Hair",
                             icon: "scissors",
-                            key: "head",
+                            key: "hair",
                             options: AvatarConfigView.hairStyles
                         )
                         section(
-                            title: "Accessories",
+                            title: "Glasses",
                             icon: "eyeglasses",
-                            key: "accessories",
-                            options: AvatarConfigView.accessories
+                            key: "glasses",
+                            options: AvatarConfigView.glasses
+                        )
+                        section(
+                            title: "Hat",
+                            icon: "hat.cap.fill",
+                            key: "hat",
+                            options: AvatarConfigView.hats
+                        )
+                        section(
+                            title: "Mouth",
+                            icon: "mouth.fill",
+                            key: "mouth",
+                            options: AvatarConfigView.mouths
+                        )
+                        colorSection(
+                            title: "Hair colour",
+                            icon: "paintbrush.fill",
+                            key: "hairColor",
+                            colors: AvatarConfigView.hairColors
                         )
                         colorSection(
                             title: "Clothing colour",
@@ -181,41 +199,55 @@ struct AvatarConfigView: View {
     }
 }
 
-// MARK: - Preset libraries (open-peeps style)
+// MARK: - Preset libraries (pixel-art style)
 extension AvatarConfigView {
     static let hairStyles: [(value: String, label: String)] = [
         ("", "Default"),
-        ("BehindAfro", "Afro"),
-        ("Bantu", "Bantu"),
-        ("Big", "Big"),
-        ("Bun", "Bun"),
-        ("BunUndercut", "Bun Cut"),
-        ("Buns", "Buns"),
-        ("Cornrows", "Cornrows"),
-        ("Curly", "Curly"),
-        ("Dreads", "Dreads"),
-        ("FlatTop", "Flat Top"),
-        ("Pompadour", "Pomp"),
-        ("ShavedSides", "Shaved"),
-        ("ShortCurly", "Short Curly"),
-        ("ShortVolumed", "Volumed"),
-        ("Twists", "Twists")
+        ("short01", "Short A"),
+        ("short02", "Short B"),
+        ("short03", "Short C"),
+        ("short04", "Short D"),
+        ("short05", "Short E"),
+        ("long01", "Long A"),
+        ("long02", "Long B"),
+        ("long03", "Long C"),
+        ("long04", "Long D"),
+        ("long05", "Long E")
     ]
-    static let accessories: [(value: String, label: String)] = [
+    static let glasses: [(value: String, label: String)] = [
         ("", "None"),
-        ("eyepatch", "Eyepatch"),
-        ("glasses", "Glasses"),
-        ("glasses2", "Round"),
-        ("glasses3", "Frame"),
-        ("glasses4", "Square"),
-        ("sunglasses", "Sunnies"),
-        ("sunglasses2", "Aviator")
+        ("variant01", "Round"),
+        ("variant02", "Square"),
+        ("variant03", "Aviator"),
+        ("variant04", "Star"),
+        ("variant05", "VR")
+    ]
+    static let hats: [(value: String, label: String)] = [
+        ("", "None"),
+        ("variant01", "Cap A"),
+        ("variant02", "Cap B"),
+        ("variant03", "Beanie"),
+        ("variant04", "Headband"),
+        ("variant05", "Crown"),
+        ("variant06", "Top hat")
+    ]
+    static let mouths: [(value: String, label: String)] = [
+        ("", "Default"),
+        ("happy01", "Smile"),
+        ("happy02", "Grin"),
+        ("happy03", "Laugh"),
+        ("happy04", "Wink"),
+        ("sad01", "Frown"),
+        ("sad02", "Worried")
+    ]
+    static let hairColors: [String] = [
+        "000000", "5b3e26", "8d5524", "c68642", "e6b87d", "ffd1a4", "8b3a3a", "5e60ce"
     ]
     static let clothingColors: [String] = [
-        "6dbdb1", "ed7d3a", "5e94c4", "97a4b3", "ac6651", "f0a83a", "6b4f8e"
+        "6dbdb1", "ed7d3a", "5e94c4", "97a4b3", "ac6651", "f0a83a", "6b4f8e", "3fb950"
     ]
     static let skinColors: [String] = [
-        "edb98a", "d08b5b", "ae5d29", "694d3d", "f8d4b4"
+        "f8d4b4", "edb98a", "d08b5b", "ae5d29", "694d3d"
     ]
 }
 

@@ -73,13 +73,25 @@ struct QuestDetailView: View {
 
                 // Actions
                 VStack(spacing: 12) {
-                    if chore.status == .pending {
-                        Button("Accept Mission") {
-                            Task { isActing = true; await choreStore.startChore(chore); dismiss() }
+                    // pending or in_progress → single "Mission Complete!" button (no
+                    // separate Accept step). Most chores auto-approve so the points
+                    // award on this single tap; the rest go to the parent for review.
+                    if chore.status == .pending || chore.status == .in_progress {
+                        Button("Mission Complete!") {
+                            Task {
+                                isActing = true
+                                await choreStore.completeChore(chore)
+                                onComplete()
+                                dismiss()
+                            }
                         }
-                        .buttonStyle(NeonButtonStyle(color: .neonBlue)).disabled(isActing)
+                        .buttonStyle(NeonButtonStyle(color: .neonGreen))
+                        .disabled(isActing)
 
-                        if !siblings.isEmpty {
+                        // Daily habits (brush teeth, etc) and pet routines aren't
+                        // transferable — they're things only YOU can do.
+                        let isPersonal = chore.choreType == "daily_habit" || chore.choreType == "routine"
+                        if !siblings.isEmpty && !isPersonal {
                             HStack(spacing: 12) {
                                 Button { showSiblingPicker = .transfer } label: {
                                     Label("Transfer", systemImage: "arrow.right.arrow.left")
@@ -90,11 +102,6 @@ struct QuestDetailView: View {
                                 }.buttonStyle(SecondaryButtonStyle())
                             }
                         }
-                    } else if chore.status == .in_progress {
-                        Button("Mission Complete!") {
-                            Task { isActing = true; await choreStore.completeChore(chore); onComplete(); dismiss() }
-                        }
-                        .buttonStyle(NeonButtonStyle(color: .neonGreen)).disabled(isActing)
                     } else if chore.status == .completed {
                         Text("Awaiting Approval").font(.system(size: 16, weight: .bold, design: .rounded)).foregroundStyle(.neonBlue)
                     } else if chore.status == .approved {

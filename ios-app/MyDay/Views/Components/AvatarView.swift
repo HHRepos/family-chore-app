@@ -20,9 +20,11 @@ struct AvatarView: View {
 
     private var url: URL? {
         // Render at 2x size for retina sharpness, capped to DiceBear's
-        // typical max. The seed is URL-safe via .addingPercentEncoding.
+        // typical max. Pixel-art style for a Minecraft-feel that resonates
+        // with kids better than the open-peeps hand-drawn style we tried
+        // first (testers called it "creepy").
         let pixelSize = Int(min(size * 2, 512))
-        var components = URLComponents(string: "https://api.dicebear.com/9.x/open-peeps/png")
+        var components = URLComponents(string: "https://api.dicebear.com/9.x/pixel-art/png")
         var query: [URLQueryItem] = [
             URLQueryItem(name: "seed", value: seed),
             URLQueryItem(name: "size", value: String(pixelSize)),
