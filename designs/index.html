@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMyDays — Design Concepts</title>
+<style>
+  /* ---------- Page shell ---------- */
+  :root {
+    --ink:        #111315;
+    --ink-soft:   #4b525a;
+    --ink-mute:   #8b929b;
+    --paper:      #fafaf7;
+    --rule:       #e7e7e1;
+    --accent:     #ff5d3a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--paper); color: var(--ink);
+    font-family: -apple-system, "SF Pro Text", "Inter", system-ui, sans-serif;
+    line-height: 1.55; font-size: 16px;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 24px 96px; }
+  .eyebrow {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--accent);
+  }
+  h1 {
+    font-family: -apple-system, "SF Pro Display", system-ui;
+    font-size: clamp(36px, 6vw, 64px); font-weight: 700; letter-spacing: -0.03em;
+    margin: 8px 0 16px;
+  }
+  h2 {
+    font-family: -apple-system, "SF Pro Display", system-ui;
+    font-size: clamp(28px, 4vw, 44px); font-weight: 700; letter-spacing: -0.02em;
+    margin: 0 0 12px;
+  }
+  h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin: 32px 0 8px; }
+  p { margin: 0 0 12px; max-width: 65ch; color: var(--ink-soft); }
+  .lede { font-size: 19px; color: var(--ink); max-width: 60ch; }
+  hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 64px 0; }
+  blockquote {
+    margin: 16px 0; padding: 0 0 0 16px;
+    border-left: 3px solid var(--accent);
+    font-style: italic; color: var(--ink-soft); font-size: 17px;
+  }
+
+  /* ---------- Concept layout ---------- */
+  .concept { display: grid; grid-template-columns: 360px 1fr; gap: 56px; align-items: start; }
+  @media (max-width: 880px) { .concept { grid-template-columns: 1fr; gap: 24px; } }
+  .concept-num {
+    font-family: "SF Pro Display", system-ui;
+    font-size: 80px; font-weight: 800; letter-spacing: -0.04em;
+    line-height: 0.9;
+    background: linear-gradient(135deg, var(--accent), #b53d22);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: -8px;
+  }
+  .principle {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em;
+    color: var(--ink); margin: 24px 0 4px;
+  }
+  .feel-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .feel-tags span {
+    font-size: 12px; font-weight: 600; padding: 4px 10px;
+    background: rgba(255, 93, 58, 0.08);
+    color: var(--accent);
+    border-radius: 999px;
+    border: 1px solid rgba(255, 93, 58, 0.2);
+  }
+  .ref { font-size: 12px; color: var(--ink-mute); margin-top: 16px; }
+  .cut-list { font-size: 14px; color: var(--ink-soft); margin: 8px 0 0; padding-left: 20px; }
+  .cut-list li { margin: 4px 0; }
+
+  /* ---------- iPhone frame (shared) ---------- */
+  .phone {
+    width: 320px; height: 660px;
+    border-radius: 50px;
+    background: #111;
+    padding: 14px;
+    box-shadow:
+      0 30px 60px rgba(0,0,0,0.18),
+      0 8px 18px rgba(0,0,0,0.10),
+      inset 0 0 0 1.5px rgba(255,255,255,0.05);
+    position: relative;
+    margin: 0 auto;
+  }
+  .phone::before {
+    content: ""; position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 28px; background: #000; border-radius: 14px; z-index: 10;
+  }
+  .screen {
+    width: 100%; height: 100%; border-radius: 38px; overflow: hidden;
+    position: relative; isolation: isolate;
+  }
+
+  /* ===================================================================
+     CONCEPT 1 — THE GARDEN
+     Calm, organic, growth metaphor. Watercolor + lush nature.
+     =================================================================== */
+  .screen.garden {
+    background: linear-gradient(180deg, #e8f1d6 0%, #d6e4b9 50%, #c1d3a0 100%);
+    font-family: "Avenir Next", -apple-system, sans-serif;
+    color: #2c3a23;
+  }
+  .garden .topbar {
+    padding: 50px 24px 0; display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .garden .topbar .name { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  .garden .topbar .sub  { font-size: 11px; color: #5e6f4a; margin-top: 1px; }
+  .garden .topbar .seed-count {
+    background: rgba(255,255,255,0.55); padding: 5px 11px; border-radius: 20px;
+    font-size: 13px; font-weight: 700; color: #6a4f1a;
+    backdrop-filter: blur(4px);
+  }
+  .garden .stage {
+    margin-top: 18px; height: 360px; position: relative;
+    background:
+      radial-gradient(ellipse 90% 40% at 50% 92%, rgba(120,160,80,0.32) 0%, transparent 60%);
+  }
+  .garden .ground {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 36%;
+    background: linear-gradient(180deg, transparent 0%, #a3b97c 28%, #7e9655 100%);
+    border-radius: 70% 70% 0 0 / 30% 30% 0 0;
+  }
+  .garden .tree {
+    position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%);
+    width: 200px; height: 240px;
+    filter: drop-shadow(0 8px 12px rgba(60, 80, 30, 0.25));
+  }
+  .garden .flower {
+    position: absolute; width: 56px; height: 56px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    cursor: pointer; transition: transform 0.2s;
+    background: rgba(255,255,255,0.92);
+    border: 2px solid rgba(255,255,255,0.8);
+    font-size: 24px;
+  }
+  .garden .flower.f1 { bottom: 32%; left: 18%; transform: rotate(-6deg); }
+  .garden .flower.f2 { bottom: 24%; right: 16%; transform: rotate(8deg); }
+  .garden .flower.f3 { bottom: 8%; left: 50%; transform: translateX(-50%); }
+  .garden .quest-card {
+    margin: 14px 22px 0; padding: 14px 16px; border-radius: 18px;
+    background: rgba(255,255,255,0.78); backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    display: flex; gap: 12px; align-items: center;
+  }
+  .garden .quest-card .icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #f7c873; display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .garden .quest-card .body { flex: 1; }
+  .garden .quest-card .title { font-size: 14px; font-weight: 600; }
+  .garden .quest-card .desc  { font-size: 11px; color: #5e6f4a; margin-top: 1px; }
+  .garden .quest-card .cta {
+    font-size: 12px; font-weight: 700; color: #5e8a25;
+    padding: 6px 12px; border-radius: 20px;
+    background: #d8e8b8;
+  }
+
+  /* ===================================================================
+     CONCEPT 2 — THE QUEST
+     Adventure RPG. Pixel-art, narrative, party-mode for siblings.
+     =================================================================== */
+  .screen.quest {
+    background:
+      radial-gradient(ellipse at 50% 100%, #1a3a5e 0%, #0a1a2e 70%);
+    font-family: "Press Start 2P", "Courier New", monospace;
+    color: #fff;
+    image-rendering: pixelated;
+  }
+  .quest .map {
+    position: absolute; inset: 50px 0 200px;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 4px, transparent 4px 8px),
+      radial-gradient(ellipse at 30% 30%, rgba(120, 200, 255, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 60%, rgba(255, 180, 120, 0.12) 0%, transparent 50%);
+    background-color: #15324c;
+  }
+  .quest .hud {
+    position: absolute; top: 50px; left: 0; right: 0;
+    padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 5;
+  }
+  .quest .hud .hero {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .quest .hud .avatar {
+    width: 44px; height: 44px; border-radius: 8px; background: #ffd35a;
+    border: 3px solid #000;
+    box-shadow: 4px 4px 0 #000;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .quest .hud .stats { font-size: 9px; line-height: 1.6; }
+  .quest .hud .stats .lv  { color: #ffd35a; }
+  .quest .hud .stats .name { color: #fff; }
+  .quest .hud .xp-bar {
+    width: 100px; height: 8px; background: #000; border: 2px solid #000;
+    margin-top: 4px; box-shadow: 2px 2px 0 #000;
+  }
+  .quest .hud .xp-bar > span {
+    display: block; height: 100%; width: 65%;
+    background: linear-gradient(90deg, #6dff8b, #c7ff52);
+  }
+  .quest .hud .coins { font-size: 11px; color: #ffd35a; }
+  .quest .character {
+    position: absolute; bottom: 220px; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 60px;
+    background: #ff5d3a; border: 3px solid #000;
+    box-shadow: 4px 4px 0 #000;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    z-index: 4;
+  }
+  .quest .pin {
+    position: absolute;
+    width: 36px; height: 36px;
+    background: #ffd35a; border: 3px solid #000;
+    box-shadow: 3px 3px 0 #000;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #000; font-weight: bold;
+  }
+  .quest .pin.exclaim { background: #ff5d3a; color: #fff; transform: rotate(-3deg); }
+  .quest .pin.p1 { top: 130px; left: 50px; }
+  .quest .pin.p2 { top: 200px; right: 40px; }
+  .quest .pin.p3 { top: 290px; left: 70px; }
+  .quest .panel {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #000; border-top: 4px solid #fff;
+    padding: 16px; z-index: 5;
+  }
+  .quest .panel .title { font-size: 9px; color: #ffd35a; margin-bottom: 6px; }
+  .quest .panel .text  { font-size: 10px; line-height: 1.6; color: #fff; }
+  .quest .panel .next  {
+    margin-top: 10px; display: inline-block;
+    background: #ff5d3a; color: #fff; padding: 6px 14px;
+    border: 3px solid #fff; box-shadow: 3px 3px 0 #fff;
+    font-size: 9px; font-weight: 700;
+  }
+
+  /* ===================================================================
+     CONCEPT 3 — THE CARD
+     Apple-clean. Minimal. One thing at a time. Premium.
+     =================================================================== */
+  .screen.card {
+    background: #f4f4f0;
+    font-family: -apple-system, "SF Pro Display", "Inter", sans-serif;
+    color: #111;
+  }
+  .card .topstrip {
+    padding: 60px 26px 0;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    color: #66675c;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+  }
+  .card .topstrip .left .small { font-size: 10px; opacity: 0.55; }
+  .card .topstrip .stack-counter { font-size: 14px; font-weight: 700; color: #111; }
+  .card .topstrip .stack-counter .div { color: #c0c1ba; font-weight: 400; }
+  .card .floating {
+    position: absolute; left: 24px; right: 24px; top: 130px; bottom: 200px;
+    perspective: 1200px;
+  }
+  .card .stack {
+    position: absolute; inset: 0;
+    transform: translateZ(0);
+  }
+  .card .stack .c {
+    position: absolute; left: 0; right: 0;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.10), 0 4px 14px rgba(0,0,0,0.06);
+  }
+  .card .stack .c.back2 { top: 18px; height: 100%; transform: scale(0.9); opacity: 0.5; background: #ebebe5;}
+  .card .stack .c.back1 { top: 9px;  height: 100%; transform: scale(0.95); opacity: 0.85; background: #f6f6f0; }
+  .card .stack .c.front { top: 0;    height: 100%; }
+  .card .front-content {
+    position: absolute; inset: 0;
+    padding: 28px 26px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .card .front-content .meta {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em;
+    color: #888881;
+  }
+  .card .front-content .icon {
+    font-size: 56px; line-height: 1; margin: 4px 0 12px;
+  }
+  .card .front-content .title {
+    font-size: 36px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.05;
+  }
+  .card .front-content .reward {
+    margin-top: 10px;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: #b8761e;
+    background: #fef2dc; padding: 5px 11px; border-radius: 999px;
+    align-self: flex-start;
+  }
+  .card .swipe-hint {
+    margin-top: auto;
+    text-align: center;
+    font-size: 11px; color: #b3b4ad; letter-spacing: 0.04em;
+  }
+  .card .home-bar-zone {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 180px;
+    background: #f4f4f0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding-bottom: 32px;
+  }
+  .card .home-bar-zone .done-btn {
+    width: 80px; height: 80px; border-radius: 50%; background: #111;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 16px 30px rgba(0,0,0,0.20);
+    font-size: 32px; color: #fff;
+  }
+  .card .home-bar-zone .done-btn-label {
+    margin-top: 12px; font-size: 13px; font-weight: 600; color: #444;
+  }
+
+  /* ---------- Recommendation block ---------- */
+  .recommendation {
+    background: var(--ink); color: var(--paper);
+    padding: 48px 56px; border-radius: 24px;
+    margin: 64px 0 0;
+  }
+  .recommendation .eyebrow { color: #ff8a6c; }
+  .recommendation h2 { color: #fff; font-size: 36px; }
+  .recommendation p { color: rgba(255,255,255,0.78); }
+  .recommendation .grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    margin-top: 24px;
+  }
+  @media (max-width: 760px) { .recommendation .grid { grid-template-columns: 1fr; } }
+  .recommendation .grid .row {
+    background: rgba(255,255,255,0.04); padding: 16px;
+    border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+    font-size: 14px;
+  }
+  .recommendation .grid .row strong { color: #ff8a6c; display: block; margin-bottom: 4px; }
+
+  /* ---------- Floating phone wrappers ---------- */
+  .phones { margin-top: 36px; display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .caption {
+    font-size: 12px; color: var(--ink-mute); text-align: center; margin-top: 12px;
+  }
+  details { margin: 12px 0 0; font-size: 14px; color: var(--ink-soft); }
+  details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+  details ul { margin: 8px 0 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <p class="eyebrow">A design proposal</p>
+  <h1>OMyDays. Stripped to the bone.</h1>
+  <p class="lede">
+    The current app has 5 tabs, 6 sub-skills, 8 stat tiles, 3 reward systems,
+    a weekly badge ladder, a streak meter, an XP bar, a leaderboard, a contracts
+    board, a rules screen, a settings tree, an avatar customizer and a points
+    pop animation. It works. It's not memorable. A 7-year-old won't tell their
+    friends about it.
+  </p>
+  <p class="lede">
+    Three concepts below. Each picks a single metaphor and ruthlessly removes
+    everything that doesn't serve it. They are not three variations — they are
+    three <em>different bets</em> on what this product is.
+  </p>
+
+  <blockquote>
+    "The hardest part of design is not the part you put in. It's the part you
+    leave out." Each of these leaves out 70% of what's currently on screen.
+  </blockquote>
+
+  <hr class="rule">
+
+  <!-- ============================================================== -->
+  <!-- Concept 1 — The Garden                                          -->
+  <!-- ============================================================== -->
+  <section class="concept">
+    <div>
+      <div class="phone">
+        <div class="screen garden">
+          <div class="topbar">
+            <div>
+              <div class="name">Yusuf</div>
+              <div class="sub">Day 12 of looking after your tree</div>
+            </div>
+            <div class="seed-count">🌱 24 seeds</div>
+          </div>
+          <div class="stage">
+            <!-- Tree -->
+            <svg class="tree" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="100" cy="60"  rx="64" ry="58" fill="#7fa64a"/>
+              <ellipse cx="60"  cy="100" rx="50" ry="42" fill="#94bd5e"/>
+              <ellipse cx="140" cy="100" rx="50" ry="42" fill="#94bd5e"/>
+              <ellipse cx="100" cy="120" rx="64" ry="44" fill="#a8cf72"/>
+              <rect x="92" y="148" width="16" height="80" fill="#6f4e2c" rx="3"/>
+            </svg>
+            <!-- Three flowers (today's chores) -->
+            <div class="flower f1" title="Brush teeth">🪥</div>
+            <div class="flower f2" title="Walk Fifi">🐱</div>
+            <div class="flower f3" title="Tidy room">🧺</div>
+            <div class="ground"></div>
+          </div>
+
+          <div class="quest-card">
+            <div class="icon">🪥</div>
+            <div class="body">
+              <div class="title">Brush your teeth</div>
+              <div class="desc">Water the flower to grow it</div>
+            </div>
+            <div class="cta">Tap to water</div>
+          </div>
+        </div>
+      </div>
+      <p class="caption">Concept 1 — child's home screen</p>
+    </div>
+
+    <div>
+      <div class="concept-num">01</div>
+      <h2>The Garden</h2>
+      <p class="lede">
+        You don't do chores. You grow yourself. Every chore you complete waters
+        a flower. Every week you stay consistent, the tree grows. After a month
+        you have a whole landscape that's yours, that you built.
+      </p>
+
+      <div class="principle">Metaphor</div>
+      <p>A living garden you are responsible for. Tending the garden is the
+        chore; the garden grows because of you.</p>
+
+      <div class="principle">What disappears</div>
+      <ul class="cut-list">
+        <li>Tabs. There is one screen. Everything you need is on it.</li>
+        <li>Points, XP, levels — replaced by a single number: how many days you've watered. The tree is the score.</li>
+        <li>Badge grids, streak meters, weekly ladders — the tree's size IS the badge.</li>
+        <li>The shop, for now. Rewards re-enter as seeds for new plants you can grow.</li>
+      </ul>
+
+      <div class="principle">The moment of joy</div>
+      <p>Tap a flower → water particles fall → the flower opens into bloom →
+        a soft chime, gentle haptic. <strong>The flower stays in your garden forever.</strong>
+        After 30 days you walk in to a riot of color you made.</p>
+
+      <div class="principle">Family layer</div>
+      <p>The "parent" view is the family park: your kids' gardens side by side.
+        Approval = mowing the path between them so the family can walk through
+        each other's gardens. Co-watering for shared chores (bins, pets).</p>
+
+      <div class="feel-tags">
+        <span>Calm</span><span>Patient</span><span>Beautiful</span><span>Long-arc</span>
+      </div>
+
+      <details>
+        <summary>Inspiration & references</summary>
+        <ul>
+          <li>Animal Crossing — accumulation as story</li>
+          <li>Headspace — color-as-mood, breathing animations</li>
+          <li>Forest (the focus app) — single growing thing as metric</li>
+        </ul>
+      </details>
+
+      <p class="ref">Tone: hand-drawn watercolor. Heavily illustrated. No neon.<br>
+        Best for: families that already feel a little frantic. Reduces anxiety.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ============================================================== -->
+  <!-- Concept 2 — The Quest                                           -->
+  <!-- ============================================================== -->
+  <section class="concept">
+    <div>
+      <div class="phone">
+        <div class="screen quest">
+          <div class="map"></div>
+          <div class="hud">
+            <div class="hero">
+              <div class="avatar">🦸</div>
+              <div class="stats">
+                <div class="name">YUSUF</div>
+                <div class="lv">LV 4 SCOUT</div>
+                <div class="xp-bar"><span></span></div>
+              </div>
+            </div>
+            <div class="coins">★ 142</div>
+          </div>
+          <div class="pin p1">!</div>
+          <div class="pin p2">?</div>
+          <div class="pin exclaim p3">!</div>
+          <div class="character">🧒</div>
+          <div class="panel">
+            <div class="title">QUEST UNLOCKED</div>
+            <div class="text">Walk to the kitchen and brush your teeth. Earn ★8 + 10 XP. Last quest in your morning chain!</div>
+            <div class="next">▶ ACCEPT</div>
+          </div>
+        </div>
+      </div>
+      <p class="caption">Concept 2 — child's home screen</p>
+    </div>
+
+    <div>
+      <div class="concept-num">02</div>
+      <h2>The Quest</h2>
+      <p class="lede">
+        Every day is an adventure. Your child has a hero, a class, a level, and
+        a map. Today's chores are quest pins on the map. Boss fights are
+        challenge tasks the parent posts. Co-op is when siblings team up on
+        a task.
+      </p>
+
+      <div class="principle">Metaphor</div>
+      <p>Pokémon-style overworld. Your character. Your inventory. Your
+        story arc that gets bigger every day.</p>
+
+      <div class="principle">What disappears</div>
+      <ul class="cut-list">
+        <li>The word "chore" (it's a quest now).</li>
+        <li>The five tabs (replaced by zones on a single map: Home, Pets, Kitchen, Outside).</li>
+        <li>Points become coins, XP becomes XP — kids already speak this language fluently.</li>
+        <li>The leaderboard becomes the family party — you can <em>see</em> your siblings' avatars on the map.</li>
+      </ul>
+
+      <div class="principle">The moment of joy</div>
+      <p>Quest complete → "+8 ★" floats up → chime → your character LEVELS UP
+        (visible animation, fanfare). A new piece of armor unlocks.
+        <strong>You walk to your bed feeling 6 inches taller.</strong></p>
+
+      <div class="principle">Family layer</div>
+      <p>Parent's view is "Quest Master Mode" — they're the dungeon master.
+        They can post side quests (the contracts board), bless boss fights,
+        award rare loot. The family forms a "party" — parent helps a child
+        complete a tough quest = co-op XP for both.</p>
+
+      <div class="feel-tags">
+        <span>Adventurous</span><span>Story-driven</span><span>Sticky</span><span>Identity</span>
+      </div>
+
+      <details>
+        <summary>Inspiration & references</summary>
+        <ul>
+          <li>Pokémon Scarlet/Violet — overworld with markers</li>
+          <li>Habitica — chore-as-RPG, but it never crossed the bridge to <em>fun</em></li>
+          <li>Stardew Valley — living world that progresses with you</li>
+        </ul>
+      </details>
+
+      <p class="ref">Tone: pixel-art rendered crisp on retina. CRT-modern.<br>
+        Best for: families with multiple kids. Sibling rivalry becomes sibling co-op.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ============================================================== -->
+  <!-- Concept 3 — The Card                                            -->
+  <!-- ============================================================== -->
+  <section class="concept">
+    <div>
+      <div class="phone">
+        <div class="screen card">
+          <div class="topstrip">
+            <div class="left">
+              <div>Tuesday morning</div>
+              <div class="small">Yusuf · 8:14</div>
+            </div>
+            <div class="stack-counter">3<span class="div"> / </span>5</div>
+          </div>
+
+          <div class="floating">
+            <div class="stack">
+              <div class="c back2"></div>
+              <div class="c back1"></div>
+              <div class="c front">
+                <div class="front-content">
+                  <div>
+                    <div class="meta">Daily habit</div>
+                    <div class="icon">🪥</div>
+                    <div class="title">Brush your teeth.</div>
+                    <div class="reward">+ 1 star</div>
+                  </div>
+                  <div class="swipe-hint">⌃ swipe up when done</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="home-bar-zone">
+            <div class="done-btn">✓</div>
+            <div class="done-btn-label">Done</div>
+          </div>
+        </div>
+      </div>
+      <p class="caption">Concept 3 — child's home screen</p>
+    </div>
+
+    <div>
+      <div class="concept-num">03</div>
+      <h2>The Card</h2>
+      <p class="lede">
+        Your day is a stack of cards. The top card is the only thing that
+        matters. Do it. Swipe up. The next card slides into place. The whole
+        app is one screen, one card, one tap.
+      </p>
+
+      <div class="principle">Metaphor</div>
+      <p>The Things 3 / iA Writer school of design. Premium minimal. The
+        product is a beautiful, calm tool — not a game, not a garden. A
+        <em>tool that respects your time and your attention.</em></p>
+
+      <div class="principle">What disappears</div>
+      <ul class="cut-list">
+        <li>Everything except today's stack of cards.</li>
+        <li>Numbers. The only number on screen is "3 / 5" — how many cards left.</li>
+        <li>Color, mostly. Cream paper, black ink, one accent color per card category.</li>
+        <li>The tab bar. Pull down for shop, side-swipe for family — but only when you actively need them.</li>
+      </ul>
+
+      <div class="principle">The moment of joy</div>
+      <p>Big satisfying swipe + heavy haptic + a single warm "ting". The
+        stack of remaining cards visibly shrinks. <strong>When you finish the last card,
+        the screen goes blank with one line: "That's all today. Well done."</strong>
+        And then, intentionally, nothing.</p>
+
+      <div class="principle">Family layer</div>
+      <p>Each family member is a deck. The parent's home screen is a small
+        rack of deck-spines along the side. Tap a child's deck to peek at
+        what they're doing. Nothing more — the parent is invited to trust,
+        not surveil.</p>
+
+      <div class="feel-tags">
+        <span>Frictionless</span><span>Premium</span><span>Calm</span><span>Adult-feeling</span>
+      </div>
+
+      <details>
+        <summary>Inspiration & references</summary>
+        <ul>
+          <li>Things 3 — the gold standard of considered iOS design</li>
+          <li>iA Writer — typography as the entire experience</li>
+          <li>Tinder — swipe physics done with respect, not gimmick</li>
+          <li>Apple Reminders + Streaks — minimal but tactile</li>
+        </ul>
+      </details>
+
+      <p class="ref">Tone: warm cream paper, sharp black, tactile shadows.<br>
+        Best for: older kids (10+) and parents who want the app to get out of the way.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ============================================================== -->
+  <!-- Recommendation                                                  -->
+  <!-- ============================================================== -->
+  <div class="recommendation">
+    <p class="eyebrow">If you put me in a room and made me pick</p>
+    <h2>The Garden, then layer in the Quest as a "mode".</h2>
+    <p>
+      The Garden has a soul. It changes how a kid thinks about the app —
+      from "I have to do my chores" to "I have to look after my garden".
+      That's the Jobs move: it's not a chore app, it's a thing you grow.
+    </p>
+    <p>
+      The Quest is the right add-on for older kids who outgrow the calm —
+      offer it as a switchable theme later (an iOS Settings toggle, like
+      switching wallpapers). Same data underneath, different skin.
+    </p>
+    <p>
+      The Card concept is genuinely the most "Steve" — but it's adult-feeling.
+      Ship it later as a Parent Mode for adults running their own self-care.
+      Kids won't fall in love with it.
+    </p>
+
+    <div class="grid">
+      <div class="row">
+        <strong>Phase 1 (4–6 weeks)</strong>
+        Re-skin the existing app to The Garden. Same data layer, same
+        backend, new visual language. Single screen. Drop 4 of 5 tabs. Move
+        Skills/Shop/Schedule into a pull-up tray.
+      </div>
+      <div class="row">
+        <strong>Phase 2 (2 weeks)</strong>
+        Add the Quest theme switcher. Kids 8+ unlock it as a "level 5
+        reward". Adds the map, the pixel character, the loot animation —
+        nothing else.
+      </div>
+      <div class="row">
+        <strong>Phase 3 (later)</strong>
+        Card mode for parents. Pull-down gesture from anywhere lights up
+        a clean card stack of <em>parent-side</em> tasks (approve, restock
+        rewards, plan next week). It is for the adults.
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 64px;">Three things I'd insist on regardless of which we pick</h3>
+  <ul class="cut-list" style="font-size: 16px;">
+    <li><strong>Sound design.</strong> Every chore completion has a sound. Different per category. They will become the audio fingerprint of your kid's day.</li>
+    <li><strong>Haptics.</strong> The "thunk" when a chore lands is felt, not heard. Borrow Apple's Haptic Touch playbook — distinct patterns for different events.</li>
+    <li><strong>One typeface, two weights, one accent colour.</strong> The current design uses 6 neon colours, 4 fonts, and 8 button styles. That isn't kid-friendly — it's noisy. A child reads emotion from clarity, not from candy.</li>
+  </ul>
+
+  <p style="margin-top: 56px; color: var(--ink-mute); font-size: 13px;">
+    Mockups are CSS-rendered, not implemented. No JS, no images.
+    Browser-inspect to see how every pixel is composed.
+    Tell me which one resonates and I'll spec the build.
+  </p>
+
+</div>
+
+</body>
+</html>
