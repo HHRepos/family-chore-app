@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
-> **Last updated:** 2026-05-09
-> **Version:** iOS 1.0.1 (Build 14) — TestFlight
+> **Last updated:** 2026-05-10
+> **Version:** iOS 1.0.1 (Build 15) — TestFlight · The Living Garden Phase 1
 > **API:** https://54-171-244-65.nip.io/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.
 
@@ -517,6 +517,32 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ---
 
 ## Changelog
+
+### 2026-05-10 — Build 15 (Living Garden Phase 1)
+
+The redesign begins. The kid's home tab now renders a brand new
+[GardenView](ios-app/MyDay/Views/Child/GardenView.swift) instead of
+the legacy QuestMapView. Phase 1 ships with placeholder visuals
+(SwiftUI-rendered tree, gradient sky, emoji creatures); the watercolour
++ Ghibli illustrator pack arrives in subsequent phases per the
+[designer brief](designs/designer-brief.html).
+
+**What's in Phase 1:**
+- One-screen layout: top bar, garden stage (tree + today's flowers + wandering cat), card stack at the bottom
+- Time-of-day shifting sky (dawn / day / dusk / night gradients)
+- Card swipe-up gesture marks chores complete, animates the corresponding flower bloom + ripple
+- Past flowers visible as dim background population (history)
+- Empty state copy when all chores done: *"That's all today. Well done."*
+- Wandering cat drifts across without flipping (the Ghibli-pace fix from the variations page)
+- All existing data wiring intact: ChoreStore, ShopStore, 10s polling, scenePhase refresh, +N points burst on point increases
+- Bumped `CURRENT_PROJECT_VERSION` 14 → 15
+
+**Backup of Build 14**: tag `v1.0.1-build14`, branch `legacy/build14-pre-redesign`. Rollback procedure in [ROLLBACK.md](ROLLBACK.md).
+
+**Pending phases (illustrator handoff):**
+- Phase 2: real watercolour tree art with growth stages
+- Phase 3: Animal Corner / Wildlife Glade / Fountain zone screens
+- Phase 4: Lottie animations for swipe-to-water, character cast, fireflies, time-of-day transitions
 
 ### 2026-05-09 — Build 14 (skills profile + pet day schedule)
 

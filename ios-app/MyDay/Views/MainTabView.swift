@@ -56,7 +56,7 @@ struct MainTabView: View {
     @ViewBuilder
     private var childContent: some View {
         switch childTab {
-        case .quests: QuestMapView()
+        case .quests: GardenView()       // Living Garden — Build 15 onwards
         case .shop: ShopView()
         case .contracts: ContractBoardView()
         case .rules: FamilyRulesView()

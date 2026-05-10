@@ -19,8 +19,8 @@ hr { border: none; border-top: 1px solid #21262d; margin: 30px 0; }
 .crumb a { color: #6e7681; }
 </style></head><body><div class="crumb"><a href="index.html">← Wiki home</a></div><h1 id="omydays-project-wiki">OMyDays — Project Wiki</h1>
 <blockquote>
-<p><strong>Last updated:</strong> 2026-05-09
-<strong>Version:</strong> iOS 1.0.1 (Build 14) — TestFlight
+<p><strong>Last updated:</strong> 2026-05-10
+<strong>Version:</strong> iOS 1.0.1 (Build 15) — TestFlight · The Living Garden Phase 1
 <strong>API:</strong> https://54-171-244-65.nip.io/v1
 <strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.</p>
 </blockquote>
@@ -1232,6 +1232,27 @@ cd ios-app &amp;&amp; fastlane beta
 </table></div>
 <hr />
 <h2 id="project-changelog">Changelog</h2>
+<h3 id="2026-05-10-build-15-living-garden-phase-1">2026-05-10 — Build 15 (Living Garden Phase 1)</h3>
+<p>The redesign begins. The kid's home tab now renders a brand new
+<a href="ios-app/MyDay/Views/Child/GardenView.swift">GardenView</a> instead of
+the legacy QuestMapView. Phase 1 ships with placeholder visuals
+(SwiftUI-rendered tree, gradient sky, emoji creatures); the watercolour
++ Ghibli illustrator pack arrives in subsequent phases per the
+<a href="designs/designer-brief.html">designer brief</a>.</p>
+<p><strong>What's in Phase 1:</strong>
+- One-screen layout: top bar, garden stage (tree + today's flowers + wandering cat), card stack at the bottom
+- Time-of-day shifting sky (dawn / day / dusk / night gradients)
+- Card swipe-up gesture marks chores complete, animates the corresponding flower bloom + ripple
+- Past flowers visible as dim background population (history)
+- Empty state copy when all chores done: <em>"That's all today. Well done."</em>
+- Wandering cat drifts across without flipping (the Ghibli-pace fix from the variations page)
+- All existing data wiring intact: ChoreStore, ShopStore, 10s polling, scenePhase refresh, +N points burst on point increases
+- Bumped <code>CURRENT_PROJECT_VERSION</code> 14 → 15</p>
+<p><strong>Backup of Build 14</strong>: tag <code>v1.0.1-build14</code>, branch <code>legacy/build14-pre-redesign</code>. Rollback procedure in <a href="ROLLBACK.md">ROLLBACK.md</a>.</p>
+<p><strong>Pending phases (illustrator handoff):</strong>
+- Phase 2: real watercolour tree art with growth stages
+- Phase 3: Animal Corner / Wildlife Glade / Fountain zone screens
+- Phase 4: Lottie animations for swipe-to-water, character cast, fireflies, time-of-day transitions</p>
 <h3 id="2026-05-09-build-14-skills-profile-pet-day-schedule">2026-05-09 — Build 14 (skills profile + pet day schedule)</h3>
 <p>Closes the last two items from the deferred list:</p>
 <p><strong>Skills &amp; qualities profile.</strong> New <code>GET /v1/users/{id}/skills</code> endpoint computes six derived skills from existing chore + job data — no new tables, recomputed on every fetch. Each skill has six tiers (Novice → Apprentice → Skilled → Expert → Master → Legendary) with thresholds tuned per skill so reaching the next tier feels achievable for short-cycle skills (Discipline, Reliability) and meaningful for rare-event ones (Entrepreneurship).</p>
