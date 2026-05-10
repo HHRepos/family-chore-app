@@ -121,33 +121,44 @@ struct GardenView: View {
                 .offset(y: -8)
                 .modifier(SwaySway())
 
-            // Past flowers — small, dim background population
-            ForEach(Array(historicalFlowers().prefix(12).enumerated()), id: \.offset) { idx, hf in
+            // Past flowers — small, dim, scattered around the tree's base.
+            // Pure decoration — not interactive, doesn't represent today.
+            ForEach(Array(historicalFlowers().prefix(8).enumerated()), id: \.offset) { idx, hf in
                 Text(hf.emoji)
-                    .font(.system(size: 14))
-                    .opacity(0.55)
-                    .position(x: hf.x * geo.size.width, y: 250 + hf.y * 60)
-            }
-
-            // Today's flowers — prominent, ripple if bloomed
-            ForEach(Array(todayCards.prefix(5).enumerated()), id: \.element.id) { idx, chore in
-                let pos = flowerPosition(for: idx, total: min(todayCards.count, 5), in: geo)
-                FlowerBubble(
-                    emoji: chore.choreEmoji,
-                    isBloomed: chore.status == .approved || chore.status == .completed,
-                    isAnimating: bloomingFlowerId == chore.assignedChoreId
-                )
-                .position(x: pos.x, y: pos.y)
-            }
-
-            // Wandering cat — once per chore family with a real pet config
-            if hasRealPet {
-                Text(petEmoji)
-                    .font(.system(size: 32))
-                    .modifier(WanderRight(width: geo.size.width))
-                    .position(x: 0, y: geo.size.height * 0.6 + 30)
+                    .font(.system(size: 12))
+                    .opacity(0.4)
+                    .position(x: hf.x * geo.size.width, y: 350 + hf.y * 50)
                     .allowsHitTesting(false)
             }
+
+            // Wandering cat — once per family with a real pet config.
+            // Drifts left-to-right, no flip.
+            if hasRealPet {
+                Text(petEmoji)
+                    .font(.system(size: 28))
+                    .modifier(WanderRight(width: geo.size.width))
+                    .position(x: 0, y: geo.size.height * 0.6 + 20)
+                    .allowsHitTesting(false)
+            }
+
+            // Today's progress shows above the card stack as a simple
+            // text-only indicator instead of floating flower bubbles.
+            VStack(spacing: 4) {
+                Spacer()
+                if !todayCards.isEmpty {
+                    HStack(spacing: 6) {
+                        ForEach(0..<min(totalToday, 8), id: \.self) { idx in
+                            Circle()
+                                .fill(idx < completedToday ? Color.gardenAccentGreen : Color.white.opacity(0.55))
+                                .frame(width: 6, height: 6)
+                        }
+                    }
+                    Text("\(completedToday) of \(totalToday) watered today")
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundStyle(Color.gardenInkSoft)
+                }
+            }
+            .padding(.bottom, 180)
 
             // Empty state if no chores at all today
             if todayCards.isEmpty && !choreStore.isLoading {

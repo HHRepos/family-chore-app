@@ -338,7 +338,7 @@ a:hover { text-decoration: underline; }
     <h1 id="omydays-project-wiki">OMyDays — Project Wiki</h1>
 <blockquote>
 <p><strong>Last updated:</strong> 2026-05-10
-<strong>Version:</strong> iOS 1.0.1 (Build 15) — TestFlight · The Living Garden Phase 1
+<strong>Version:</strong> iOS 1.0.1 (Build 16) — TestFlight · Living Garden full Phase 1
 <strong>API:</strong> https://54-171-244-65.nip.io/v1
 <strong>Status:</strong> Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.</p>
 </blockquote>
@@ -1550,6 +1550,29 @@ cd ios-app &amp;&amp; fastlane beta
 </table></div>
 <hr />
 <h2 id="project-changelog">Changelog</h2>
+<h3 id="2026-05-10-build-16-living-garden-full-phase-1">2026-05-10 — Build 16 (Living Garden full Phase 1)</h3>
+<p>The full Living Garden zone structure is now wired across kid and parent
+sides. Build 15's GardenView keeps the home tab; four new screens take
+over the rest of the app.</p>
+<p><strong>Floating-flower fix:</strong> The flower bubbles around the tree on the home
+screen were confusing — testers couldn't tell which flowers represented
+chores and which were decoration. Removed entirely. Today's progress is
+now an honest dot row + counter ("3 of 5 watered today") under the tree.
+Today's chores live ONLY in the bottom card stack.</p>
+<p><strong>Kid tabs (5 zones):</strong>
+- 🏡 Garden — <code>GardenView</code> (Build 15, decluttered)
+- 🐾 Animals — new <code>AnimalCornerView</code> showing each pet with their care chores filtered for the kid
+- 🌿 Glade — existing <code>ShopView</code> (lite rebrand; full glade overhaul in Phase 2)
+- ⛲ Fountain — new <code>FountainView</code> showing earned play minutes (15 min × watered chores) and four device chips (Telly / Console / Tablet / VR)
+- 👤 Profile — existing <code>ProfileView</code></p>
+<p><strong>Parent tabs (5 zones):</strong>
+- 🏡 Park — new <code>FamilyParkView</code> replaces CommandCenterView. One row per family member with a mini tree showing today's progress, a ripe-count badge, and a black approval ribbon at the top tap-to-review
+- 🐾 Pets — existing <code>PetConfigView</code>
+- ⛲ Fountain — same <code>FountainView</code> as kids see (parent gets a peek at the kid-side experience)
+- 🌿 Glade — existing <code>ParentShopView</code>
+- 📖 Codex — existing <code>ParentSettingsView</code> (renamed in tab label)</p>
+<p><strong>Tab bar updated:</strong> new icons (<code>leaf.fill</code>, <code>pawprint.fill</code>, <code>sparkles</code>, <code>drop.fill</code>, <code>tree.fill</code>) and labels matching the design's zone vocabulary. Enum case names retained for backward-compat.</p>
+<p><strong>No backend changes</strong> — all data flows through existing endpoints. Phase 2 (illustrator pack: watercolour tree growth stages, Lottie animations, character cast) is unblocked.</p>
 <h3 id="2026-05-10-build-15-living-garden-phase-1">2026-05-10 — Build 15 (Living Garden Phase 1)</h3>
 <p>The redesign begins. The kid's home tab now renders a brand new
 <a href="ios-app/MyDay/Views/Child/GardenView.swift">GardenView</a> instead of

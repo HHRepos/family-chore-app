@@ -1,49 +1,55 @@
 import SwiftUI
 
 enum ChildTab: String, CaseIterable {
+    /// Living Garden zone names. Case names retained for routing
+    /// compatibility, but labels and icons reflect the new design:
+    /// 🏡 Home · 🐾 Animals · 🌿 Glade · ⛲ Fountain · 👤 Profile
     case quests, shop, contracts, rules, profile
 
     var icon: String {
         switch self {
-        case .quests: return "scroll.fill"
-        case .shop: return "storefront.fill"
-        case .contracts: return "target"
-        case .rules: return "calendar"
+        case .quests: return "leaf.fill"            // Home garden
+        case .shop: return "sparkles"               // Wildlife glade (decoration shop)
+        case .contracts: return "pawprint.fill"     // Animal corner (real pets)
+        case .rules: return "drop.fill"             // By the fountain (play time)
         case .profile: return "person.fill"
         }
     }
 
     var label: String {
         switch self {
-        case .quests: return "Quests"
-        case .shop: return "Shop"
-        case .contracts: return "Contracts"
-        case .rules: return "Schedule"
+        case .quests: return "Garden"
+        case .shop: return "Glade"
+        case .contracts: return "Animals"
+        case .rules: return "Fountain"
         case .profile: return "Profile"
         }
     }
 }
 
 enum ParentTab: String, CaseIterable {
+    /// Living Garden parent zones. Case names retained for routing
+    /// compatibility:
+    /// 🏡 Park · 🐾 Pets · 🌿 Glade · ⛲ Fountain · 📖 Codex
     case command, approvals, contracts, shop, settings
 
     var icon: String {
         switch self {
-        case .command: return "square.grid.2x2.fill"
-        case .approvals: return "checkmark.seal.fill"
-        case .contracts: return "target"
-        case .shop: return "storefront.fill"
+        case .command: return "tree.fill"           // Family park
+        case .approvals: return "pawprint.fill"     // Pet management
+        case .contracts: return "drop.fill"         // Fountain (play settings)
+        case .shop: return "sparkles"
         case .settings: return "gearshape.fill"
         }
     }
 
     var label: String {
         switch self {
-        case .command: return "HQ"
-        case .approvals: return "Approve"
-        case .contracts: return "Contracts"
-        case .shop: return "Shop"
-        case .settings: return "Settings"
+        case .command: return "Park"
+        case .approvals: return "Pets"
+        case .contracts: return "Fountain"
+        case .shop: return "Glade"
+        case .settings: return "Codex"
         }
     }
 }

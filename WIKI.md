@@ -1,7 +1,7 @@
 # OMyDays — Project Wiki
 
 > **Last updated:** 2026-05-10
-> **Version:** iOS 1.0.1 (Build 15) — TestFlight · The Living Garden Phase 1
+> **Version:** iOS 1.0.1 (Build 16) — TestFlight · Living Garden full Phase 1
 > **API:** https://54-171-244-65.nip.io/v1
 > **Status:** Mobile-only (web validation code removed 2026-05-07). Backend migrated from Lambda+RDS to Lightsail VM 2026-05-08.
 
@@ -517,6 +517,36 @@ See [ROADMAP.md](ROADMAP.md) for the full feature backlog. Highlights:
 ---
 
 ## Changelog
+
+### 2026-05-10 — Build 16 (Living Garden full Phase 1)
+
+The full Living Garden zone structure is now wired across kid and parent
+sides. Build 15's GardenView keeps the home tab; four new screens take
+over the rest of the app.
+
+**Floating-flower fix:** The flower bubbles around the tree on the home
+screen were confusing — testers couldn't tell which flowers represented
+chores and which were decoration. Removed entirely. Today's progress is
+now an honest dot row + counter ("3 of 5 watered today") under the tree.
+Today's chores live ONLY in the bottom card stack.
+
+**Kid tabs (5 zones):**
+- 🏡 Garden — `GardenView` (Build 15, decluttered)
+- 🐾 Animals — new `AnimalCornerView` showing each pet with their care chores filtered for the kid
+- 🌿 Glade — existing `ShopView` (lite rebrand; full glade overhaul in Phase 2)
+- ⛲ Fountain — new `FountainView` showing earned play minutes (15 min × watered chores) and four device chips (Telly / Console / Tablet / VR)
+- 👤 Profile — existing `ProfileView`
+
+**Parent tabs (5 zones):**
+- 🏡 Park — new `FamilyParkView` replaces CommandCenterView. One row per family member with a mini tree showing today's progress, a ripe-count badge, and a black approval ribbon at the top tap-to-review
+- 🐾 Pets — existing `PetConfigView`
+- ⛲ Fountain — same `FountainView` as kids see (parent gets a peek at the kid-side experience)
+- 🌿 Glade — existing `ParentShopView`
+- 📖 Codex — existing `ParentSettingsView` (renamed in tab label)
+
+**Tab bar updated:** new icons (`leaf.fill`, `pawprint.fill`, `sparkles`, `drop.fill`, `tree.fill`) and labels matching the design's zone vocabulary. Enum case names retained for backward-compat.
+
+**No backend changes** — all data flows through existing endpoints. Phase 2 (illustrator pack: watercolour tree growth stages, Lottie animations, character cast) is unblocked.
 
 ### 2026-05-10 — Build 15 (Living Garden Phase 1)
 

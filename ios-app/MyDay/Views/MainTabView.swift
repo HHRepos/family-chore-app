@@ -55,23 +55,26 @@ struct MainTabView: View {
 
     @ViewBuilder
     private var childContent: some View {
+        // Living Garden zones — Build 16 onwards.
+        // Tab enum case names retained for routing; views remapped.
         switch childTab {
-        case .quests: GardenView()       // Living Garden — Build 15 onwards
-        case .shop: ShopView()
-        case .contracts: ContractBoardView()
-        case .rules: FamilyRulesView()
-        case .profile: ProfileView()
+        case .quests: GardenView()         // 🏡 Home garden
+        case .shop: ShopView()             // 🌿 Wildlife glade (rebrand of shop in Phase 2)
+        case .contracts: AnimalCornerView() // 🐾 Animal corner (real pets)
+        case .rules: FountainView()        // ⛲ By the fountain (play time)
+        case .profile: ProfileView()       // 👤 Profile
         }
     }
 
     @ViewBuilder
     private var parentContent: some View {
+        // Living Garden parent zones.
         switch parentTab {
-        case .command: CommandCenterView()
-        case .approvals: ApprovalsView()
-        case .contracts: ContractBoardView()
-        case .shop: ParentShopView()
-        case .settings: ParentSettingsView()
+        case .command: FamilyParkView()    // 🏡 Family park
+        case .approvals: PetConfigView()   // 🐾 Pets — manage pet config + rotation
+        case .contracts: FountainView()    // ⛲ Fountain — same view as kids; parent sees defaults
+        case .shop: ParentShopView()       // 🌿 Glade
+        case .settings: ParentSettingsView() // 📖 Codex (rebranded label)
         }
     }
 }
