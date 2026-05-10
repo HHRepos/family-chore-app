@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Living Garden — Designer Brief</title>
+<style>
+  :root {
+    --ink:#1f1f1d; --ink-soft:#4b5247; --ink-mute:#8b918a; --paper:#fafaf3; --rule:#e7e7d8;
+    --accent:#7e9655; --accent-warm:#d6a455;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,"SF Pro Text","Inter",system-ui,sans-serif; line-height:1.6; font-size:16px; }
+  a { color: var(--accent); }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 56px 32px 96px; }
+  .crumb { font-size: 13px; color: var(--ink-mute); margin-bottom: 24px; }
+  .doc-meta {
+    margin: 24px 0 8px;
+    font-size: 12px; color: var(--ink-mute); letter-spacing: 0.04em;
+    text-transform: uppercase; font-weight: 600;
+  }
+  h1 {
+    font-family: "New York", "Iowan Old Style", Georgia, serif;
+    font-size: 52px; font-weight: 500; letter-spacing: -0.02em;
+    margin: 8px 0 16px;
+  }
+  h2 {
+    font-family: "New York", "Iowan Old Style", Georgia, serif;
+    font-size: 28px; font-weight: 500; letter-spacing: -0.01em;
+    margin: 56px 0 12px;
+    border-bottom: 1px solid var(--rule); padding-bottom: 6px;
+  }
+  h3 { font-size: 17px; font-weight: 700; margin: 24px 0 6px; letter-spacing: -0.005em; }
+  p { margin: 0 0 12px; max-width: 64ch; color: var(--ink-soft); }
+  .lede { font-size: 18px; color: var(--ink); max-width: 60ch; line-height: 1.55; }
+  blockquote { margin: 16px 0 16px 0; padding: 0 0 0 16px;
+    border-left: 3px solid var(--accent);
+    font-style: italic; color: var(--ink-soft); font-size: 16px; }
+  ul.std { padding-left: 20px; color: var(--ink-soft); }
+  ul.std li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  table th, table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  table th { background: #f3f1e3; color: var(--ink); font-weight: 700; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.06em; }
+
+  pre { background: #1c1d18; color: #e6edcf; padding: 14px 16px; border-radius: 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; overflow-x: auto; line-height: 1.5; }
+
+  /* Color palette swatches */
+  .palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0; }
+  @media (max-width: 600px) { .palette { grid-template-columns: repeat(2, 1fr); } }
+  .sw {
+    aspect-ratio: 1 / 1; border-radius: 12px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 8px; color: var(--ink); font-size: 11px; font-weight: 600;
+  }
+  .sw.light { color: var(--ink); }
+  .sw.dark  { color: white; }
+  .sw .role { font-size: 10px; opacity: 0.7; }
+
+  /* Character cards */
+  .cast { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 16px 0; }
+  @media (max-width: 600px) { .cast { grid-template-columns: 1fr; } }
+  .actor {
+    background: white; border: 1px solid var(--rule); border-radius: 12px;
+    padding: 16px; display: grid; grid-template-columns: 80px 1fr; gap: 16px; align-items: center;
+  }
+  .actor svg { width: 80px; height: 80px; }
+  .actor h4 { margin: 0 0 4px; font-size: 15px; font-weight: 700; }
+  .actor .role { font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .actor p { margin: 6px 0 0; font-size: 12px; line-height: 1.5; }
+
+  .pillrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+  .pill {
+    font-size: 11px; padding: 3px 9px; border-radius: 999px;
+    background: #f3f1e3; color: var(--ink-soft); font-weight: 600;
+  }
+
+  .callout {
+    background: #f3f8e8; border-left: 3px solid var(--accent);
+    padding: 14px 18px; border-radius: 4px;
+    margin: 16px 0; font-size: 14px; color: var(--ink);
+  }
+  .callout strong { color: var(--accent); }
+
+  .signature {
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--rule);
+    font-size: 12px; color: var(--ink-mute);
+  }
+
+  /* Reference imagery grid */
+  .refs {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin: 12px 0;
+  }
+  .ref-card {
+    aspect-ratio: 4 / 3; border-radius: 10px; padding: 12px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    color: white; font-size: 11px; font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  }
+  .ref-card .name { font-size: 13px; font-weight: 700; }
+  .ref-card .why  { opacity: 0.85; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb">
+    <a href="./">← Overview</a> ·
+    <a href="garden-variations.html">← Variations</a>
+  </div>
+
+  <p class="doc-meta">Designer Brief · OMyDays · v1.0</p>
+  <h1>The Living Garden.</h1>
+  <p class="lede">
+    A children's family-ritual app that needs an illustrator to bring a
+    living, painted world to life. The selected aesthetic is
+    <strong>watercolour softness with Ghibli-grade magic</strong> —
+    calm and pastel as the foundation, with fireflies, dappled light, and
+    a small cast of recurring characters layered on top.
+  </p>
+
+  <p>
+    This brief is what you'd hand to the illustrator. It's structured for a
+    freelance / studio engagement: aesthetic direction, full asset list,
+    animation specification, deliverable formats, phasing, and review
+    cadence. ~30 static illustrations + ~15 Lottie animations across
+    a 4–6 week engagement.
+  </p>
+
+  <!-- ===== Project at a glance ===== -->
+  <h2>Project at a glance</h2>
+  <table>
+    <tr><th>Product</th><td>OMyDays — a family ritual app where kids tend a small living garden by completing daily routines</td></tr>
+    <tr><th>Audience</th><td>Primary: kids age 5–12. Secondary: parents.</td></tr>
+    <tr><th>Platform</th><td>iOS (SwiftUI). Currently in TestFlight beta.</td></tr>
+    <tr><th>Tone</th><td>Calm, magical, hand-painted. Anti-gamified. The opposite of neon.</td></tr>
+    <tr><th>Constraint</th><td>The garden is alive even when nothing's happening. Idle states matter as much as interaction states.</td></tr>
+    <tr><th>Star moment</th><td>The 600ms swipe-to-water gesture: card swipes up → 3 droplets arc to a flower → flower opens → ripple lingers 5s. Everything else is context for that moment.</td></tr>
+  </table>
+
+  <!-- ===== Aesthetic direction ===== -->
+  <h2>Aesthetic direction</h2>
+  <p>
+    Take watercolour as the base — soft pastel palette, hand-painted
+    edges, gentle shapes — and layer on the magic-realism of a Studio
+    Ghibli forest: dappled sunlight through a canopy, occasional
+    fireflies, a small mossy detail at the base of a tree, the
+    sense that something might wander into frame at any moment.
+  </p>
+
+  <blockquote>
+    Reference points (do <em>not</em> copy): the watercolour textures of
+    Beatrix Potter, the calm interiors of Studio Ghibli's <em>My Neighbour
+    Totoro</em>, the colour and pacing of <em>Sky: Children of the
+    Light</em>. Not Animal Crossing (too cartoon), not Stardew Valley (too
+    pixel), not Disney (too saccharine).
+  </blockquote>
+
+  <h3>Visual language rules</h3>
+  <ul class="std">
+    <li><strong>Soft edges.</strong> No hard outlines. Stroke implied by colour transition, not pen weight.</li>
+    <li><strong>Pastel base, warm highlights.</strong> Sky pastels at 30–40% saturation. Highlights and ambient particles at 70–80% saturation, used sparingly.</li>
+    <li><strong>Dappled light.</strong> A subtle warm-amber gradient overlay on every screen, suggesting sunlight filtering through canopy.</li>
+    <li><strong>Magic in the margins, not the foreground.</strong> Fireflies, dust motes, falling leaves, a garden spirit that occasionally walks past — never centre-stage, always at the periphery.</li>
+    <li><strong>Painterly, not vector-perfect.</strong> Slight texture, hand-finished feel. Geometry is suggested, not enforced.</li>
+    <li><strong>Time-of-day shifts.</strong> Dawn (warm pinks), day (sage greens), dusk (amber + violet), night (deep blue with stars). Same garden, four moods.</li>
+  </ul>
+
+  <h3>What we are not</h3>
+  <ul class="std">
+    <li>Not gamified — no XP bars, no levels visible, no badge collections in the art.</li>
+    <li>Not cartoonish — characters have personality, but they're painted, not bouncy.</li>
+    <li>Not minimal/Scandinavian — soft and rich, not flat and geometric.</li>
+    <li>Not retro / pixel-art.</li>
+  </ul>
+
+  <!-- ===== Colour palette ===== -->
+  <h2>Colour palette</h2>
+  <p>Five core hues for the watercolour base, three magic accents that
+    overlay. All shipped as light + dark variants for time-of-day shifts.</p>
+
+  <h3>Base (watercolour)</h3>
+  <div class="palette">
+    <div class="sw light" style="background:#e8f1d6"><div class="role">sky</div>#e8f1d6</div>
+    <div class="sw light" style="background:#a8cf72"><div class="role">leaf</div>#a8cf72</div>
+    <div class="sw dark"  style="background:#7e9655"><div class="role">canopy</div>#7e9655</div>
+    <div class="sw dark"  style="background:#6f4e2c"><div class="role">trunk</div>#6f4e2c</div>
+    <div class="sw light" style="background:#fef9ed"><div class="role">paper</div>#fef9ed</div>
+  </div>
+
+  <h3>Magic accents (Ghibli)</h3>
+  <div class="palette">
+    <div class="sw light" style="background:#fff0c8"><div class="role">dappled light</div>#fff0c8</div>
+    <div class="sw dark"  style="background:#d6a455"><div class="role">firefly glow</div>#d6a455</div>
+    <div class="sw dark"  style="background:#5e3d8e"><div class="role">dusk shadow</div>#5e3d8e</div>
+    <div class="sw dark"  style="background:#1e3a4e"><div class="role">night sky</div>#1e3a4e</div>
+    <div class="sw light" style="background:#ff8a5b"><div class="role">flower bloom</div>#ff8a5b</div>
+  </div>
+
+  <div class="callout">
+    <strong>Critical:</strong> the dappled-light overlay (#fff0c8 at 8–12%
+    opacity) goes <em>on top of every scene</em>. It's what makes
+    watercolour read as "in a forest" instead of "on a wall". Test this
+    before locking the rest of the palette.
+  </div>
+
+  <!-- ===== Typography ===== -->
+  <h2>Typography</h2>
+  <table>
+    <tr><th>Role</th><th>Choice</th><th>Notes</th></tr>
+    <tr>
+      <td>Body / UI</td>
+      <td>SF Pro Text (system) or Mulish</td>
+      <td>One typeface, two weights (regular 400, bold 700). Clean, readable, calm.</td>
+    </tr>
+    <tr>
+      <td>Headline / character names</td>
+      <td>"New York" (Apple's serif) or Iowan Old Style</td>
+      <td>Used sparingly — only for "Yusuf's garden" header and character intro cards. Adds the storybook feel.</td>
+    </tr>
+    <tr>
+      <td>Numerical (seed counter, day count)</td>
+      <td>Same as body, monospaced numerals on</td>
+      <td>The odometer roll on the seed counter needs tabular figures.</td>
+    </tr>
+  </table>
+
+  <!-- ===== Character cast ===== -->
+  <h2>Character cast (12 illustrations)</h2>
+
+  <h3>The four archetypes</h3>
+  <div class="cast">
+    <div class="actor">
+      <svg viewBox="0 0 100 100">
+        <ellipse cx="50" cy="80" rx="20" ry="6" fill="#3a6e3a" opacity="0.3"/>
+        <path d="M 50 80 Q 50 50 45 35 Q 40 25 30 22" stroke="#5a8a4a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="28" cy="22" rx="10" ry="6" fill="#7eb056" transform="rotate(-30 28 22)"/>
+        <ellipse cx="62" cy="35" rx="9" ry="5" fill="#7eb056" transform="rotate(40 62 35)"/>
+        <circle cx="48" cy="60" r="3" fill="#2c3a23"/>
+        <circle cx="52" cy="60" r="3" fill="#2c3a23"/>
+        <path d="M 47 65 Q 50 67 53 65" stroke="#2c3a23" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="role">Garden spirit</div>
+        <h4>The Sapling</h4>
+        <p>Welcomes the kid on first run. Appears occasionally to celebrate
+          milestones (day 7, day 30, etc). A walking sapling with two leaves
+          and a soft face. Calm, warm, slightly mysterious.</p>
+        <div class="pillrow"><span class="pill">3 poses</span><span class="pill">2 Lottie animations</span></div>
+      </div>
+    </div>
+
+    <div class="actor">
+      <svg viewBox="0 0 100 100">
+        <ellipse cx="50" cy="78" rx="24" ry="14" fill="#d8a35a"/>
+        <circle cx="50" cy="55" r="20" fill="#d8a35a"/>
+        <path d="M 32 45 L 28 28 L 38 38 Z" fill="#d8a35a"/>
+        <path d="M 68 45 L 72 28 L 62 38 Z" fill="#d8a35a"/>
+        <ellipse cx="44" cy="55" rx="2" ry="3" fill="#2c3a23"/>
+        <ellipse cx="56" cy="55" rx="2" ry="3" fill="#2c3a23"/>
+        <path d="M 44 65 Q 50 70 56 65" stroke="#2c3a23" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M 70 80 Q 80 78 78 70" stroke="#d8a35a" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="role">Real-world pet</div>
+        <h4>The Companion</h4>
+        <p>Six variants for parents to pick at setup: Cat, Dog, Bunny,
+          Hamster, Parrot, Fish. Each has 3 poses (standing, sitting,
+          sleeping) + a walk cycle.</p>
+        <div class="pillrow"><span class="pill">6 species × 3 poses</span><span class="pill">walk cycle Lottie</span></div>
+      </div>
+    </div>
+
+    <div class="actor">
+      <svg viewBox="0 0 100 100">
+        <ellipse cx="50" cy="70" rx="32" ry="22" fill="#7e5a3a"/>
+        <path d="M 22 70 L 18 60 M 30 50 L 26 38 M 40 44 L 38 30 M 50 42 L 50 28
+                 M 60 44 L 62 30 M 70 50 L 74 38 M 78 70 L 82 60"
+              stroke="#5a3e1f" stroke-width="2.5" stroke-linecap="round"/>
+        <ellipse cx="22" cy="74" rx="8" ry="6" fill="#d8a35a"/>
+        <circle cx="20" cy="72" r="1.5" fill="#2c3a23"/>
+      </svg>
+      <div>
+        <div class="role">Bought decoration</div>
+        <h4>The Wildlings</h4>
+        <p>Eight buyable creatures from the glade: Hedgehog, Deer,
+          Butterfly, Ladybug, Snail, Frog, Robin, Fireflies. No chores
+          attached. Each has 1 idle Lottie loop.</p>
+        <div class="pillrow"><span class="pill">8 creatures</span><span class="pill">1 ambient loop each</span></div>
+      </div>
+    </div>
+
+    <div class="actor">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="34" r="14" fill="#f7d4a3"/>
+        <path d="M 38 30 Q 40 18 50 16 Q 60 18 62 30" fill="#3a2818"/>
+        <rect x="40" y="48" width="20" height="28" rx="2" fill="#5e94c4"/>
+        <rect x="40" y="76" width="9" height="14" rx="1" fill="#6b4f8e"/>
+        <rect x="51" y="76" width="9" height="14" rx="1" fill="#6b4f8e"/>
+        <circle cx="46" cy="34" r="1.5" fill="#2c3a23"/>
+        <circle cx="54" cy="34" r="1.5" fill="#2c3a23"/>
+      </svg>
+      <div>
+        <div class="role">Kid avatar</div>
+        <h4>The Gardener</h4>
+        <p>The kid's character. 3 hair styles × 3 hair colours × 3 skin
+          tones × 3 outfits. Walks across the garden in idle states; the
+          kid sees themselves wandering their own world.</p>
+        <div class="pillrow"><span class="pill">customisable</span><span class="pill">walk + water + sit</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Asset inventory ===== -->
+  <h2>Full asset inventory</h2>
+
+  <h3>Static SVG illustrations (~22)</h3>
+  <table>
+    <tr><th>Asset</th><th>Quantity</th><th>Notes</th></tr>
+    <tr>
+      <td><strong>Tree growth stages</strong></td>
+      <td>6</td>
+      <td>Day 1 (sapling), Day 7, Day 30, Day 90, Day 180, Day 365. Each is the same tree with progressively more layers, knots, and seasonal touches.</td>
+    </tr>
+    <tr>
+      <td><strong>Flowers</strong></td>
+      <td>4 categories × 2 states = 8</td>
+      <td>Daily habit, routine, household, pitched. Each in "bud" and "bloomed" states. The Lottie bloom animation transitions between them.</td>
+    </tr>
+    <tr>
+      <td><strong>Sky gradients</strong></td>
+      <td>4</td>
+      <td>Dawn, day, dusk, night. Render as full-screen gradients with the painted-canopy edge built in.</td>
+    </tr>
+    <tr>
+      <td><strong>Ground textures</strong></td>
+      <td>2</td>
+      <td>Day grass, dusk shadow grass. Subtle horizon variation.</td>
+    </tr>
+    <tr>
+      <td><strong>Glade scene</strong></td>
+      <td>1</td>
+      <td>The wildlife glade — deeper, mossier, dimmer than the home garden.</td>
+    </tr>
+    <tr>
+      <td><strong>Pond / fountain</strong></td>
+      <td>1</td>
+      <td>Reflective surface, ripple-friendly. Lit from below at night.</td>
+    </tr>
+  </table>
+
+  <h3>Lottie animations (~15)</h3>
+  <table>
+    <tr><th>Animation</th><th>Duration</th><th>Where it appears</th></tr>
+    <tr>
+      <td><strong>Tree sway</strong></td>
+      <td>7s loop</td>
+      <td>Home garden — gentle 1° sway each direction.</td>
+    </tr>
+    <tr>
+      <td><strong>Flower bloom</strong></td>
+      <td>0.6s, played on swipe</td>
+      <td>Bud → spring open → ripple — the star moment.</td>
+    </tr>
+    <tr>
+      <td><strong>Water droplets</strong></td>
+      <td>0.4s, played on swipe</td>
+      <td>Three droplets arc from card swipe to flower.</td>
+    </tr>
+    <tr>
+      <td><strong>Sapling appear</strong></td>
+      <td>2s</td>
+      <td>First-run + milestone moments.</td>
+    </tr>
+    <tr>
+      <td><strong>Companion (cat)</strong></td>
+      <td>walk cycle 1.5s loop, idle blink 4s loop, sleep loop 6s</td>
+      <td>Real pet wandering the garden.</td>
+    </tr>
+    <tr>
+      <td><strong>Companion (other 5)</strong></td>
+      <td>walk + idle each</td>
+      <td>Dog / Bunny / Hamster / Parrot / Fish.</td>
+    </tr>
+    <tr>
+      <td><strong>Wildlings idle</strong></td>
+      <td>2–4s loops, one per creature</td>
+      <td>Hedgehog scuffle, deer head turn, butterfly flutter, etc.</td>
+    </tr>
+    <tr>
+      <td><strong>Fireflies</strong></td>
+      <td>5–7s float-up loops, 3 staggered</td>
+      <td>Always present. Star of the magic-realism.</td>
+    </tr>
+    <tr>
+      <td><strong>Gardener avatar</strong></td>
+      <td>walk + idle + water + sit</td>
+      <td>Kid's character.</td>
+    </tr>
+    <tr>
+      <td><strong>Pond ripple</strong></td>
+      <td>2.5s loop</td>
+      <td>Continuous on the fountain screen.</td>
+    </tr>
+    <tr>
+      <td><strong>Falling leaves</strong></td>
+      <td>9s gravity, staggered ×3</td>
+      <td>Day 30+ gardens — autumn touches.</td>
+    </tr>
+    <tr>
+      <td><strong>Day-to-night transition</strong></td>
+      <td>3s</td>
+      <td>Played when scenePhase shifts at sunset (~7pm).</td>
+    </tr>
+  </table>
+
+  <!-- ===== Reference moodboard ===== -->
+  <h2>Reference moodboard</h2>
+  <p>These are tonal references — colour, mood, character feel — not
+    targets to imitate. We are <strong>not</strong> licensing or copying
+    any of these. The illustrator makes our garden, fresh.</p>
+
+  <div class="refs">
+    <div class="ref-card" style="background: linear-gradient(135deg, #d4e8b5, #6fb061);">
+      <div class="name">Studio Ghibli</div>
+      <div class="why">Mood, dappled light, Totoro forest calm</div>
+    </div>
+    <div class="ref-card" style="background: linear-gradient(135deg, #fef0d6, #d6a455);">
+      <div class="name">Beatrix Potter</div>
+      <div class="why">Watercolour palette, soft edges, animal personalities</div>
+    </div>
+    <div class="ref-card" style="background: linear-gradient(135deg, #aed09c, #4a8a52);">
+      <div class="name">Sky: Children of the Light</div>
+      <div class="why">Pacing, stillness, ambient magic</div>
+    </div>
+    <div class="ref-card" style="background: linear-gradient(135deg, #f5cd9d, #c89c93);">
+      <div class="name">Winnie-the-Pooh (Shepard)</div>
+      <div class="why">Character cast that feels like family</div>
+    </div>
+    <div class="ref-card" style="background: linear-gradient(135deg, #c8e6f5, #5fa84a);">
+      <div class="name">Alto's Odyssey</div>
+      <div class="why">Time-of-day gradients done beautifully</div>
+    </div>
+    <div class="ref-card" style="background: linear-gradient(135deg, #f9e7b8, #bdda93);">
+      <div class="name">Old children's storybook plates</div>
+      <div class="why">Painterly texture, nothing too sharp</div>
+    </div>
+  </div>
+
+  <!-- ===== Deliverables ===== -->
+  <h2>Deliverables</h2>
+  <ul class="std">
+    <li><strong>Static illustrations</strong> — SVG (vector). Each at 1x intended display size, exported with stroke widths normalized.</li>
+    <li><strong>Lottie animations</strong> — JSON (Lottie 5.7+). One per file, named consistently. Frame rate: 60fps. Easing curves locked.</li>
+    <li><strong>Style sheet</strong> — A one-page PDF showing the painted texture style, brush behaviour, line weight, shadow rules. Will be referenced by all future contributors.</li>
+    <li><strong>Source files</strong> — Procreate / Illustrator / After Effects, whatever the illustrator works in. Owned by us at delivery.</li>
+    <li><strong>Variants</strong> — Each character and tree at light + dark for time-of-day. Sky gradients at 4 times.</li>
+  </ul>
+
+  <h3>File naming convention</h3>
+  <pre>characters/sapling.lottie.json
+characters/companion-cat-walk.lottie.json
+characters/companion-cat-idle.lottie.json
+characters/companion-cat-sleep.lottie.json
+wildlings/hedgehog.lottie.json
+wildlings/firefly.lottie.json
+trees/tree-day1.svg
+trees/tree-day30.svg
+flowers/habit-bud.svg
+flowers/habit-bloom.svg
+flowers/habit-bloom.lottie.json     // animated transition
+sky/dawn.svg
+sky/day.svg
+sky/dusk.svg
+sky/night.svg</pre>
+
+  <!-- ===== Process ===== -->
+  <h2>Process &amp; phasing</h2>
+  <p>Four phases over ~5 weeks. Each phase ends in a review checkpoint —
+    designer presents, we approve, we move on.</p>
+
+  <table>
+    <tr><th>Phase</th><th>Duration</th><th>Deliverables</th></tr>
+    <tr>
+      <td><strong>1 · Style sample</strong></td>
+      <td>1 week</td>
+      <td>The Sapling + 1 cat companion + 1 hedgehog wildling + the Day-1 tree, all in the chosen aesthetic. Locks the visual language. <em>Paid even if we don't proceed.</em></td>
+    </tr>
+    <tr>
+      <td><strong>2 · Character cast</strong></td>
+      <td>2 weeks</td>
+      <td>Remaining 5 companion species, 7 remaining wildlings, gardener avatar with all customisations.</td>
+    </tr>
+    <tr>
+      <td><strong>3 · World &amp; growth</strong></td>
+      <td>1.5 weeks</td>
+      <td>6 tree growth stages, 4 sky gradients, 4 flower categories with bud/bloom states, ground textures, glade scene, pond.</td>
+    </tr>
+    <tr>
+      <td><strong>4 · Animations &amp; polish</strong></td>
+      <td>1.5 weeks</td>
+      <td>All Lottie animations, the swipe-to-water sequence (the demo moment), edge cases (empty garden first-run, missed-day brown leaf), style sheet PDF.</td>
+    </tr>
+  </table>
+
+  <!-- ===== Budget guidance ===== -->
+  <h2>Budget guidance</h2>
+  <p>For a senior illustrator with native Lottie / After Effects experience,
+    expect <strong>£8,000–14,000</strong> for the full pack at this scope
+    (or ~$10–18k USD). Higher end for studios; lower end for an independent
+    illustrator looking for a portfolio piece in app design. The Phase 1
+    sample alone usually runs £800–1,500.</p>
+
+  <p>Where to find the right person:</p>
+  <ul class="std">
+    <li><strong>Behance / Dribbble</strong> — search "watercolour app illustration", "Ghibli illustration", "Lottie children's app"</li>
+    <li><strong>Twitter / Bluesky</strong> — illustrators in the kids' app space (Headspace, Calm, Mindstrong all use independents)</li>
+    <li><strong>Society6 / Etsy</strong> — illustrators with a watercolour Etsy store often take commission work</li>
+    <li><strong>Lottie's own marketplace</strong> — illustrators who already work in Lottie format</li>
+  </ul>
+
+  <h3>Vetting — three things to look for</h3>
+  <ul class="std">
+    <li>Have they shipped <em>animated</em> illustrations (Lottie / video / GIF) before? Static portfolio doesn't translate automatically to motion.</li>
+    <li>Can they make a face that's expressive without being cartoonish? Show them The Sapling reference and ask for a 30-min sketch — see what they do.</li>
+    <li>Do they understand iOS asset pipelines (1x/2x/3x, dark mode, Dynamic Type)? Saves us a week of reformatting.</li>
+  </ul>
+
+  <!-- ===== Success criteria ===== -->
+  <h2>What success looks like</h2>
+  <p class="lede">
+    A 7-year-old opens the app for the first time. The Sapling appears,
+    smiles, addresses them by name. Their tree sprouts. The cat walks in.
+    A firefly drifts up. The kid says <strong>"oh"</strong> and means
+    it. They show their parent. The parent says <strong>"that's
+    beautiful"</strong> and means it. That's the bar.
+  </p>
+
+  <p>If the illustration achieves a calm magic that both the kid and the
+    parent want to look at, we've succeeded. If it looks like a commodity
+    children's app that uses a forest as wallpaper, we've failed.</p>
+
+  <div class="signature">
+    Brief authored: 2026-05-10 · OMyDays · The Living Garden ·
+    <a href="./">design proposal home</a>
+  </div>
+</div>
+</body></html>
