@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Image Prompts — Living Garden</title>
+<style>
+  :root {
+    --ink:#1f1f1d; --ink-soft:#4b5247; --ink-mute:#8b918a;
+    --paper:#fafaf3; --rule:#e7e7d8;
+    --accent:#7e9655; --warm:#d6a455;
+    --tree:#6f9849; --flower:#d6a455; --sky:#7eaad9; --char:#b87dad; --wild:#cf8a4f; --scene:#5e9b8a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,"SF Pro Text","Inter",system-ui,sans-serif; line-height:1.55; font-size:16px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 48px 20px 80px; }
+  .crumb { font-size: 13px; color: var(--ink-mute); margin-bottom: 24px; }
+  .doc-meta { font-size: 11px; color: var(--ink-mute); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+  h1 {
+    font-family: "New York", "Iowan Old Style", Georgia, serif;
+    font-size: clamp(36px, 6vw, 56px); font-weight: 500; letter-spacing: -0.02em;
+    margin: 8px 0 12px;
+  }
+  h2 {
+    font-family: "New York", "Iowan Old Style", Georgia, serif;
+    font-size: clamp(22px, 3vw, 30px); font-weight: 500; letter-spacing: -0.01em;
+    margin: 56px 0 12px;
+    border-bottom: 1px solid var(--rule); padding-bottom: 6px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  h2 .swatch {
+    width: 14px; height: 14px; border-radius: 50%; display: inline-block;
+  }
+  h3 { font-size: 16px; font-weight: 700; margin: 20px 0 6px; }
+  p { margin: 0 0 12px; max-width: 64ch; color: var(--ink-soft); }
+  .lede { font-size: 17px; color: var(--ink); max-width: 60ch; line-height: 1.55; }
+
+  .callout {
+    background: #fef9ed; border-left: 3px solid var(--warm);
+    padding: 12px 16px; border-radius: 4px;
+    margin: 14px 0; font-size: 14px; color: var(--ink);
+  }
+  .callout strong { color: var(--warm); }
+
+  pre.tree-view {
+    background: #1c1d18; color: #e6edcf;
+    padding: 18px 20px; border-radius: 10px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px; overflow-x: auto; line-height: 1.6;
+  }
+  pre.tree-view .c { color: #8b948a; }
+
+  /* ---------- Prompt cards ---------- */
+  .prompt-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+  .prompt-card[data-cat="tree"]   { border-left: 4px solid var(--tree); }
+  .prompt-card[data-cat="flower"] { border-left: 4px solid var(--flower); }
+  .prompt-card[data-cat="sky"]    { border-left: 4px solid var(--sky); }
+  .prompt-card[data-cat="char"]   { border-left: 4px solid var(--char); }
+  .prompt-card[data-cat="wild"]   { border-left: 4px solid var(--wild); }
+  .prompt-card[data-cat="scene"]  { border-left: 4px solid var(--scene); }
+
+  .prompt-head {
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--rule);
+    flex-wrap: wrap;
+  }
+  .prompt-head .filename {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px; font-weight: 700; color: var(--ink);
+    background: #f3f1e3; padding: 4px 8px; border-radius: 6px;
+    flex: 1 1 auto; min-width: 0;
+    word-break: break-all;
+  }
+  .prompt-head .meta {
+    font-size: 11px; color: var(--ink-mute); font-weight: 600;
+    margin-right: auto;
+  }
+  .prompt-head button.copy-btn {
+    background: var(--ink); color: white;
+    border: none; border-radius: 8px;
+    padding: 7px 14px; font-size: 12px; font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+  }
+  .prompt-head button.copy-btn:hover {
+    background: var(--accent);
+  }
+  .prompt-head button.copy-btn.copied {
+    background: var(--accent);
+  }
+
+  .prompt-body {
+    padding: 14px;
+  }
+  .prompt-body textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+  }
+  .prompt-body .variant-note {
+    font-size: 11px; color: var(--warm);
+    margin-top: 6px; font-weight: 600;
+  }
+
+  /* TOC */
+  .toc {
+    background: white; border: 1px solid var(--rule);
+    border-radius: 10px; padding: 16px 20px;
+    margin: 32px 0;
+  }
+  .toc ul { list-style: none; padding: 0; margin: 8px 0 0;
+    columns: 2; column-gap: 24px;
+  }
+  .toc li { padding: 4px 0; font-size: 14px; }
+  .toc li a { color: var(--ink); }
+
+  table.style-rules {
+    width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px;
+  }
+  table.style-rules th, table.style-rules td {
+    padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top;
+  }
+  table.style-rules th {
+    background: #f3f1e3; color: var(--ink); font-weight: 700;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  .signature {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule);
+    font-size: 12px; color: var(--ink-mute);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">
+    <a href="./">← Overview</a> · <a href="designer-brief.html">← Designer brief</a>
+  </div>
+
+  <p class="doc-meta">Living Garden · AI image prompts · v1.0</p>
+  <h1>Prompts you can copy.</h1>
+  <p class="lede">
+    Every visual asset for the Living Garden Phase 2 — trees, flowers, skies,
+    characters, wildlings, scenes — has a tuned AI image prompt below. Tap
+    <strong>Copy prompt</strong>, paste into Midjourney / DALL-E / Krea /
+    Ideogram / Stable Diffusion, save the result with the suggested filename,
+    drop into the folder. Each prompt is locked to the watercolour-Ghibli
+    aesthetic from the designer brief so the output stays consistent across
+    ~30 generations.
+  </p>
+
+  <div class="callout">
+    <strong>Workflow:</strong> Generate the foundation tree (`tree-day7.png`)
+    first. Confirm the style feels right. Then go through the rest in any
+    order — the prompts share enough style language that the output will be
+    coherent. Re-roll any image until it matches the foundation's vibe.
+  </div>
+
+  <h2>Where to put the results</h2>
+
+  <p>Save raw image files to a new top-level folder in the repo, then drag
+    them into Xcode's asset catalog when you're ready to wire them up. The
+    folder structure mirrors the categories below.</p>
+
+  <pre class="tree-view"><span class="c">family-chore-app/</span>
+└── garden-art/                  <span class="c"># NEW — create at repo root</span>
+    ├── trees/
+    │   ├── tree-day1.png
+    │   ├── tree-day7.png
+    │   ├── tree-day30.png
+    │   ├── tree-day90.png
+    │   ├── tree-day180.png
+    │   └── tree-day365.png
+    ├── flowers/
+    │   ├── flower-habit-bud.png
+    │   ├── flower-habit-bloom.png
+    │   ├── flower-routine-bud.png
+    │   ├── flower-routine-bloom.png
+    │   ├── flower-household-bud.png
+    │   ├── flower-household-bloom.png
+    │   ├── flower-pitched-bud.png
+    │   └── flower-pitched-bloom.png
+    ├── sky/
+    │   ├── sky-dawn.png
+    │   ├── sky-day.png
+    │   ├── sky-dusk.png
+    │   └── sky-night.png
+    ├── characters/
+    │   ├── sapling-idle.png
+    │   ├── sapling-wave.png
+    │   ├── sapling-sleep.png
+    │   ├── companion-cat.png
+    │   ├── companion-dog.png
+    │   ├── companion-bunny.png
+    │   ├── companion-hamster.png
+    │   ├── companion-parrot.png
+    │   ├── companion-fish.png
+    │   └── gardener-base.png
+    ├── wildlings/
+    │   ├── wildling-hedgehog.png
+    │   ├── wildling-deer.png
+    │   ├── wildling-butterfly.png
+    │   ├── wildling-ladybug.png
+    │   ├── wildling-snail.png
+    │   ├── wildling-frog.png
+    │   ├── wildling-robin.png
+    │   └── wildling-fireflies.png
+    └── scenes/
+        ├── scene-glade.png
+        ├── scene-pond.png
+        ├── ground-day.png
+        └── ground-dusk.png</pre>
+
+  <p>Once you have the files, the iOS integration is a 1-line drag into
+    <code>ios-app/MyDay/Assets.xcassets/Garden/</code> (Xcode auto-creates
+    the imageset). The file names match what `GardenView.swift` and friends
+    will reference, so no code changes needed.</p>
+
+  <h2>Table of contents</h2>
+  <div class="toc">
+    <ul>
+      <li><a href="#foundation">↗ Foundation test</a></li>
+      <li><a href="#trees">🌳 Trees (6)</a></li>
+      <li><a href="#flowers">🌸 Flowers (8)</a></li>
+      <li><a href="#sky">☁️ Sky gradients (4)</a></li>
+      <li><a href="#characters">👥 Characters (10)</a></li>
+      <li><a href="#wildlings">🐾 Wildlings (8)</a></li>
+      <li><a href="#scenes">🌌 Scenes (4)</a></li>
+      <li><a href="#style">🎨 Style rules</a></li>
+    </ul>
+  </div>
+
+  <!-- ============== FOUNDATION ============== -->
+  <h2 id="foundation"><span class="swatch" style="background:var(--accent)"></span> Foundation test — do this first</h2>
+
+  <p>Run this prompt before anything else. It establishes the visual
+    language. If the result feels right (warm, soft, painterly, magical
+    without being twee), proceed. If it feels generic or stiff, tweak
+    the negative prompts at the bottom and re-roll until it locks in.</p>
+
+  <div class="prompt-card" data-cat="tree">
+    <div class="prompt-head">
+      <span class="filename">foundation-test.png</span>
+      <span class="meta">1024×1024 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-foundation')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-foundation">A small charming tree about 1m tall, painted in soft watercolour with pastel sage and warm dappled gold tones. The trunk is gentle brown, the foliage is layered in different greens — sage, lime, forest. The whole illustration feels like a calm corner of a Studio Ghibli forest crossed with a Beatrix Potter storybook plate: soft edges, hand-painted texture, gentle magical realism, warm filtered sunlight from above. Standing alone with no background, centred composition, transparent PNG, 1024×1024. No text, no labels, no UI elements, no flat geometric shapes, no neon, no harsh shadows, no thick black outlines, no 3D render, no photorealistic.</textarea>
+    </div>
+  </div>
+
+  <!-- ============== TREES ============== -->
+  <h2 id="trees"><span class="swatch" style="background:var(--tree)"></span> Trees · 6 growth stages</h2>
+
+  <p>One per growth-stage milestone. The tree gets bigger and gains
+    detail (knot, fallen leaves, blossoms) as the days accumulate.</p>
+
+  <div class="prompt-card" data-cat="tree">
+    <div class="prompt-head">
+      <span class="filename">trees/tree-day1.png</span>
+      <span class="meta">1024×1024 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-tree1')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-tree1">A tiny watercolour sapling with two small fresh leaves emerging from rich brown soil. Bright spring green, just sprouting, very young, tender, hopeful. Centred composition. Hand-painted watercolour in the style of Studio Ghibli's calm forest combined with Beatrix Potter's gentle pastel palette. Soft edges, dappled warm sunlight, transparent background. PNG, 1024×1024. No text, no labels, no flat geometric shapes, no neon, no harsh outlines, no 3D, no photorealistic.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="tree">
+    <div class="prompt-head">
+      <span class="filename">trees/tree-day7.png</span>
+      <span class="meta">1024×1024 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-tree7')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-tree7">A small young tree about 30cm tall, slim trunk, a delicate canopy of a few real leaves forming a tiny dome. Soft sage greens, fresh new growth, gently swaying. Watercolour, Studio Ghibli + Beatrix Potter style, soft edges, dappled sunlight from above. Standing alone, centred, transparent PNG background. 1024×1024. No text, no UI, no flat geometric shapes, no neon, no harsh outlines, no 3D render.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="tree">
+    <div class="prompt-head">
+      <span class="filename">trees/tree-day30.png</span>
+      <span class="meta">1024×1024 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-tree30')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-tree30">A young tree about 1m tall, with a thin trunk and a small dome of canopy in layered greens — sage, lime, soft forest green. A few small fallen leaves rest at the base hinting at history. Hand-painted watercolour, Ghibli grove warmth + Beatrix Potter softness, dappled sunlight. Standing alone, centred, transparent PNG. 1024×1024. No text, no labels, no flat geometry, no neon, no thick outlines, no 3D, no photo.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="tree">
+    <div class="prompt-head">
+      <span class="filename">trees/tree-day90.png</span>
+      <span class="meta">1024×1024 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-tree90')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-tree90">A handsome mid-sized broadleaf tree, about 2m tall, multiple distinct foliage clusters in different shades of green, a small knot in the trunk gives character. The kind of tree found in a calm English country garden. Watercolour, Studio Ghibli + Beatrix Potter, dappled warm sunlight from above. Standing alone, centred composition, transparent PNG. 1024×1024. No text, no UI, no flat shapes, no neon, no outlines, no 3D, no photorealistic.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="tree">
+    <div class="prompt-head">
+      <span class="filename">trees/tree-day180.png</span>
+      <span class="meta">1024×1024 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-tree180')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-tree180">A robust mature tree, about 3m tall, with rich layered foliage and subtle hints of seasonal change — a few autumn-tipped leaves at the edges. Thick trunk with character, a knot, slight bark texture, fallen leaves around the base. Watercolour, Studio Ghibli grove magic + Beatrix Potter palette warmth. Standing alone, centred, transparent PNG. 1024×1024. No text, no labels, no flat geometric, no neon, no harsh outlines, no 3D.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="tree">
+    <div class="prompt-head">
+      <span class="filename">trees/tree-day365.png</span>
+      <span class="meta">1024×1024 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-tree365')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-tree365">A grand old oak in full bloom — wide canopy, gnarled trunk full of character, dense layered foliage. A few cherry blossoms at the canopy edges suggest spring; warm summer sunlight filters through. The tree looks loved and well-tended over a year. Watercolour, Studio Ghibli + Beatrix Potter style. Standing alone, centred composition, transparent PNG. 1024×1024. No text, no UI, no flat geometry, no neon, no outlines, no 3D, no photo.</textarea>
+    </div>
+  </div>
+
+  <!-- ============== FLOWERS ============== -->
+  <h2 id="flowers"><span class="swatch" style="background:var(--flower)"></span> Flowers · 4 categories × 2 states</h2>
+
+  <p>Each chore category has its own flower colour. The "bud" and "bloom"
+    states are used by the flower-bloom Lottie animation. Generate both
+    states from the prompt — same flower, two stages.</p>
+
+  <div class="prompt-card" data-cat="flower">
+    <div class="prompt-head">
+      <span class="filename">flowers/flower-habit-bud.png + flower-habit-bloom.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-flower-habit')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-flower-habit">A friendly cottage-garden flower with warm yellow petals (like buttercup or marigold) and a soft golden centre. Watercolour, slightly playful but calm. The flower feels like a "daily habit" flower — sunny, encouraging, reliable. Centred composition, white transparent background. PNG, 512×512. Studio Ghibli + Beatrix Potter style, soft hand-painted edges, no text, no UI, no flat geometric shapes, no neon, no thick outlines.</textarea>
+      <div class="variant-note">Generate twice: once with "bud — closed, smaller, just emerging" and once with "bloom — fully open petals, vibrant, slightly larger". Same flower in two states.</div>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="flower">
+    <div class="prompt-head">
+      <span class="filename">flowers/flower-routine-bud.png + flower-routine-bloom.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-flower-routine')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-flower-routine">A gentle wildflower with soft sage-green petals and a cream centre — looks like something a hedgehog would befriend. Watercolour, Studio Ghibli + Beatrix Potter. The "routine flower" — for pet-care and household-rhythm chores. Centred, transparent PNG, 512×512. Hand-painted, soft edges, no text, no labels, no flat geometric, no neon, no outlines.</textarea>
+      <div class="variant-note">Generate twice — bud state (tightly closed, smaller) and bloom state (fully open, vibrant centre).</div>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="flower">
+    <div class="prompt-head">
+      <span class="filename">flowers/flower-household-bud.png + flower-household-bloom.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-flower-household')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-flower-household">A simple white daisy-like flower with a soft yellow centre. Clean, classic, ungendered, warm. Watercolour, hand-painted, Beatrix Potter charm. The "household flower" — for tidying and chores around the house. Centred composition, white transparent background. PNG, 512×512. Soft edges, no text, no UI, no flat shapes, no neon, no outlines, no 3D.</textarea>
+      <div class="variant-note">Generate twice — bud (closed, smaller) and bloom (fully open, vibrant petals).</div>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="flower">
+    <div class="prompt-head">
+      <span class="filename">flowers/flower-pitched-bud.png + flower-pitched-bloom.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-flower-pitched')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-flower-pitched">A magical-looking flower with soft lavender-purple petals and a tiny golden glow at the centre — slightly fantastical, like something from a Ghibli enchanted forest. The "pitched contract flower" — for the kid's own ideas. Watercolour, hand-painted, Studio Ghibli grove magic + Beatrix Potter softness. Centred, transparent PNG, 512×512. Soft edges, no text, no UI, no flat geometric shapes, no neon harshness.</textarea>
+      <div class="variant-note">Generate twice — bud state and bloom state.</div>
+    </div>
+  </div>
+
+  <!-- ============== SKY ============== -->
+  <h2 id="sky"><span class="swatch" style="background:var(--sky)"></span> Sky gradients · 4 times of day</h2>
+
+  <p>Wide vertical gradients used as full-screen iOS backgrounds. The
+    SwiftUI side picks one based on the current hour and crossfades.</p>
+
+  <div class="prompt-card" data-cat="sky">
+    <div class="prompt-head">
+      <span class="filename">sky/sky-dawn.png</span>
+      <span class="meta">1290×2796 · iPhone Pro size</span>
+      <button class="copy-btn" onclick="copyPrompt('p-sky-dawn')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-sky-dawn">A wide watercolour sky gradient at dawn — soft warm pinks and peach at the horizon transitioning gently into pastel cream and then a tender lavender at the top. Painterly wash, hand-painted, no specific clouds, slightly textured paper feel. Calm, hopeful, magical. Studio Ghibli + Beatrix Potter style. Vertical 1290×2796 PNG, suitable as a full-screen iOS background. No text, no UI elements, no flat geometric, no neon, no logos.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="sky">
+    <div class="prompt-head">
+      <span class="filename">sky/sky-day.png</span>
+      <span class="meta">1290×2796 · iPhone Pro size</span>
+      <button class="copy-btn" onclick="copyPrompt('p-sky-day')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-sky-day">A wide watercolour sky gradient on a calm clear day — soft sage green at the horizon transitioning gently into a pastel sky blue at the top. Painterly wash with a hint of dappled warm gold suggesting filtered sunlight. Hand-painted, slightly textured. Studio Ghibli grove + Beatrix Potter palette. Vertical 1290×2796 PNG. No text, no UI, no clouds with hard outlines, no neon, no logos.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="sky">
+    <div class="prompt-head">
+      <span class="filename">sky/sky-dusk.png</span>
+      <span class="meta">1290×2796 · iPhone Pro size</span>
+      <button class="copy-btn" onclick="copyPrompt('p-sky-dusk')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-sky-dusk">A wide watercolour sky gradient at dusk — warm amber and rose-gold at the horizon transitioning gently up through soft violet to a deeper ink-blue at the top. Magical hour, painterly wash, hand-painted, slightly dreamy. Studio Ghibli + Beatrix Potter style. Vertical 1290×2796 PNG, suitable as iOS app background. No text, no UI, no flat geometric clouds, no neon, no logos.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="sky">
+    <div class="prompt-head">
+      <span class="filename">sky/sky-night.png</span>
+      <span class="meta">1290×2796 · iPhone Pro size</span>
+      <button class="copy-btn" onclick="copyPrompt('p-sky-night')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-sky-night">A watercolour night sky — deep ink-blue at the horizon transitioning gently to indigo-violet at the top, with a few small subtle stars scattered tastefully (not many — just a quiet handful, painted as soft glowing dots). Magical, calm, contemplative. Studio Ghibli + Beatrix Potter style. Vertical 1290×2796 PNG. No text, no constellations with lines, no UI, no neon, no flat shapes.</textarea>
+    </div>
+  </div>
+
+  <!-- ============== CHARACTERS ============== -->
+  <h2 id="characters"><span class="swatch" style="background:var(--char)"></span> Characters · 10 illustrations</h2>
+
+  <h3>The Sapling — garden spirit (3 poses)</h3>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/sapling-idle.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-sapling-idle')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-sapling-idle">A small whimsical garden spirit character — a walking sapling about 60cm tall, with two big innocent eyes, two small fresh leaves on its head like hair, slim green body, tiny feet. Standing peacefully, neutral pose, looking up gently. Watercolour, hand-painted, Studio Ghibli forest spirit charm crossed with Beatrix Potter softness. Calm, warm, slightly mysterious but not creepy. Centred composition, transparent PNG, 512×512. Soft edges, no text, no UI, no flat geometric, no neon, no thick black outlines.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/sapling-wave.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-sapling-wave')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-sapling-wave">The same small walking-sapling garden spirit (two leaves on head, slim green body, big eyes), this time with one leaf raised in a friendly hello wave, smiling gently. Same watercolour Ghibli + Beatrix Potter style as the previous Sapling. Centred composition, transparent PNG, 512×512. No text, no UI, no flat shapes, no neon.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/sapling-sleep.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-sapling-sleep')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-sapling-sleep">The same small walking-sapling garden spirit, this time curled up asleep at the base of a tree, leaves drooping peacefully, eyes closed, tiny "z" floating up. Watercolour, calm, Studio Ghibli + Beatrix Potter style. Centred, transparent PNG, 512×512. Soft edges, no text, no UI, no flat shapes.</textarea>
+    </div>
+  </div>
+
+  <h3>Companion pets — 6 species</h3>
+
+  <p>Each is a real-world pet a parent picks at setup. Generate one image
+    per species; if you need multiple poses (idle, walk, sleep), re-roll
+    with the pose change appended to the prompt.</p>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/companion-cat.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-cat')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-cat">A friendly stylised tabby cat sitting peacefully, painted in soft watercolour. Warm orange and cream tones, expressive eyes, a slight smile. Charming and gentle, in the style of Beatrix Potter — warm, storybook, lifelike but not cartoonish. The cat looks loved. Centred composition, transparent PNG, 512×512. Soft edges, no text, no UI, no flat geometric, no neon, no thick black outlines.</textarea>
+      <div class="variant-note">For walk and sleep poses, append "walking gracefully, mid-stride" or "curled up asleep, eyes closed" to the prompt.</div>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/companion-dog.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-dog')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-dog">A friendly stylised dog sitting attentively, medium-size mixed breed (golden retriever-ish), painted in soft watercolour. Warm gold and cream tones, gentle expressive eyes, slight tail wag. In the style of Beatrix Potter — warm storybook, characterful, not cartoonish. Centred, transparent PNG, 512×512. Soft edges, no text, no UI, no flat shapes, no neon, no thick outlines.</textarea>
+      <div class="variant-note">Walk pose: "walking, mid-stride, paws lifted". Sleep: "curled up asleep, paws tucked".</div>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/companion-bunny.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-bunny')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-bunny">A small fluffy bunny rabbit sitting upright with long ears, painted in soft watercolour. Cream and grey tones, twitching nose, gentle dark eyes. In the style of Beatrix Potter (Peter Rabbit charm) — warm, storybook, lifelike but soft. Centred, transparent PNG, 512×512. Soft edges, no text, no UI, no flat shapes, no thick outlines.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/companion-hamster.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-hamster')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-hamster">A small charming hamster, fluffy round body, big bright eyes, sitting up holding a tiny seed, painted in soft watercolour. Warm honey and cream tones. Beatrix Potter storybook style — warm and characterful. Centred, transparent PNG, 512×512. Soft edges, no text, no UI, no flat shapes.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/companion-parrot.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-parrot')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-parrot">A friendly small parrot perched on a branch, with soft watercolour-painted feathers in muted greens and warm yellow accents (not gaudy — gentle). Curious head tilt, expressive bright eye. Beatrix Potter storybook style. Centred, transparent PNG, 512×512. Soft edges, no text, no UI, no flat geometric, no neon brightness, no thick outlines.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/companion-fish.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-fish')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-fish">A small goldfish in a vintage round glass bowl, watercolour painting, warm orange-gold body, gentle ripples on the water inside the bowl. Soft and storybook, Beatrix Potter aesthetic. Centred composition, transparent PNG, 512×512. Soft edges, no text, no UI, no flat shapes, no thick outlines, no neon.</textarea>
+    </div>
+  </div>
+
+  <h3>The Gardener — kid's avatar (1 base)</h3>
+
+  <div class="prompt-card" data-cat="char">
+    <div class="prompt-head">
+      <span class="filename">characters/gardener-base.png</span>
+      <span class="meta">512×512 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-gardener')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-gardener">A young child standing in a garden, ready for a quest — watercolour painting, Studio Ghibli + Beatrix Potter charm. Wearing simple comfortable clothing in soft colours (sky blue top, gentle brown trousers). Expressive face but not cartoonish, warm gentle smile, hair in a casual style. Slight cheek blush. Welcoming pose, hands at sides, looking softly at the viewer. Centred, transparent PNG, 512×512. Soft edges, no text, no UI, no flat shapes, no neon, no thick black outlines, no hyperreal.</textarea>
+      <div class="variant-note">For walk/water/sit pose variants, generate the same character with the pose appended. For hair-colour / skin-tone variants, append: "(dark hair, light olive skin)" / "(blonde hair, fair skin)" / "(black hair, dark skin)" etc.</div>
+    </div>
+  </div>
+
+  <!-- ============== WILDLINGS ============== -->
+  <h2 id="wildlings"><span class="swatch" style="background:var(--wild)"></span> Wildlings · 8 decorative critters</h2>
+
+  <p>These are buyable from the glade. They have no chores attached —
+    pure ambient delight. Each gets one prompt; the SwiftUI animation
+    layer adds idle motion later.</p>
+
+  <div class="prompt-card" data-cat="wild">
+    <div class="prompt-head">
+      <span class="filename">wildlings/wildling-hedgehog.png</span>
+      <span class="meta">256×256 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-hedge')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-hedge">A small charming hedgehog with a slightly inquisitive expression, gentle dark eyes, soft brown spines and a cream belly. Watercolour, Beatrix Potter style — warm, storybook, lifelike but soft. Centred composition, transparent PNG, 256×256. Soft edges, no text, no UI, no flat shapes, no thick outlines.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="wild">
+    <div class="prompt-head">
+      <span class="filename">wildlings/wildling-deer.png</span>
+      <span class="meta">256×256 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-deer')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-deer">A young roe-deer fawn standing peacefully, gentle eyes, white spots on a soft brown coat. Watercolour, Studio Ghibli forest gentle creature + Beatrix Potter charm. Centred, transparent PNG, 256×256. Soft edges, no text, no flat shapes, no thick outlines.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="wild">
+    <div class="prompt-head">
+      <span class="filename">wildlings/wildling-butterfly.png</span>
+      <span class="meta">256×256 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-butterfly')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-butterfly">A delicate watercolour butterfly with soft amber and cream wings, slight orange edges, gentle pattern. Beatrix Potter painterly style. Wings open, side view. Centred, transparent PNG, 256×256. Soft edges, no text, no flat geometric.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="wild">
+    <div class="prompt-head">
+      <span class="filename">wildlings/wildling-ladybug.png</span>
+      <span class="meta">256×256 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-ladybug')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-ladybug">A small charming ladybug, soft red shell with gentle black spots, tiny black head and feelers. Watercolour, painterly, slightly stylised but warm. Beatrix Potter charm. Centred, transparent PNG, 256×256. Soft edges, no text, no harsh outlines.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="wild">
+    <div class="prompt-head">
+      <span class="filename">wildlings/wildling-snail.png</span>
+      <span class="meta">256×256 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-snail')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-snail">A friendly garden snail with a swirled honey-cream shell, soft greenish body, two long curious antennae. Watercolour, Beatrix Potter charm. Side view, centred composition, transparent PNG, 256×256. Soft edges, no text, no UI, no flat shapes.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="wild">
+    <div class="prompt-head">
+      <span class="filename">wildlings/wildling-frog.png</span>
+      <span class="meta">256×256 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-frog')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-frog">A small friendly green frog sitting on a soft rock, watercolour, Beatrix Potter painterly charm, gentle expressive eyes, slight smile. Centred, transparent PNG, 256×256. Soft edges, no text, no flat geometric, no thick outlines, no cartoon.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="wild">
+    <div class="prompt-head">
+      <span class="filename">wildlings/wildling-robin.png</span>
+      <span class="meta">256×256 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-robin')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-robin">A small English robin with a warm orange-red breast and soft brown back, perched gently. Watercolour, Beatrix Potter painterly style, expressive bright eye, gentle slight tilt of head. Centred, transparent PNG, 256×256. Soft edges, no text, no flat shapes, no harsh outlines.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="wild">
+    <div class="prompt-head">
+      <span class="filename">wildlings/wildling-fireflies.png</span>
+      <span class="meta">256×256 · transparent</span>
+      <button class="copy-btn" onclick="copyPrompt('p-firefly')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-firefly">A cluster of three small glowing fireflies floating gently, painted in watercolour with warm golden-amber light and soft glow halos around each. Magical, dreamy, Studio Ghibli grove magic. Centred composition with the fireflies arranged at slightly different heights, transparent PNG, 256×256. Soft edges, no text, no flat geometric stars, no neon harshness.</textarea>
+    </div>
+  </div>
+
+  <!-- ============== SCENES ============== -->
+  <h2 id="scenes"><span class="swatch" style="background:var(--scene)"></span> Scenes · 4 background environments</h2>
+
+  <div class="prompt-card" data-cat="scene">
+    <div class="prompt-head">
+      <span class="filename">scenes/scene-glade.png</span>
+      <span class="meta">1290×2796 · vertical iOS bg</span>
+      <button class="copy-btn" onclick="copyPrompt('p-glade')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-glade">A peaceful watercolour woodland glade interior — slightly dimmer than open garden, mossy ground with a few small mushrooms, dappled warm sunlight filtering through tall trees from above, several glowing fireflies floating near centre at different heights, magical dreamy atmosphere. Hand-painted, Studio Ghibli forest interior + Beatrix Potter charm. Vertical composition suitable as full-screen iOS background. PNG 1290×2796. No text, no UI, no characters, no flat geometric, no neon.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="scene">
+    <div class="prompt-head">
+      <span class="filename">scenes/scene-pond.png</span>
+      <span class="meta">1024×768 · landscape</span>
+      <button class="copy-btn" onclick="copyPrompt('p-pond')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-pond">A still calm watercolour pond seen from slightly above — soft blue and teal water with subtle concentric ripples expanding from centre, a few gentle lily pads at edges, golden warm sunlight catching the surface. Magical, peaceful. Studio Ghibli + Beatrix Potter style. Landscape composition, edges fade slightly to transparent. PNG, 1024×768. No text, no UI, no flat shapes, no harsh shadows, no logos.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="scene">
+    <div class="prompt-head">
+      <span class="filename">scenes/ground-day.png</span>
+      <span class="meta">2048×768 · wide</span>
+      <button class="copy-btn" onclick="copyPrompt('p-ground-day')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-ground-day">A wide watercolour ground texture for use as the foreground in a garden scene — gentle grassy hills, soft sage greens, occasional small wildflowers (yellow, white, sage). Painterly, no specific subject, calm horizon. Suitable as a tileable foreground. Studio Ghibli + Beatrix Potter style. Long horizontal aspect, edges fade gently to transparent at top. PNG, 2048×768. No text, no UI, no flat geometric, no neon, no harsh outlines.</textarea>
+    </div>
+  </div>
+
+  <div class="prompt-card" data-cat="scene">
+    <div class="prompt-head">
+      <span class="filename">scenes/ground-dusk.png</span>
+      <span class="meta">2048×768 · wide</span>
+      <button class="copy-btn" onclick="copyPrompt('p-ground-dusk')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-ground-dusk">Same wide watercolour ground texture as the day version, but at dusk — warmer palette, longer soft shadows hinted, slightly muted greens with amber and rose-gold undertones, a few wildflowers catching the last light. Painterly, calm. Studio Ghibli + Beatrix Potter. Long horizontal, edges fade. PNG, 2048×768. No text, no UI, no flat geometric, no harsh outlines.</textarea>
+    </div>
+  </div>
+
+  <!-- ============== STYLE RULES ============== -->
+  <h2 id="style"><span class="swatch" style="background:var(--accent)"></span> Style consistency rules</h2>
+
+  <p>Every prompt above ends with the same negative-prompt list. Repeat
+    these in each generation for visual consistency. If your AI tool has
+    a "negative prompt" field, paste this in:</p>
+
+  <div class="prompt-card" data-cat="">
+    <div class="prompt-head">
+      <span class="filename">universal-negatives</span>
+      <span class="meta">paste in every "negative prompt" field</span>
+      <button class="copy-btn" onclick="copyPrompt('p-negatives')">Copy prompt</button>
+    </div>
+    <div class="prompt-body">
+      <textarea readonly id="p-negatives">text, labels, watermarks, logos, words, signatures, flat geometric shapes, neon colours, harsh shadows, thick black outlines, cartoon style, photorealistic, 3D render, AI artifacts, distorted faces, extra limbs, glitched, low resolution, pixelated, oversaturated, gritty, dark and gloomy, horror</textarea>
+    </div>
+  </div>
+
+  <p>And a quick recap of the visual rules from the designer brief:</p>
+
+  <table class="style-rules">
+    <tr><th>Rule</th><th>Why</th></tr>
+    <tr>
+      <td>Soft edges, no hard outlines</td>
+      <td>Watercolour, not vector. Implied stroke through colour transitions.</td>
+    </tr>
+    <tr>
+      <td>Pastel base, warm amber accents</td>
+      <td>Sky 30-40% sat, accents 70-80% used sparingly.</td>
+    </tr>
+    <tr>
+      <td>Dappled warm light from above</td>
+      <td>Always feels like sunlight through canopy.</td>
+    </tr>
+    <tr>
+      <td>Magic in the margins</td>
+      <td>Fireflies, dust motes, leaves drift past — never centre stage.</td>
+    </tr>
+    <tr>
+      <td>Painterly, not vector-perfect</td>
+      <td>Slight texture, hand-finished feel.</td>
+    </tr>
+    <tr>
+      <td>One typeface, two weights</td>
+      <td>Doesn't apply to images, but applies if any UI text gets generated. Don't.</td>
+    </tr>
+  </table>
+
+  <h2>What we're NOT making</h2>
+  <ul style="font-size: 14px; color: var(--ink-soft); padding-left: 20px;">
+    <li>Not gamified — no XP bars, no levels visible, no badge collections in the art</li>
+    <li>Not cartoonish — characters have personality but they're painted, not bouncy</li>
+    <li>Not minimal/Scandinavian — soft and rich, not flat and geometric</li>
+    <li>Not retro / pixel-art / 3D / vector / commercial-clipart</li>
+  </ul>
+
+  <h2>Once you have all the files</h2>
+  <ol style="font-size: 14px; color: var(--ink-soft); padding-left: 20px; line-height: 1.7;">
+    <li>Save each generated image with the filename shown in the prompt card.</li>
+    <li>Drop into <code>family-chore-app/garden-art/</code> in the matching subfolder.</li>
+    <li>Commit them: <code>git add garden-art/ && git commit -m "Add Phase-2 illustrator pack"</code></li>
+    <li>Tell me when they're in. I'll wire them into the SwiftUI views and ship Build 17 with real visuals.</li>
+  </ol>
+
+  <div class="signature">
+    Document authored: 2026-05-10 · OMyDays Living Garden ·
+    <a href="./">design proposal home</a>
+  </div>
+</div>
+
+<script>
+  function copyPrompt(id) {
+    const el = document.getElementById(id);
+    const text = el.value || el.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = el.closest('.prompt-card').querySelector('.copy-btn');
+      const original = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove('copied');
+      }, 1400);
+    }).catch(() => {
+      // Fallback: select the textarea so user can manual-copy
+      el.focus();
+      el.select();
+    });
+  }
+</script>
+
+</body>
+</html>
