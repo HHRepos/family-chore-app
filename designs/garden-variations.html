@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garden — variations &amp; future state</title>
+<style>
+  :root { --ink:#111315; --ink-soft:#4b525a; --ink-mute:#8b929b; --paper:#fafaf7; --rule:#e7e7e1; --accent:#ff5d3a; --green:#5e8a25; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,"SF Pro Text","Inter",system-ui,sans-serif; line-height:1.55; font-size:16px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 24px 96px; }
+  .crumb { font-size: 13px; color: var(--ink-mute); margin-bottom: 32px; }
+  .eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); }
+  h1 { font-size: clamp(40px,7vw,72px); font-weight: 700; letter-spacing: -0.03em; margin: 8px 0 16px; }
+  h2 { font-size: clamp(26px,3.4vw,38px); font-weight: 700; letter-spacing: -0.02em; margin: 64px 0 12px; }
+  h3 { font-size: 18px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin: 0 0 12px; max-width: 65ch; color: var(--ink-soft); }
+  .lede { font-size: 19px; color: var(--ink); max-width: 60ch; }
+  hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 56px 0; }
+
+  .principle { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin: 20px 0 4px; }
+  .pair { display: grid; grid-template-columns: 360px 1fr; gap: 56px; align-items: start; margin-top: 32px; }
+  @media (max-width: 880px) { .pair { grid-template-columns: 1fr; gap: 24px; } }
+  .pair .copy h3 { margin-top: 0; }
+  .caption { font-size: 12px; color: var(--ink-mute); text-align: center; margin-top: 12px; }
+
+  .row { display: grid; gap: 24px; }
+  .four-up { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 1000px) { .four-up { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .four-up { grid-template-columns: 1fr; } }
+
+  /* ---------- Phone frame ---------- */
+  .phone { width: 320px; height: 660px; border-radius: 50px; background: #111; padding: 14px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.18), 0 8px 18px rgba(0,0,0,0.10),
+      inset 0 0 0 1.5px rgba(255,255,255,0.05); position: relative; margin: 0 auto; }
+  .phone.small { width: 240px; height: 500px; padding: 10px; border-radius: 38px; }
+  .phone.small::before { width: 80px; height: 20px; top: 14px; }
+  .phone::before { content:""; position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 28px; background: #000; border-radius: 14px; z-index: 10; }
+  .screen { width: 100%; height: 100%; border-radius: 38px; overflow: hidden; position: relative; isolation: isolate; }
+  .phone.small .screen { border-radius: 30px; }
+
+  /* ---------- Animations (no flip!) ---------- */
+  @keyframes sway {
+    0%,100% { transform: translateX(-50%) rotate(-1deg); }
+    50%     { transform: translateX(-50%) rotate(1deg); }
+  }
+  @keyframes drift {
+    0%   { transform: translateX(-40px); opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { transform: translateX(80px); opacity: 0; }
+  }
+  @keyframes drift-slow {
+    0%   { transform: translateX(-30px); opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateX(60px); opacity: 0; }
+  }
+  @keyframes flutter {
+    0%   { transform: translate(0, 0); }
+    50%  { transform: translate(-30px, -10px); }
+    100% { transform: translate(-60px, 0); }
+  }
+  @keyframes float-up {
+    0%   { transform: translateY(0); opacity: 0.6; }
+    50%  { opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+  }
+  @keyframes ripple {
+    0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0.55; }
+    100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+  }
+  @keyframes leaf-fall {
+    0%   { transform: translate(0, -10px) rotate(0); opacity: 0; }
+    10%  { opacity: 1; }
+    100% { transform: translate(-40px, 240px) rotate(180deg); opacity: 0; }
+  }
+
+  /* ===========================================================
+     Day 32 — Mature garden (lots of life)
+     =========================================================== */
+  .scr-day32 {
+    background: linear-gradient(180deg, #d4e8b5 0%, #b8d18a 50%, #a3b97c 100%);
+    font-family: "Avenir Next", -apple-system, sans-serif; color: #2c3a23;
+  }
+  .scr-day32 .topbar { padding: 50px 22px 0; display: flex; justify-content: space-between; align-items: flex-end; }
+  .scr-day32 .topbar .name { font-size: 18px; font-weight: 600; color: #2c3a23; letter-spacing: -0.01em; }
+  .scr-day32 .topbar .sub  { font-size: 11px; color: #4d5e30; margin-top: 2px; }
+  .scr-day32 .topbar .seeds {
+    background: rgba(255,255,255,0.65); padding: 6px 12px; border-radius: 20px;
+    font-size: 13px; font-weight: 700; color: #6a4f1a;
+  }
+  .scr-day32 .day-stamp {
+    position: absolute; top: 90px; left: 22px;
+    background: #6f4e2c; color: #fef9ed; padding: 4px 10px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; transform: rotate(-3deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    letter-spacing: 0.05em;
+  }
+  .scr-day32 .stage { padding-top: 14px; height: 380px; position: relative; }
+
+  /* The mature tree — taller, more layers */
+  .day32-tree {
+    position: absolute; bottom: 32%; left: 50%;
+    transform-origin: 50% 100%; transform: translateX(-50%);
+    width: 230px; height: 280px;
+    filter: drop-shadow(0 10px 16px rgba(60,80,30,0.3));
+    animation: sway 7s ease-in-out infinite;
+  }
+  /* Falling leaves to suggest growth */
+  .scr-day32 .leaf {
+    position: absolute; font-size: 12px; opacity: 0;
+    animation: leaf-fall 9s ease-in infinite;
+  }
+  .scr-day32 .leaf.l1 { top: 28%; left: 45%; animation-delay: 0s; }
+  .scr-day32 .leaf.l2 { top: 32%; left: 60%; animation-delay: 3s; }
+  .scr-day32 .leaf.l3 { top: 25%; left: 38%; animation-delay: 6s; }
+
+  /* Flower beds — much denser than day 1 */
+  .scr-day32 .bed {
+    position: absolute; display: flex; gap: 4px;
+    bottom: 18%;
+  }
+  .scr-day32 .bed.left  { left: 8%; transform: rotate(-3deg); }
+  .scr-day32 .bed.right { right: 8%; transform: rotate(3deg); }
+  .scr-day32 .bed .b {
+    width: 22px; height: 22px; font-size: 14px; line-height: 22px; text-align: center;
+    background: rgba(255,255,255,0.9); border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  }
+  .scr-day32 .bed .b.dim { opacity: 0.55; transform: scale(0.85); }
+
+  /* Today's flowers — bigger, prominent */
+  .scr-day32 .today-flower {
+    position: absolute; width: 50px; height: 50px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.95); font-size: 22px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+    border: 2px solid rgba(255,255,255,0.9);
+  }
+  .scr-day32 .today-flower::after {
+    content:""; position: absolute; left: 50%; top: 50%;
+    width: 70px; height: 70px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+    animation: ripple 3.5s ease-out infinite;
+  }
+  .scr-day32 .today-flower.tf1 { bottom: 50%; left: 16%; }
+  .scr-day32 .today-flower.tf2 { bottom: 45%; right: 14%; }
+  .scr-day32 .today-flower.tf3 { bottom: 30%; left: 70%; }
+
+  /* Wildlife — multiple */
+  .scr-day32 .pet { position: absolute; bottom: 14%; left: 38%; font-size: 28px;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.15)); }
+  .scr-day32 .hedgehog {
+    position: absolute; bottom: 12%; right: 30%; font-size: 22px;
+    animation: drift 18s ease-in-out infinite;
+  }
+  .scr-day32 .deer {
+    position: absolute; bottom: 22%; left: 55%; font-size: 24px;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.15));
+  }
+  .scr-day32 .firefly {
+    position: absolute; width: 5px; height: 5px;
+    border-radius: 50%; background: rgba(255, 230, 120, 0.9);
+    box-shadow: 0 0 10px 3px rgba(255, 220, 100, 0.7);
+  }
+  .scr-day32 .firefly.f1 { top: 42%; left: 28%; animation: float-up 5s ease-out infinite; }
+  .scr-day32 .firefly.f2 { top: 38%; right: 28%; animation: float-up 6s ease-out infinite; animation-delay: 1.2s; }
+  .scr-day32 .firefly.f3 { top: 50%; left: 60%; animation: float-up 7s ease-out infinite; animation-delay: 2.5s; }
+
+  .scr-day32 .butterfly {
+    position: absolute; top: 35%; right: 18%; font-size: 18px;
+    animation: flutter 7s ease-in-out infinite;
+  }
+  .scr-day32 .bird {
+    position: absolute; top: 24%; left: 18%; font-size: 14px;
+    animation: drift-slow 22s ease-in-out infinite;
+  }
+
+  /* Bench, tiny detail */
+  .scr-day32 .bench {
+    position: absolute; bottom: 10%; right: 12%;
+    font-size: 18px; opacity: 0.9;
+    transform: rotate(-2deg);
+  }
+  /* Small wooden sign */
+  .scr-day32 .sign {
+    position: absolute; bottom: 25%; left: 12%;
+    background: #8e6e3f; color: #fef9ed;
+    padding: 4px 8px; font-size: 10px;
+    border-radius: 2px;
+    transform: rotate(-2deg);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+    font-weight: 600;
+  }
+  .scr-day32 .sign::before {
+    content:""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    width: 3px; height: 8px; background: #6a4e25;
+  }
+
+  .scr-day32 .ground {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 36%;
+    background: linear-gradient(180deg, transparent 0%, #94b56b 28%, #6e8848 100%);
+    border-radius: 70% 70% 0 0 / 30% 30% 0 0;
+  }
+
+  /* The card stack */
+  .scr-day32 .cardstack { position: absolute; bottom: 30px; left: 22px; right: 22px;
+    height: 130px; }
+  .scr-day32 .cardstack .c {
+    position: absolute; left: 0; right: 0;
+    background: white; border-radius: 18px;
+    box-shadow: 0 -8px 20px rgba(0,0,0,0.06), 0 -2px 8px rgba(0,0,0,0.04);
+  }
+  .scr-day32 .cardstack .c.b3 { top: 20px; height: 110px; transform: scale(0.88); opacity: 0.5; background: #ebe7d9; }
+  .scr-day32 .cardstack .c.b2 { top: 12px; height: 110px; transform: scale(0.94); opacity: 0.85; background: #f4f0e0; }
+  .scr-day32 .cardstack .c.front { top: 0; height: 110px; padding: 14px 16px; }
+  .scr-day32 .cardstack .c.front .cat { font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.16em; color: #b8761e; }
+  .scr-day32 .cardstack .c.front .row {
+    display: flex; align-items: center; gap: 12px; margin-top: 6px;
+  }
+  .scr-day32 .cardstack .c.front .icon { font-size: 28px; }
+  .scr-day32 .cardstack .c.front .body { flex: 1; }
+  .scr-day32 .cardstack .c.front .title { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .scr-day32 .cardstack .c.front .desc { font-size: 11px; color: #5e6f4a; margin-top: 1px; }
+  .scr-day32 .cardstack .c.front .water-btn {
+    margin-top: 8px; display: inline-flex; gap: 6px; align-items: center;
+    background: #d8e8b8; color: #5e8a25;
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700;
+  }
+
+  /* ===========================================================
+     STYLE VARIATIONS — 4 distinct directions
+     =========================================================== */
+
+  /* Common small-phone elements (each variation overrides) */
+  .var-name {
+    margin-top: 16px; text-align: center;
+    font-size: 14px; font-weight: 700; color: var(--ink);
+  }
+  .var-tag {
+    margin-top: 4px; text-align: center;
+    font-size: 11px; color: var(--ink-mute);
+  }
+  .var-bullets {
+    margin-top: 10px; padding: 0 8px;
+    font-size: 11px; color: var(--ink-soft); list-style: none;
+  }
+  .var-bullets li { padding: 2px 0; line-height: 1.4; }
+  .var-bullets li::before { content: "· "; opacity: 0.4; }
+
+  /* Variation A — Watercolor (current refined) */
+  .var-a {
+    background: linear-gradient(180deg, #e8f1d6 0%, #d6e4b9 50%, #c1d3a0 100%);
+    font-family: "Avenir Next", sans-serif; color: #2c3a23;
+  }
+  .var-stage {
+    height: 100%; position: relative; padding-top: 50px;
+    overflow: hidden;
+  }
+  .var-stage .top-pill {
+    position: absolute; top: 35px; left: 16px; right: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px;
+  }
+  .var-stage .top-pill .n { font-weight: 600; }
+  .var-stage .top-pill .s {
+    background: rgba(255,255,255,0.6); padding: 3px 8px; border-radius: 10px;
+    font-weight: 700; font-size: 9px;
+  }
+  .var-tree {
+    position: absolute; bottom: 36%; left: 50%; transform: translateX(-50%);
+    width: 130px; height: 160px;
+    animation: sway 7s ease-in-out infinite;
+  }
+  .var-flower {
+    position: absolute; width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.92); font-size: 14px;
+    box-shadow: 0 3px 7px rgba(0,0,0,0.1);
+    border: 1.5px solid rgba(255,255,255,0.85);
+  }
+  .var-ground {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 30%;
+  }
+
+  .var-a .var-ground {
+    background: linear-gradient(180deg, transparent 0%, #a3b97c 28%, #7e9655 100%);
+    border-radius: 60% 60% 0 0 / 26% 26% 0 0;
+  }
+  .var-a .f1 { bottom: 44%; left: 16%; }
+  .var-a .f2 { bottom: 40%; right: 16%; }
+  .var-a .f3 { bottom: 22%; left: 28%; }
+  .var-a .f4 { bottom: 20%; right: 24%; }
+
+  /* Variation B — Ghibli (lush, dappled, magical) */
+  .var-b {
+    background:
+      radial-gradient(ellipse 70% 50% at 30% 30%, rgba(255,240,200,0.6) 0%, transparent 60%),
+      linear-gradient(180deg, #aed09c 0%, #6fb061 40%, #4a8a52 100%);
+    font-family: "Avenir Next", sans-serif; color: #1f3a23;
+  }
+  .var-b .var-ground {
+    background: linear-gradient(180deg, transparent 0%, #5a8a4a 28%, #3a6e3a 100%);
+    border-radius: 60% 60% 0 0 / 26% 26% 0 0;
+  }
+  .var-b .var-tree { width: 140px; height: 180px; }
+  .var-b .moss-1 { position: absolute; bottom: 28%; left: 14%; font-size: 14px; }
+  .var-b .moss-2 { position: absolute; bottom: 26%; right: 16%; font-size: 14px; }
+  .var-b .firefly {
+    position: absolute; width: 4px; height: 4px;
+    border-radius: 50%; background: rgba(255, 240, 150, 0.95);
+    box-shadow: 0 0 10px 3px rgba(255, 230, 100, 0.8);
+  }
+  .var-b .firefly.f1 { top: 35%; left: 30%; animation: float-up 5s ease-out infinite; }
+  .var-b .firefly.f2 { top: 40%; right: 35%; animation: float-up 6s ease-out infinite 1s; }
+  .var-b .b-flower {
+    position: absolute; width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,250,240,0.95); font-size: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+  }
+  .var-b .bf1 { bottom: 40%; left: 16%; }
+  .var-b .bf2 { bottom: 36%; right: 16%; }
+  .var-b .bf3 { bottom: 22%; left: 50%; transform: translateX(-50%); }
+
+  /* Variation C — Scandinavian flat (geometric, minimal) */
+  .var-c {
+    background: #f1ede0;
+    font-family: -apple-system, "SF Pro", sans-serif; color: #2c3026;
+  }
+  .var-c .var-ground {
+    background: #c9d098;
+    height: 26%;
+  }
+  .var-c .var-tree-c {
+    position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 150px;
+  }
+  .var-c .var-tree-c svg { width: 100%; height: 100%; }
+  .var-c .c-flower {
+    position: absolute; width: 26px; height: 26px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .var-c .cf1 { background: #d97a55; bottom: 30%; left: 18%; }
+  .var-c .cf2 { background: #e0c364; bottom: 32%; right: 22%; }
+  .var-c .cf3 { background: #88a86b; bottom: 18%; left: 30%; }
+  .var-c .cf4 { background: #6e8db5; bottom: 16%; right: 28%; }
+  .var-c .sun {
+    position: absolute; top: 60px; right: 20px;
+    width: 30px; height: 30px; background: #d97a55; border-radius: 50%;
+    opacity: 0.7;
+  }
+
+  /* Variation D — Cottagecore (warm, woody, golden) */
+  .var-d {
+    background: linear-gradient(180deg, #fcefd2 0%, #f4d49e 50%, #e0a878 100%);
+    font-family: "Avenir Next", sans-serif; color: #6b3a1f;
+  }
+  .var-d .var-ground {
+    background: linear-gradient(180deg, transparent 0%, #c19063 30%, #8e6438 100%);
+    height: 32%;
+    border-radius: 60% 60% 0 0 / 26% 26% 0 0;
+  }
+  .var-d .var-tree-d {
+    position: absolute; bottom: 32%; left: 50%; transform: translateX(-50%);
+    width: 130px; height: 170px;
+    filter: drop-shadow(0 8px 12px rgba(110, 60, 30, 0.3));
+    animation: sway 7s ease-in-out infinite;
+  }
+  .var-d .mushroom-1 { position: absolute; bottom: 16%; left: 18%; font-size: 16px; }
+  .var-d .mushroom-2 { position: absolute; bottom: 18%; right: 16%; font-size: 14px; }
+  .var-d .fence {
+    position: absolute; bottom: 22%; left: 8%; right: 8%;
+    height: 14px;
+    background:
+      repeating-linear-gradient(90deg, #6b3a1f 0 4px, transparent 4px 16px);
+    opacity: 0.45;
+  }
+  .var-d .d-flower {
+    position: absolute; width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,250,240,0.95); font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 3px 6px rgba(110,60,30,0.2);
+  }
+  .var-d .df1 { bottom: 38%; left: 16%; }
+  .var-d .df2 { bottom: 34%; right: 18%; }
+  .var-d .df3 { bottom: 26%; left: 50%; transform: translateX(-50%); }
+
+  /* ===========================================================
+     CHARACTER PROPOSAL — sketches in SVG
+     =========================================================== */
+  .char-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
+  @media (max-width: 700px) { .char-row { grid-template-columns: repeat(2, 1fr); } }
+  .char-card {
+    background: white; border-radius: 16px; padding: 20px 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    text-align: center;
+  }
+  .char-card svg { width: 100%; max-width: 100px; height: 100px; }
+  .char-card .name { font-size: 13px; font-weight: 700; margin-top: 8px; color: var(--ink); }
+  .char-card .role { font-size: 10px; color: var(--ink-mute); margin-top: 2px; }
+
+  /* Color-palette swatches */
+  .palette-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
+  @media (max-width: 700px) { .palette-row { grid-template-columns: repeat(2, 1fr); } }
+  .palette {
+    background: white; border-radius: 14px; padding: 16px 14px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+  }
+  .palette .name { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .palette .swatches { display: flex; gap: 6px; }
+  .palette .sw { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); }
+  .palette .desc { font-size: 11px; color: var(--ink-soft); margin-top: 8px; line-height: 1.4; }
+
+  table.spec { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  table.spec th, table.spec td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--rule); }
+  table.spec th { background: #f3f8e8; color: #2c3a23; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  pre.code { background: #1a1d1f; color: #e6edf3; padding: 14px 16px; border-radius: 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; overflow-x: auto; line-height: 1.5; }
+  pre.code .k { color: #ff7b72; }
+  pre.code .v { color: #79c0ff; }
+  pre.code .c { color: #8b949e; }
+</style>
+</head><body>
+
+<div class="wrap">
+  <div class="crumb">
+    <a href="./">← Overview</a> ·
+    <a href="living-garden.html">← The Living Garden</a>
+  </div>
+  <p class="eyebrow">Iterating on the Garden</p>
+  <h1>Variations &amp; the Day-32 future state.</h1>
+  <p class="lede">
+    Three things from your last note: the wandering creatures shouldn't
+    flip when they change direction, you wanted to see what a 30-day
+    garden actually looks like, and you wanted alternative aesthetic
+    directions for the Garden — different palettes, different characters.
+    All three answered below.
+  </p>
+
+  <hr class="rule">
+
+  <!-- ============================================== -->
+  <!-- 1. The wander fix                              -->
+  <!-- ============================================== -->
+  <h2>1 — The wander fix</h2>
+  <p>The previous animation used <code>scaleX(-1)</code> to flip the cat
+    when it changed direction. Looked janky. Fixed: creatures now drift one
+    way across the screen and fade out at the edge, with a fade-in at the
+    start for the next cycle. Same pattern reused for the deer in the
+    glade.</p>
+
+  <pre class="code"><span class="c">/* Old — flipped on direction change (looked weird) */</span>
+<span class="k">@keyframes</span> wander {
+  0%, 100% { transform: <span class="v">translateX(0)</span>; }
+  40%      { transform: <span class="v">translateX(60px) scaleX(-1)</span>; <span class="c">/* ← flips */</span> }
+}
+
+<span class="c">/* New — drifts across, fades in/out, no flip */</span>
+<span class="k">@keyframes</span> drift {
+  0%   { transform: <span class="v">translateX(-40px)</span>; opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: <span class="v">translateX(80px)</span>; opacity: 0; }
+}</pre>
+  <p>The Living Garden page has been updated. Reload and the cat should
+    now look like a pet passing through, not pacing a cage.</p>
+
+  <hr class="rule">
+
+  <!-- ============================================== -->
+  <!-- 2. Day 32 future state                         -->
+  <!-- ============================================== -->
+  <h2>2 — Day 32: what 30 days looks like</h2>
+  <p class="lede">
+    A consistent kid hits day 32 with a noticeably bigger tree, a denser
+    flower bed (every category they've completed many times forms a small
+    bed of past blooms), a bought hedgehog and a deer wandering the meadow,
+    fireflies near the trunk, a small wooden "Day 32" sign, and a tiny
+    bench under the tree. Today's three flowers are still the prominent
+    ones — the past 30 days are background <em>density</em>, not
+    foreground noise.
+  </p>
+
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen scr-day32">
+        <div class="topbar">
+          <div>
+            <div class="name">Yusuf's garden</div>
+            <div class="sub">Day 32 · light afternoon breeze</div>
+          </div>
+          <div class="seeds">🌱 387</div>
+        </div>
+        <div class="day-stamp">DAY 32</div>
+        <div class="stage">
+          <!-- Big mature tree -->
+          <svg class="day32-tree" viewBox="0 0 230 280" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="115" cy="44"  rx="78" ry="62" fill="#6b9842"/>
+            <ellipse cx="60"  cy="78" rx="58" ry="48" fill="#80ad58"/>
+            <ellipse cx="170" cy="78" rx="58" ry="48" fill="#80ad58"/>
+            <ellipse cx="115" cy="100" rx="80" ry="56" fill="#9bc77b"/>
+            <ellipse cx="40"  cy="120" rx="42" ry="32" fill="#9bc77b"/>
+            <ellipse cx="190" cy="120" rx="42" ry="32" fill="#9bc77b"/>
+            <ellipse cx="115" cy="140" rx="78" ry="40" fill="#a8cf72"/>
+            <rect x="105" y="170" width="20" height="100" fill="#6f4e2c" rx="3"/>
+            <!-- Knot in trunk -->
+            <ellipse cx="116" cy="200" rx="3" ry="5" fill="#4f3621"/>
+          </svg>
+          <!-- Falling leaves -->
+          <div class="leaf l1">🍃</div>
+          <div class="leaf l2">🍃</div>
+          <div class="leaf l3">🍂</div>
+
+          <!-- Past flower beds -->
+          <div class="bed left">
+            <div class="b">🪥</div>
+            <div class="b dim">🪥</div>
+            <div class="b dim">🪥</div>
+            <div class="b">🍽️</div>
+            <div class="b dim">🍽️</div>
+          </div>
+          <div class="bed right">
+            <div class="b">🐱</div>
+            <div class="b">🐱</div>
+            <div class="b dim">🚿</div>
+            <div class="b dim">🚿</div>
+            <div class="b dim">🚿</div>
+          </div>
+
+          <!-- Today's flowers (prominent) -->
+          <div class="today-flower tf1">🪥</div>
+          <div class="today-flower tf2">🐱</div>
+          <div class="today-flower tf3">🧺</div>
+
+          <!-- Wildlife -->
+          <div class="pet">🐱</div>
+          <div class="hedgehog">🦔</div>
+          <div class="deer">🦌</div>
+          <div class="firefly f1"></div>
+          <div class="firefly f2"></div>
+          <div class="firefly f3"></div>
+          <div class="butterfly">🦋</div>
+          <div class="bird">🐦</div>
+          <div class="bench">🪑</div>
+
+          <div class="sign">DAY 32</div>
+
+          <div class="ground"></div>
+        </div>
+        <div class="cardstack">
+          <div class="c b3"></div>
+          <div class="c b2"></div>
+          <div class="c front">
+            <div class="cat">Daily habit · 1 of 3 today</div>
+            <div class="row">
+              <div class="icon">🪥</div>
+              <div class="body">
+                <div class="title">Brush your teeth</div>
+                <div class="desc">Today's morning flower</div>
+              </div>
+            </div>
+            <div class="water-btn">💧 Water</div>
+          </div>
+        </div>
+      </div></div>
+      <p class="caption">Day 32 · 387 seeds · 1 hedgehog, 1 deer · tree visibly bigger</p>
+    </div>
+    <div class="copy">
+      <h3>What's grown after 30 days</h3>
+
+      <div class="principle">The tree</div>
+      <p>Comparing day 1 to day 32: the tree has visibly more layers of
+        foliage, a thicker trunk, and a small wood-knot detail. Growth is
+        gradual — the tree gets a tiny new layer roughly every 10 days,
+        so day 7 looks slightly bigger than day 1, day 30 looks
+        substantially bigger, day 90 has cherry-blossom petals or autumn
+        colour depending on time of year.</p>
+
+      <div class="principle">Past flowers cluster as beds</div>
+      <p>Every chore the kid completes leaves a small flower behind
+        permanently. After 30 days × 3-5 chores/day, that's 100+ flowers.
+        They cluster into "beds" by category — toothbrush flowers form
+        one bed, pet-care flowers another. Today's three flowers are
+        rendered <em>large and bright</em>; the historical ones are
+        smaller and dimmer in the background. Density without noise.</p>
+
+      <div class="principle">Wildlife population</div>
+      <p>Wildlife joins the garden as the kid spends seeds in the glade.
+        Day 12 they bought a hedgehog. Day 25 they saved up enough for the
+        deer. The deer wanders across the meadow in the upper-middle. Three
+        fireflies float up from the ground near the tree. A butterfly
+        crosses near the right-hand flower bed.</p>
+
+      <div class="principle">A tiny bench, a sign, a knot</div>
+      <p>The garden accumulates small objects of meaning: a wooden bench
+        appears around day 14 (a bonus from a 7-day streak). The "DAY 32"
+        sign is a permanent post that updates with the day count. Tiny
+        details that the kid earns and notices but never has to manage.</p>
+
+      <div class="principle">The card stack stays the same</div>
+      <p>Today's chores are still three cards, just like day 1. The kid's
+        daily ritual doesn't get more complex over time — only the
+        background of the garden grows. Today's task list stays calm
+        regardless of how many days they've put in.</p>
+
+      <div class="principle">Day 90 and beyond</div>
+      <p>Beyond 90 days the tree may shed leaves to reflect autumn (real-
+        world season-based), then bud blossoms in spring. Wildlife can
+        nest. The kid's avatar can sit on the bench in idle states. The
+        garden becomes a living world that's been steadily tended.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- ============================================== -->
+  <!-- 3. Style variations                            -->
+  <!-- ============================================== -->
+  <h2>3 — Four style variations</h2>
+  <p class="lede">
+    The "Garden" concept has many possible aesthetic directions. Below
+    are four — same data, same interactions, very different feeling. Each
+    is rendered as a small phone showing the home garden in that style.
+    Pick one, or splice between them.
+  </p>
+
+  <div class="row four-up" style="margin-top: 32px;">
+    <!-- A: Watercolor -->
+    <div>
+      <div class="phone small"><div class="screen var-a">
+        <div class="var-stage">
+          <div class="top-pill">
+            <div class="n">Yusuf's garden</div>
+            <div class="s">🌱 24</div>
+          </div>
+          <svg class="var-tree" viewBox="0 0 130 160" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="65" cy="44" rx="42" ry="38" fill="#7fa64a"/>
+            <ellipse cx="38" cy="68" rx="32" ry="26" fill="#94bd5e"/>
+            <ellipse cx="92" cy="68" rx="32" ry="26" fill="#94bd5e"/>
+            <ellipse cx="65" cy="86" rx="42" ry="28" fill="#a8cf72"/>
+            <rect x="60" y="105" width="10" height="56" fill="#6f4e2c" rx="2"/>
+          </svg>
+          <div class="var-flower f1">🪥</div>
+          <div class="var-flower f2">🐱</div>
+          <div class="var-flower f3">🧺</div>
+          <div class="var-flower f4">🚿</div>
+          <div class="var-ground"></div>
+        </div>
+      </div></div>
+      <div class="var-name">A · Watercolor</div>
+      <div class="var-tag">Soft, painted, calm — the current draft</div>
+      <ul class="var-bullets">
+        <li>Sage greens, rounded organic shapes</li>
+        <li>Hand-drawn pastel feel</li>
+        <li>Slow, gentle, low-saturation</li>
+        <li>Reduces anxiety; calming</li>
+        <li>Best for: families that already feel a bit frantic</li>
+      </ul>
+    </div>
+
+    <!-- B: Ghibli -->
+    <div>
+      <div class="phone small"><div class="screen var-b">
+        <div class="var-stage">
+          <div class="top-pill">
+            <div class="n" style="color: #fff8e8;">Yusuf's grove</div>
+            <div class="s" style="background: rgba(255,250,220,0.85); color: #5a3a18;">🌱 24</div>
+          </div>
+          <svg class="var-tree" viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="70" cy="48" rx="48" ry="44" fill="#3d6e3a"/>
+            <ellipse cx="40" cy="78" rx="32" ry="28" fill="#5a8a4a"/>
+            <ellipse cx="100" cy="78" rx="32" ry="28" fill="#5a8a4a"/>
+            <ellipse cx="70" cy="98" rx="46" ry="32" fill="#7eb056"/>
+            <ellipse cx="70" cy="116" rx="36" ry="22" fill="#a3c977"/>
+            <rect x="64" y="130" width="12" height="50" fill="#3a2e1a" rx="2"/>
+          </svg>
+          <div class="moss-1">🌿</div>
+          <div class="moss-2">🍄</div>
+          <div class="firefly f1"></div>
+          <div class="firefly f2"></div>
+          <div class="b-flower bf1">🪥</div>
+          <div class="b-flower bf2">🐱</div>
+          <div class="b-flower bf3">🧺</div>
+          <div class="var-ground"></div>
+        </div>
+      </div></div>
+      <div class="var-name">B · Ghibli grove</div>
+      <div class="var-tag">Lush, dappled, slightly magical</div>
+      <ul class="var-bullets">
+        <li>Deeper greens, dappled light overlay</li>
+        <li>Mushrooms, ferns, fireflies always</li>
+        <li>Slight mystery — feels like Totoro's wood</li>
+        <li>"Grove" instead of "garden" in copy</li>
+        <li>Best for: kids who love nature/anime</li>
+      </ul>
+    </div>
+
+    <!-- C: Scandinavian flat -->
+    <div>
+      <div class="phone small"><div class="screen var-c">
+        <div class="var-stage">
+          <div class="top-pill">
+            <div class="n">Yusuf · garden</div>
+            <div class="s">🌱 24</div>
+          </div>
+          <div class="sun"></div>
+          <div class="var-tree-c">
+            <svg viewBox="0 0 110 150" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="55" cy="50" r="42" fill="#88a86b"/>
+              <rect x="50" y="86" width="10" height="60" fill="#5d4a30"/>
+            </svg>
+          </div>
+          <div class="c-flower cf1"></div>
+          <div class="c-flower cf2"></div>
+          <div class="c-flower cf3"></div>
+          <div class="c-flower cf4"></div>
+          <div class="var-ground"></div>
+        </div>
+      </div></div>
+      <div class="var-name">C · Scandi flat</div>
+      <div class="var-tag">Geometric, modern, IKEA-illustrated</div>
+      <ul class="var-bullets">
+        <li>Limited palette: 5 colours total</li>
+        <li>Pure geometric shapes — no emoji</li>
+        <li>Flowers are coloured circles, categories by hue</li>
+        <li>Clean, design-forward, premium</li>
+        <li>Best for: design-conscious parents</li>
+      </ul>
+    </div>
+
+    <!-- D: Cottagecore -->
+    <div>
+      <div class="phone small"><div class="screen var-d">
+        <div class="var-stage">
+          <div class="top-pill">
+            <div class="n">Yusuf's plot</div>
+            <div class="s" style="background: rgba(255,250,240,0.85); color: #6b3a1f;">🌱 24</div>
+          </div>
+          <svg class="var-tree-d" viewBox="0 0 130 170" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="65" cy="50" rx="48" ry="44" fill="#a87e3e"/>
+            <ellipse cx="36" cy="76" rx="30" ry="26" fill="#c19850"/>
+            <ellipse cx="94" cy="76" rx="30" ry="26" fill="#c19850"/>
+            <ellipse cx="65" cy="94" rx="50" ry="32" fill="#e0b56b"/>
+            <rect x="60" y="120" width="10" height="50" fill="#6b3a1f" rx="2"/>
+          </svg>
+          <div class="d-flower df1">🪥</div>
+          <div class="d-flower df2">🐱</div>
+          <div class="d-flower df3">🧺</div>
+          <div class="mushroom-1">🍄</div>
+          <div class="mushroom-2">🍂</div>
+          <div class="fence"></div>
+          <div class="var-ground"></div>
+        </div>
+      </div></div>
+      <div class="var-name">D · Cottagecore</div>
+      <div class="var-tag">Warm, rustic, eternal-autumn</div>
+      <ul class="var-bullets">
+        <li>Amber palette, woody textures</li>
+        <li>Wooden fence, mushrooms, fallen leaves</li>
+        <li>Always-autumn vibe (Stardew Valley)</li>
+        <li>Cosy, slow, generationally appealing</li>
+        <li>Best for: families that romanticise rural / cosy aesthetics</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="margin-top: 32px;">My recommendation: ship <strong>B
+    (Ghibli grove)</strong> with the door open to switch to A (Watercolor)
+    if testers find Ghibli too dense. Ghibli's depth and magic-realism
+    pulls a wider age range — a 5-year-old finds it enchanting; a 12-year-
+    old finds it cool. A is calmer but sometimes too quiet for kids who
+    grew up on Pokémon. C (Scandi) is the most "designed" and beautiful,
+    but children may feel it's too adult. D (Cottagecore) is gorgeous but
+    one-note — gets repetitive after a month.</p>
+
+  <hr class="rule">
+
+  <!-- ============================================== -->
+  <!-- 4. Character & creature design                 -->
+  <!-- ============================================== -->
+  <h2>4 — Character &amp; creature system</h2>
+  <p class="lede">
+    Right now the mockups use stock emoji (🐱 🦋 🦔). They work for a v1,
+    but they all look like they belong to different visual languages —
+    iOS-default emoji are inconsistent in style, scale, and personality.
+    For a polished launch, replace key creatures with custom illustrated
+    characters that feel like they all live in the same world.
+  </p>
+
+  <p>Below, four character archetypes for the Living Garden. These are
+    quick SVG silhouettes — actual production art would be commissioned
+    illustrations or Lottie animations, but the cast is what matters.</p>
+
+  <div class="char-row">
+    <div class="char-card">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Garden Spirit / Sapling sprite -->
+        <ellipse cx="50" cy="80" rx="20" ry="6" fill="#3a6e3a" opacity="0.3"/>
+        <path d="M 50 80 Q 50 50 45 35 Q 40 25 30 22" stroke="#5a8a4a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="28" cy="22" rx="10" ry="6" fill="#7eb056" transform="rotate(-30 28 22)"/>
+        <ellipse cx="62" cy="35" rx="9" ry="5" fill="#7eb056" transform="rotate(40 62 35)"/>
+        <circle cx="48" cy="60" r="3" fill="#2c3a23"/>
+        <circle cx="52" cy="60" r="3" fill="#2c3a23"/>
+        <path d="M 47 65 Q 50 67 53 65" stroke="#2c3a23" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="name">The Sapling</div>
+      <div class="role">Garden spirit · welcomes the kid · first-run guide</div>
+    </div>
+
+    <div class="char-card">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Stylised cat -->
+        <ellipse cx="50" cy="78" rx="24" ry="14" fill="#d8a35a"/>
+        <circle cx="50" cy="55" r="20" fill="#d8a35a"/>
+        <path d="M 32 45 L 28 28 L 38 38 Z" fill="#d8a35a"/>
+        <path d="M 68 45 L 72 28 L 62 38 Z" fill="#d8a35a"/>
+        <ellipse cx="44" cy="55" rx="2" ry="3" fill="#2c3a23"/>
+        <ellipse cx="56" cy="55" rx="2" ry="3" fill="#2c3a23"/>
+        <path d="M 44 65 Q 50 70 56 65" stroke="#2c3a23" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M 70 80 Q 80 78 78 70" stroke="#d8a35a" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="name">The Companion</div>
+      <div class="role">Real-world pet (cat / dog / hamster, parent-customisable)</div>
+    </div>
+
+    <div class="char-card">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Hedgehog (wildlife) -->
+        <ellipse cx="50" cy="70" rx="32" ry="22" fill="#7e5a3a"/>
+        <path d="M 22 70 L 18 60 M 30 50 L 26 38 M 40 44 L 38 30 M 50 42 L 50 28
+                 M 60 44 L 62 30 M 70 50 L 74 38 M 78 70 L 82 60"
+              stroke="#5a3e1f" stroke-width="2.5" stroke-linecap="round"/>
+        <ellipse cx="22" cy="74" rx="8" ry="6" fill="#d8a35a"/>
+        <circle cx="20" cy="72" r="1.5" fill="#2c3a23"/>
+        <circle cx="18" cy="76" r="0.8" fill="#2c3a23"/>
+      </svg>
+      <div class="name">The Wildling</div>
+      <div class="role">Bought from glade · pure decoration · no chores</div>
+    </div>
+
+    <div class="char-card">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Kid avatar — pixel-art-influenced silhouette -->
+        <circle cx="50" cy="34" r="14" fill="#f7d4a3"/>
+        <path d="M 38 30 Q 40 18 50 16 Q 60 18 62 30" fill="#3a2818"/>
+        <rect x="40" y="48" width="20" height="28" rx="2" fill="#5e94c4"/>
+        <rect x="40" y="76" width="9" height="14" rx="1" fill="#6b4f8e"/>
+        <rect x="51" y="76" width="9" height="14" rx="1" fill="#6b4f8e"/>
+        <circle cx="46" cy="34" r="1.5" fill="#2c3a23"/>
+        <circle cx="54" cy="34" r="1.5" fill="#2c3a23"/>
+        <path d="M 45 40 Q 50 43 55 40" stroke="#8e5a3a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="name">The Gardener</div>
+      <div class="role">The kid's avatar · walks in the garden · customisable</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 40px;">Why custom characters matter</h3>
+  <table class="spec">
+    <thead><tr><th>Emoji approach (current)</th><th>Custom characters (proposed)</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Inconsistent style — each emoji renders differently across iOS versions</td>
+        <td>One designer's hand. Same line weight, same proportions, same world.</td>
+      </tr>
+      <tr>
+        <td>No personality — 🐱 is just a cat icon</td>
+        <td>The Companion has a name, a sleeping pose, a curious pose, a happy pose</td>
+      </tr>
+      <tr>
+        <td>Can't animate beyond CSS transforms</td>
+        <td>Lottie animations: blinks, tail wags, head turns, stretches</td>
+      </tr>
+      <tr>
+        <td>Can't tell a story</td>
+        <td>Sapling appears at first-run, hedgehog joins on day 12, deer on day 25 — a cast that grows</td>
+      </tr>
+      <tr>
+        <td>Can't show emotion specific to the moment</td>
+        <td>Sapling looks proud after a streak, sad after a missed day. Cat acknowledges the kid's return.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top: 16px;">Concrete: I'd commission ~12 characters
+    total (Sapling, 4 pet variants for parents to pick, 6 wildlings, the
+    avatar) and pair each with 3-4 Lottie animations. ~4 weeks of
+    illustration work. Could be a phased thing — ship v1 with emoji,
+    swap them in over 2-3 sprints.</p>
+
+  <hr class="rule">
+
+  <!-- ============================================== -->
+  <!-- 5. Color palettes per variation                -->
+  <!-- ============================================== -->
+  <h2>5 — Colour palettes</h2>
+  <div class="palette-row">
+    <div class="palette">
+      <div class="name">A · Watercolor</div>
+      <div class="swatches">
+        <div class="sw" style="background:#e8f1d6"></div>
+        <div class="sw" style="background:#a8cf72"></div>
+        <div class="sw" style="background:#7e9655"></div>
+        <div class="sw" style="background:#6f4e2c"></div>
+        <div class="sw" style="background:#f0c97c"></div>
+      </div>
+      <div class="desc">Sage / chartreuse / olive / wood / amber. Soft, faded, painterly.</div>
+    </div>
+    <div class="palette">
+      <div class="name">B · Ghibli grove</div>
+      <div class="swatches">
+        <div class="sw" style="background:#aed09c"></div>
+        <div class="sw" style="background:#5a8a4a"></div>
+        <div class="sw" style="background:#3d6e3a"></div>
+        <div class="sw" style="background:#3a2e1a"></div>
+        <div class="sw" style="background:#fff0c8"></div>
+      </div>
+      <div class="desc">Bright moss / forest / dark canopy / earth / dappled light.</div>
+    </div>
+    <div class="palette">
+      <div class="name">C · Scandi flat</div>
+      <div class="swatches">
+        <div class="sw" style="background:#f1ede0"></div>
+        <div class="sw" style="background:#88a86b"></div>
+        <div class="sw" style="background:#d97a55"></div>
+        <div class="sw" style="background:#e0c364"></div>
+        <div class="sw" style="background:#6e8db5"></div>
+      </div>
+      <div class="desc">Cream / sage / terracotta / mustard / dusty blue. Five colours total.</div>
+    </div>
+    <div class="palette">
+      <div class="name">D · Cottagecore</div>
+      <div class="swatches">
+        <div class="sw" style="background:#fcefd2"></div>
+        <div class="sw" style="background:#e0a878"></div>
+        <div class="sw" style="background:#a87e3e"></div>
+        <div class="sw" style="background:#6b3a1f"></div>
+        <div class="sw" style="background:#c97058"></div>
+      </div>
+      <div class="desc">Wheat / pumpkin / oak / chestnut / brick. Always-autumn warmth.</div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>Where I'd take this next</h2>
+  <p class="lede">Pick a variation. I'd commit to <strong>B (Ghibli grove)</strong>
+    with the cast of four characters above as the v1 illustration ask.
+    Once you greenlight a direction, the next step is a real designer to
+    take this CSS-rendered sketch and turn it into Lottie + production
+    SwiftUI. That's a 2-3 week designer engagement, not something I'll
+    fake further in code.</p>
+
+  <p>Reply with your pick (A / B / C / D, or "splice X with Y") and I'll
+    write the designer brief.</p>
+
+  <p style="margin-top: 32px;">
+    <a href="living-garden.html">← The Living Garden (the doctrine + 9 screens)</a><br>
+    <a href="./">↑ Back to overview</a>
+  </p>
+</div>
+</body></html>

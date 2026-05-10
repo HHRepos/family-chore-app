@@ -64,12 +64,10 @@
     100% { transform: translate(-90px, 4px) rotate(0deg); }
   }
   @keyframes wander {
-    0%   { transform: translateX(0); }
-    20%  { transform: translateX(40px) scaleX(1); }
-    40%  { transform: translateX(60px) scaleX(-1); }
-    60%  { transform: translateX(20px) scaleX(-1); }
-    80%  { transform: translateX(-30px) scaleX(1); }
-    100% { transform: translateX(0); }
+    0%   { transform: translateX(-40px); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateX(80px); opacity: 0; }
   }
   @keyframes float-up {
     0%   { transform: translate(0, 0); opacity: 0.6; }
