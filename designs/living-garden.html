@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept 04 — The Living Garden</title>
+<style>
+  :root { --ink:#111315; --ink-soft:#4b525a; --ink-mute:#8b929b; --paper:#fafaf7; --rule:#e7e7e1; --accent:#ff5d3a; --green:#5e8a25; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,"SF Pro Text","Inter",system-ui,sans-serif; line-height:1.55; font-size:16px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 24px 96px; }
+  .crumb { font-size: 13px; color: var(--ink-mute); margin-bottom: 32px; }
+  .eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); }
+  h1 { font-size: clamp(40px,7vw,72px); font-weight: 700; letter-spacing: -0.03em; margin: 8px 0 16px; }
+  h2 { font-size: clamp(26px,3.4vw,38px); font-weight: 700; letter-spacing: -0.02em; margin: 64px 0 12px; }
+  h3 { font-size: 18px; font-weight: 600; margin: 24px 0 8px; }
+  p { margin: 0 0 12px; max-width: 65ch; color: var(--ink-soft); }
+  .lede { font-size: 19px; color: var(--ink); max-width: 60ch; }
+  hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 56px 0; }
+  blockquote { margin: 16px 0; padding: 0 0 0 16px; border-left: 3px solid var(--accent);
+    font-style: italic; color: var(--ink-soft); font-size: 17px; }
+  .principle { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin: 20px 0 4px; }
+  .cut-list { font-size: 14px; color: var(--ink-soft); margin: 6px 0 0; padding-left: 20px; }
+  .cut-list li { margin: 4px 0; }
+  .pair { display: grid; grid-template-columns: 360px 1fr; gap: 56px; align-items: start; margin-top: 32px; }
+  @media (max-width: 880px) { .pair { grid-template-columns: 1fr; gap: 24px; } }
+  .pair .copy h3 { margin-top: 0; }
+  .caption { font-size: 12px; color: var(--ink-mute); text-align: center; margin-top: 12px; }
+  .badge-rec {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    background: var(--green); color: white; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;
+  }
+
+  /* Phone */
+  .phone { width: 320px; height: 660px; border-radius: 50px; background: #111; padding: 14px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.18), 0 8px 18px rgba(0,0,0,0.10),
+      inset 0 0 0 1.5px rgba(255,255,255,0.05); position: relative; margin: 0 auto; }
+  .phone::before { content:""; position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 28px; background: #000; border-radius: 14px; z-index: 10; }
+  .screen { width: 100%; height: 100%; border-radius: 38px; overflow: hidden; position: relative; isolation: isolate; }
+
+  /* ============ Living-garden language ============ */
+  .screen.garden { font-family: "Avenir Next", -apple-system, sans-serif; color: #2c3a23; }
+  .topbar { padding: 50px 22px 0; display: flex; justify-content: space-between; align-items: flex-end; }
+  .topbar .name { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  .topbar .sub  { font-size: 11px; color: #5e6f4a; margin-top: 1px; }
+  .topbar .seeds {
+    background: rgba(255,255,255,0.55); padding: 5px 11px; border-radius: 20px;
+    font-size: 13px; font-weight: 700; color: #6a4f1a; backdrop-filter: blur(4px);
+  }
+
+  /* ===== Animations ===== */
+  @keyframes sway {
+    0%,100% { transform: translateX(-50%) rotate(-1deg); }
+    50%     { transform: translateX(-50%) rotate(1deg); }
+  }
+  @keyframes flutter {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    25%  { transform: translate(-22px, -6px) rotate(-8deg); }
+    50%  { transform: translate(-46px, -14px) rotate(8deg); }
+    75%  { transform: translate(-66px, -8px) rotate(-6deg); }
+    100% { transform: translate(-90px, 4px) rotate(0deg); }
+  }
+  @keyframes wander {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(40px) scaleX(1); }
+    40%  { transform: translateX(60px) scaleX(-1); }
+    60%  { transform: translateX(20px) scaleX(-1); }
+    80%  { transform: translateX(-30px) scaleX(1); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes float-up {
+    0%   { transform: translate(0, 0); opacity: 0.6; }
+    50%  { opacity: 1; }
+    100% { transform: translate(8px, -90px); opacity: 0; }
+  }
+  @keyframes grass-wave {
+    0%,100% { transform: skewX(0); }
+    50%     { transform: skewX(2deg); }
+  }
+  @keyframes star-twinkle {
+    0%,100% { opacity: 0.4; }
+    50%     { opacity: 1; }
+  }
+  @keyframes ripple {
+    0%   { transform: translate(-50%, -50%) scale(0.7); opacity: 0.55; }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+  }
+
+  .tree { position: absolute; bottom: 30%; left: 50%; transform-origin: 50% 100%;
+    transform: translateX(-50%); width: 200px; height: 240px;
+    filter: drop-shadow(0 8px 12px rgba(60,80,30,0.25));
+    animation: sway 7s ease-in-out infinite; }
+  .ground { position: absolute; bottom: 0; left: 0; right: 0; height: 36%;
+    background: linear-gradient(180deg, transparent 0%, #a3b97c 28%, #7e9655 100%);
+    border-radius: 70% 70% 0 0 / 30% 30% 0 0; }
+  .grass-wave { position: absolute; bottom: 0; left: 0; right: 0; height: 10%;
+    background:
+      radial-gradient(circle at 10% 100%, #7e9655 0%, transparent 12%),
+      radial-gradient(circle at 25% 100%, #6e8848 0%, transparent 14%),
+      radial-gradient(circle at 50% 100%, #7e9655 0%, transparent 12%),
+      radial-gradient(circle at 75% 100%, #6e8848 0%, transparent 14%),
+      radial-gradient(circle at 90% 100%, #7e9655 0%, transparent 12%);
+    transform-origin: 50% 100%; animation: grass-wave 4s ease-in-out infinite;
+  }
+  .butterfly {
+    position: absolute; font-size: 18px;
+    top: 38%; right: 22%;
+    animation: flutter 6s ease-in-out infinite;
+    animation-delay: 1.2s;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+  }
+  .visiting-bird {
+    position: absolute; font-size: 14px;
+    top: 22%; left: 16%;
+    animation: flutter 8s ease-in-out infinite reverse;
+    animation-delay: 3s;
+  }
+  .pet-wander {
+    position: absolute; font-size: 32px;
+    bottom: 14%; left: 50%; transform-origin: 50% 50%;
+    animation: wander 18s ease-in-out infinite;
+  }
+
+  /* ===== Card stack at the bottom of home ===== */
+  .cardstack { position: absolute; bottom: 30px; left: 22px; right: 22px;
+    height: 130px; perspective: 1000px;
+  }
+  .cardstack .c {
+    position: absolute; left: 0; right: 0;
+    background: white; border-radius: 18px;
+    box-shadow: 0 -8px 20px rgba(0,0,0,0.06), 0 -2px 8px rgba(0,0,0,0.04);
+  }
+  .cardstack .c.b3 { top: 20px; height: 110px; transform: scale(0.88); opacity: 0.5; background: #ebe7d9; }
+  .cardstack .c.b2 { top: 12px; height: 110px; transform: scale(0.94); opacity: 0.85; background: #f4f0e0; }
+  .cardstack .c.front { top: 0; height: 110px; padding: 14px 16px; }
+  .cardstack .c.front .cat { font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.16em; color: #b8761e; }
+  .cardstack .c.front .row { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+  .cardstack .c.front .icon { font-size: 28px; }
+  .cardstack .c.front .body { flex: 1; }
+  .cardstack .c.front .title { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .cardstack .c.front .desc { font-size: 11px; color: #5e6f4a; margin-top: 1px; }
+  .cardstack .c.front .water-btn {
+    margin-top: 8px; display: inline-flex; gap: 6px; align-items: center;
+    background: #d8e8b8; color: #5e8a25;
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700;
+  }
+  .cardstack .swipe {
+    position: absolute; left: 50%; top: -10px; transform: translateX(-50%);
+    font-size: 9px; color: #b3b4ad; letter-spacing: 0.04em;
+    background: rgba(255,255,255,0.7); padding: 2px 8px; border-radius: 10px;
+  }
+
+  /* Zone nav at very bottom */
+  .zone-nav {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 4px;
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(8px);
+    padding: 4px; border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+    z-index: 20;
+  }
+  .zone-nav .z {
+    font-size: 14px; padding: 4px 8px; border-radius: 16px;
+  }
+  .zone-nav .z.active { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+  /* Stage shared */
+  .stage-bg-day {
+    background: linear-gradient(180deg, #e8f1d6 0%, #d6e4b9 50%, #c1d3a0 100%);
+  }
+  .stage-bg-dusk {
+    background: linear-gradient(180deg, #f8c0a0 0%, #d99988 40%, #93628f 100%);
+  }
+  .stage-bg-dawn {
+    background: linear-gradient(180deg, #fce8c4 0%, #f5cd9d 50%, #c89c93 100%);
+  }
+  .stage { height: 100%; position: relative;
+    background: radial-gradient(ellipse 90% 40% at 50% 92%, rgba(120,160,80,0.32) 0%, transparent 60%); }
+  .flower {
+    position: absolute; width: 50px; height: 50px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12); background: rgba(255,255,255,0.92);
+    border: 2px solid rgba(255,255,255,0.8); font-size: 22px;
+  }
+  .flower.dim { opacity: 0.55; }
+  .flower::after { /* gentle ripple on bloomed flowers */
+    content:""; position: absolute; left: 50%; top: 50%;
+    width: 70px; height: 70px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+    animation: ripple 3.5s ease-out infinite;
+    pointer-events: none;
+  }
+  .flower.no-ripple::after { display: none; }
+
+  /* Specific phones below */
+  .scr-home .stage { padding-top: 14px; height: 380px; }
+  .scr-home .tree { bottom: 36%; }
+  .scr-home .f1 { bottom: 46%; left: 14%; transform: rotate(-6deg); }
+  .scr-home .f2 { bottom: 38%; right: 12%; transform: rotate(8deg); }
+  .scr-home .f3 { bottom: 18%; left: 20%; }
+  .scr-home .f4 { bottom: 22%; right: 22%; }
+  .scr-home .f5 { bottom: 14%; left: 50%; transform: translateX(-50%); }
+
+  /* Card spread (long press view) */
+  .scr-spread .stage { height: 240px; padding-top: 10px; }
+  .scr-spread .stage .tree { bottom: 18%; transform: translateX(-50%) scale(0.7); transform-origin: 50% 100%; }
+  .scr-spread .pile { padding: 18px 22px 0; }
+  .scr-spread .pile h4 { font-size: 14px; margin: 0 0 12px; color: #3a4a26; font-weight: 600; }
+  .scr-spread .row {
+    display: flex; gap: 12px; align-items: center;
+    background: rgba(255,255,255,0.85);
+    border-radius: 16px; padding: 10px 12px; margin-bottom: 8px;
+    backdrop-filter: blur(6px);
+  }
+  .scr-spread .row.done { opacity: 0.45; }
+  .scr-spread .row .ic {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #f7c873; display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .scr-spread .row.cat-routine .ic { background: #b3cf8a; }
+  .scr-spread .row.cat-pitched .ic { background: #c7a3e1; }
+  .scr-spread .row .body { flex: 1; }
+  .scr-spread .row .title { font-size: 13px; font-weight: 600; color: #2c3a23; }
+  .scr-spread .row .meta { font-size: 10px; color: #5e6f4a; }
+  .scr-spread .row .reward { font-size: 11px; color: #b8761e; font-weight: 700; }
+  .scr-spread .row .check { font-size: 16px; color: #5e8a25; }
+
+  /* Animal Corner */
+  .scr-pets { background: linear-gradient(180deg, #fff5dc 0%, #f0e3b8 60%, #d8c887 100%); }
+  .scr-pets .meadow { position: absolute; top: 100px; left: 0; right: 0; bottom: 280px;
+    background: linear-gradient(180deg, transparent 30%, rgba(168,194,93,0.5) 100%);
+  }
+  .scr-pets .meadow .grass {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
+    background: linear-gradient(180deg, #c2dc8d 0%, #8fb058 100%);
+    border-radius: 80% 80% 0 0 / 20% 20% 0 0;
+  }
+  .scr-pets .fifi {
+    position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%);
+    font-size: 64px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+    animation: wander 12s ease-in-out infinite;
+  }
+  .scr-pets .speech {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+    background: white; border-radius: 14px; padding: 8px 12px;
+    font-size: 12px; color: #6a5520; font-weight: 600;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    white-space: nowrap;
+  }
+  .scr-pets .speech::after {
+    content:""; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+    width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent;
+    border-top: 7px solid white;
+  }
+  .scr-pets .care { position: absolute; bottom: 60px; left: 22px; right: 22px; }
+  .scr-pets .care-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin-bottom: 8px;
+    background: rgba(255,255,255,0.85); border-radius: 14px; backdrop-filter: blur(8px);
+  }
+  .scr-pets .care-row .ic { width: 28px; height: 28px; border-radius: 50%;
+    background: #f4d99a; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .scr-pets .care-row .body { flex: 1; }
+  .scr-pets .care-row .title { font-size: 13px; font-weight: 600; color: #2c3a23; }
+  .scr-pets .care-row .desc { font-size: 10px; color: #6a5520; }
+  .scr-pets .care-row.done .title { text-decoration: line-through; color: #9aaa6c; }
+  .scr-pets .care-row .check { color: #5e8a25; font-size: 16px; }
+
+  /* Wildlife / Garden Shop */
+  .scr-shop { background: linear-gradient(180deg, #d9eff0 0%, #b8d8d0 50%, #94b8b0 100%); }
+  .scr-shop .stage { padding-top: 14px; height: 270px; }
+  .scr-shop .scene-glade {
+    position: absolute; top: 90px; left: 0; right: 0; bottom: 320px;
+  }
+  .scr-shop .scene-glade .ground {
+    height: 50%; background: linear-gradient(180deg, #b3d3c5 0%, #7eaa9a 100%);
+  }
+  .scr-shop .deer { position: absolute; bottom: 30%; left: 24%; font-size: 36px;
+    animation: wander 14s ease-in-out infinite reverse; }
+  .scr-shop .firefly {
+    position: absolute; width: 5px; height: 5px;
+    border-radius: 50%; background: rgba(255, 230, 120, 0.9);
+    box-shadow: 0 0 10px 3px rgba(255, 220, 100, 0.7);
+  }
+  .scr-shop .firefly.f1 { top: 45%; left: 60%; animation: float-up 4s ease-out infinite; }
+  .scr-shop .firefly.f2 { top: 50%; left: 70%; animation: float-up 5s ease-out infinite; animation-delay: 1s; }
+  .scr-shop .firefly.f3 { top: 40%; left: 30%; animation: float-up 6s ease-out infinite; animation-delay: 2.5s; }
+
+  .scr-shop .shop-banner {
+    position: absolute; top: 100px; left: 22px; right: 22px;
+    padding: 10px 12px; border-radius: 14px;
+    background: rgba(255,255,255,0.7); backdrop-filter: blur(6px);
+    font-size: 11px; color: #325c50; font-weight: 600;
+  }
+  .scr-shop .grid {
+    position: absolute; bottom: 60px; left: 22px; right: 22px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .scr-shop .item {
+    background: rgba(255,255,255,0.85); border-radius: 14px;
+    padding: 12px 10px; text-align: center;
+  }
+  .scr-shop .item.locked { opacity: 0.6; }
+  .scr-shop .item .emo { font-size: 32px; }
+  .scr-shop .item .name { font-size: 12px; font-weight: 700; color: #1f3a32; margin-top: 4px; }
+  .scr-shop .item .price { font-size: 10px; color: #b8761e; margin-top: 2px; font-weight: 600; }
+  .scr-shop .item .owned { font-size: 9px; color: #5e8a25; margin-top: 2px; }
+  .scr-shop .heads-up {
+    position: absolute; bottom: 16px; left: 22px; right: 22px;
+    text-align: center; font-size: 10px; color: #325c50;
+  }
+
+  /* Fountain (play time) */
+  .scr-rest { background: linear-gradient(180deg, #d6e8f0 0%, #b8d3e1 50%, #9ec1d4 100%); }
+  .scr-rest .pond {
+    position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+    width: 220px; height: 130px; border-radius: 50% / 35%;
+    background: radial-gradient(ellipse at center, #93c5dc 0%, #6ba0bd 60%, #4b7d99 100%);
+    box-shadow: 0 16px 40px rgba(40,80,110,0.4),
+                inset 0 -10px 30px rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .scr-rest .pond::before {
+    content:""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(255,240,180,0.5) 0%, transparent 50%);
+  }
+  .scr-rest .pond::after {
+    content:""; position: absolute; left: 50%; top: 50%;
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.55);
+    animation: ripple 2.5s ease-out infinite;
+  }
+  .scr-rest .pond .label {
+    text-align: center; color: white; z-index: 2; position: relative;
+  }
+  .scr-rest .pond .h { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .scr-rest .pond .l { font-size: 10px; opacity: 0.9; margin-top: 2px; }
+  .scr-rest .help-line {
+    position: absolute; top: 250px; left: 22px; right: 22px;
+    text-align: center; font-size: 11px; color: #1d3344; line-height: 1.5;
+  }
+  .scr-rest .rooms {
+    position: absolute; top: 290px; bottom: 60px; left: 22px; right: 22px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start;
+  }
+  .scr-rest .room {
+    background: rgba(255,255,255,0.7); backdrop-filter: blur(8px);
+    border-radius: 14px; padding: 10px; text-align: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .scr-rest .room .emo { font-size: 22px; }
+  .scr-rest .room .name { font-size: 11px; font-weight: 700; color: #1d3344; margin-top: 4px; }
+  .scr-rest .room .quota { font-size: 9px; color: #5b7d92; }
+  .scr-rest .room.locked { opacity: 0.6; }
+  .scr-rest .room.locked .quota { color: #a87f5a; }
+  .scr-rest .room.special {
+    background: linear-gradient(135deg, rgba(186, 138, 222, 0.4), rgba(255, 230, 180, 0.4));
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(186,138,222,0.5);
+  }
+
+  /* Family Park (parent) */
+  .scr-family { background: linear-gradient(180deg, #f4ebd2 0%, #e6d8a8 100%); }
+  .scr-family .park { padding: 90px 16px 0; display: flex; flex-direction: column; gap: 12px; }
+  .scr-family .ribbon {
+    position: absolute; top: 50px; left: 16px; right: 16px;
+    background: #2c3a23; color: #f4ebd2; padding: 10px 14px; border-radius: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; font-weight: 600;
+  }
+  .scr-family .ribbon .pill {
+    background: #ff5d3a; color: white; padding: 2px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 700;
+  }
+  .scr-family .plot {
+    background: rgba(255,255,255,0.7); backdrop-filter: blur(8px);
+    border-radius: 16px; padding: 12px; display: flex; gap: 12px; align-items: center;
+  }
+  .scr-family .plot .mini-tree { width: 64px; height: 60px; flex-shrink: 0; position: relative; }
+  .scr-family .plot .mini-tree svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 4px rgba(60,80,30,0.2)); }
+  .scr-family .plot .body { flex: 1; }
+  .scr-family .plot .name { font-size: 14px; font-weight: 600; color: #2c3a23; }
+  .scr-family .plot .progress { font-size: 11px; color: #6a5520; margin: 2px 0 6px; }
+  .scr-family .plot .bar { height: 4px; background: #e6dab2; border-radius: 2px; overflow: hidden; }
+  .scr-family .plot .bar > span { display: block; height: 100%; background: linear-gradient(90deg, #c1d3a0, #7e9655); }
+  .scr-family .plot .ripe {
+    background: #ff5d3a; color: white; border-radius: 12px; padding: 4px 8px;
+    font-size: 10px; font-weight: 700;
+  }
+
+  /* Drill-in (kid detail) */
+  .scr-kid { background: linear-gradient(180deg, #e8f1d6 0%, #c1d3a0 100%); }
+  .scr-kid .head { padding: 50px 22px 8px;
+    display: flex; justify-content: space-between; align-items: center; }
+  .scr-kid .head .name { font-size: 18px; font-weight: 600; color: #2c3a23; }
+  .scr-kid .head .sub { font-size: 11px; color: #5e6f4a; margin-top: 2px; }
+  .scr-kid .head .x { font-size: 16px; color: #2c3a23; }
+  .scr-kid .stage-mini { height: 200px; position: relative; }
+  .scr-kid .stage-mini .tree { bottom: 20%; transform: translateX(-50%) scale(0.85); }
+  .scr-kid .stage-mini .ground {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 36%;
+    background: linear-gradient(180deg, transparent 0%, #a3b97c 28%, #7e9655 100%);
+    border-radius: 70% 70% 0 0 / 30% 30% 0 0;
+  }
+  .scr-kid .actions {
+    position: absolute; top: 270px; left: 22px; right: 22px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .scr-kid .actions .btn {
+    background: rgba(255,255,255,0.8); border-radius: 14px; padding: 12px 10px;
+    font-size: 11px; font-weight: 600; color: #2c3a23; text-align: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.04);
+  }
+  .scr-kid .actions .btn.alert {
+    background: #ff5d3a; color: white; box-shadow: 0 6px 16px rgba(255,93,58,0.3);
+  }
+  .scr-kid .timeline { position: absolute; top: 380px; bottom: 60px; left: 22px; right: 22px;
+    overflow: hidden; }
+  .scr-kid .timeline h4 { font-size: 11px; color: #5e6f4a; margin: 0 0 8px;
+    text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+  .scr-kid .tl-row {
+    display: flex; gap: 10px; align-items: center; padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .scr-kid .tl-row .t { font-size: 10px; color: #8b929b; width: 38px; }
+  .scr-kid .tl-row .e { font-size: 16px; }
+  .scr-kid .tl-row .l { font-size: 12px; color: #2c3a23; flex: 1; }
+  .scr-kid .tl-row .l .s { font-weight: 700; color: #5e8a25; }
+
+  /* Codex (settings) */
+  .scr-codex { background: #fbf8ee; }
+  .scr-codex .head { padding: 50px 22px 8px; }
+  .scr-codex .head .name { font-size: 22px; font-weight: 600; color: #2c3a23; }
+  .scr-codex .head .sub { font-size: 11px; color: #6a5520; margin-top: 2px; }
+  .scr-codex .menu { padding: 16px 16px 0; }
+  .scr-codex .menu .row {
+    display: flex; align-items: center; gap: 12px; padding: 14px 14px;
+    margin-bottom: 8px;
+    background: white; border-radius: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  .scr-codex .menu .row .ic {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #f4ebd2;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .scr-codex .menu .row .body { flex: 1; }
+  .scr-codex .menu .row .title { font-size: 13px; font-weight: 600; color: #2c3a23; }
+  .scr-codex .menu .row .desc { font-size: 10px; color: #6a5520; }
+  .scr-codex .menu .row .arrow { color: #c5b07a; font-size: 14px; }
+
+  /* Setup wizard */
+  .scr-setup { background: linear-gradient(180deg, #fef9ed 0%, #ecdeb1 100%); }
+  .scr-setup .step { padding: 70px 22px 0;
+    font-size: 11px; color: #6a5520; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+  .scr-setup .q { padding: 4px 22px 12px; font-size: 22px; font-weight: 600; color: #2c3a23; letter-spacing: -0.01em; line-height: 1.15; }
+  .scr-setup .qsub { padding: 0 22px 18px; font-size: 12px; color: #6a5520; line-height: 1.5; max-width: 280px; }
+  .scr-setup .options { padding: 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .scr-setup .opt {
+    background: white; border-radius: 14px; padding: 12px 10px; text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    border: 2px solid transparent;
+  }
+  .scr-setup .opt.on {
+    border-color: #5e8a25; background: #f3f8e8;
+  }
+  .scr-setup .opt .e { font-size: 28px; }
+  .scr-setup .opt .n { font-size: 12px; font-weight: 700; color: #2c3a23; margin-top: 4px; }
+  .scr-setup .opt .s { font-size: 9px; color: #6a5520; margin-top: 2px; }
+  .scr-setup .next-btn {
+    position: absolute; bottom: 30px; left: 22px; right: 22px;
+    background: #2c3a23; color: white; border-radius: 16px;
+    padding: 14px; text-align: center; font-size: 14px; font-weight: 700;
+  }
+
+  /* Flow diagram */
+  .flow-block {
+    margin: 32px 0; padding: 28px; background: white; border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+  }
+  .flow-block h3 { margin: 0 0 16px; }
+  .flow-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;
+    text-align: center;
+  }
+  @media (max-width: 700px) { .flow-grid { grid-template-columns: 1fr 1fr; } }
+  .flow-grid .node {
+    background: #f3f8e8; border-radius: 12px; padding: 14px 10px;
+    border: 2px solid #d8e8b8;
+  }
+  .flow-grid .node .e { font-size: 28px; }
+  .flow-grid .node .n { font-size: 13px; font-weight: 700; color: #2c3a23; margin-top: 4px; }
+  .flow-grid .node .d { font-size: 10px; color: #5e6f4a; margin-top: 2px; }
+
+  table.spec { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  table.spec th, table.spec td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--rule); }
+  table.spec th { background: #f3f8e8; color: #2c3a23; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .three-up { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 32px; }
+  @media (max-width: 880px) { .three-up { grid-template-columns: 1fr; } }
+  .three-up .phone { width: 280px; height: 580px; }
+
+</style>
+</head><body>
+
+<div class="wrap">
+  <div class="crumb"><a href="./">← Back to overview</a></div>
+  <span class="badge-rec">Synthesis · the recommended direction</span>
+  <p class="eyebrow">Concept 04</p>
+  <h1>The Living Garden.</h1>
+  <p class="lede">
+    Your feedback was: Garden wins for soul, but the Card stack at the bottom
+    is what actually drives a kid through the day. The pet idea works, but
+    real-world pets and "garden creatures" need to stay distinct. Screen time
+    can't be all-or-nothing — different families play differently, and
+    "finish all chores before any play" is unrealistic on a Tuesday afternoon.
+    And the whole thing should feel <em>alive</em> — wind, fluttering, a cat
+    that wanders, fireflies at dusk.
+  </p>
+  <p class="lede">
+    Concept 04 takes the Garden's identity and folds in the things you
+    asked for. Below: nine screens, a navigation map, a setup wizard, and a
+    proposed play-time system that respects how families actually live.
+  </p>
+
+  <blockquote>
+    Steve Jobs's principle wasn't minimalism — it was synthesis. The iPhone
+    was three things in one thing. The Living Garden is the calm of the
+    Garden, the focus of the Card, and a play-time system that doesn't
+    pretend kids only play in the evening.
+  </blockquote>
+
+  <hr class="rule">
+
+  <!-- ================================================================ -->
+  <!-- THE JOBS EDIT                                                    -->
+  <!-- ================================================================ -->
+  <h2 style="border-left: 4px solid var(--accent); padding-left: 16px;">The Jobs Edit</h2>
+
+  <p class="lede">
+    First pass of the Living Garden was Jobs-shallow — I picked aesthetics
+    and called it design. A real Jobs review of this concept would be
+    sharper. Below: the cuts a Jobs-led product would force, the framing
+    that should drive the marketing, the single demo moment, the silence
+    at the end. Then the rest of the page (mockups, screens) — already
+    shipped, but to be re-cut against this doctrine.
+  </p>
+
+  <h3>What this product is</h3>
+
+  <p style="font-size: 22px; line-height: 1.4; max-width: 50ch; color: var(--ink); font-weight: 400; letter-spacing: -0.01em;">
+    OMyDays is not a chore tracker. It is the first family ritual app —
+    a small living world your kids tend daily, alongside breakfast, dinner,
+    and bedtime. The chore is the watering. The watering is the ritual.
+  </p>
+
+  <p>
+    "Chore" never appears in kid-facing UI. Not on a card. Not on a button.
+    Not in a notification. Garden, flower, water, seed, ripe — that is the
+    vocabulary, end to end. Marketing copy: <em>"Plant a garden with your
+    family."</em> Not <em>"the smartest chore app for families."</em></p>
+
+  <h3>What gets cut after a real Jobs review</h3>
+
+  <p>The current Living Garden draft (the rest of this page) still carries
+    holdover habits from the gamified app. A real edit pass cuts deeper:</p>
+
+  <table class="spec">
+    <thead>
+      <tr><th>What's still in the draft</th><th>Why it goes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>The skills profile</strong> (Discipline / Reliability / Initiative / etc)</td>
+        <td>The garden IS the skill profile. Tree size, foliage density, wildlife population. Six bars are off-metaphor.</td>
+      </tr>
+      <tr>
+        <td><strong>Reward chips on cards</strong> ("+1 🌱")</td>
+        <td>The flower opening is the reward. Don't double-bill it. Seed count ticks up silently in the top corner.</td>
+      </tr>
+      <tr>
+        <td><strong>Five zone chips at the bottom</strong></td>
+        <td>Three at most: 🏡 Home · 🐾 Animals · ⛲ Fountain. Wildlife glade is reachable from inside the garden by tapping a critter. Profile doesn't exist as a destination.</td>
+      </tr>
+      <tr>
+        <td><strong>The 6-screen setup wizard</strong></td>
+        <td>Two screens. "Family name and your name." "Add a kid." Done. Everything else has a defensible default; defaults ship, options come later.</td>
+      </tr>
+      <tr>
+        <td><strong>The 7-row Codex</strong></td>
+        <td>Two rows: Family + Account. Everything else lives <em>where it lives</em>. Pet rotation is set inside Animal Corner. Play caps are set inside the Fountain. Settings only exist when you're already in the place.</td>
+      </tr>
+      <tr>
+        <td><strong>The "Strict mode" toggle</strong></td>
+        <td>Gone. Pick one model — earn rate — and ship it. Families that hate it can complain on day 3. We then have feedback worth listening to. Don't cover both bets in v1.</td>
+      </tr>
+      <tr>
+        <td><strong>Per-kid play overrides</strong></td>
+        <td>v1 is family-wide. v2 if anyone asks.</td>
+      </tr>
+      <tr>
+        <td><strong>Day-of-week pet schedules</strong></td>
+        <td>Daily, rotated among the kids the parent ticked. One toggle. The "litter every other day" family customizes via a single "Cadence" preset, not a 7-day grid.</td>
+      </tr>
+      <tr>
+        <td><strong>The word "chore"</strong> anywhere kids see</td>
+        <td>Use "today's flowers" or "what's blooming." Cards are typed by colour and emoji, not by category labels.</td>
+      </tr>
+      <tr>
+        <td><strong>Bottom-edge swipe-up hint copy</strong></td>
+        <td>The kid will discover swipe in the first 5 seconds. Trust them. Hint text is for tutorials Jobs would refuse to ship.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>The first-frame moment</h3>
+
+  <p>A new kid signs in. Black screen. A single dot of light at centre.
+    A note swells. The dot sprouts into a sapling. Sky paints itself in.
+    Sound design fades in — wind, distant birdsong. <strong>"Yusuf —
+    this is your garden."</strong> Tap to continue. The cat walks in
+    from the side, sits, watches. <strong>"Fifi lives here too."</strong>
+    Tap. Three flower buds appear around the tree. <strong>"These are
+    today."</strong> Tap. A card slides up from the bottom: brush teeth.
+    <strong>"Water this one to see what happens."</strong> The kid does.
+    First-run is over.</p>
+
+  <p>Total: 35 seconds. No form. No tab. No options. No "Welcome to OMyDays!"
+    onboarding card. The first thing the kid feels is being addressed by
+    name in their own garden, with a creature already living there,
+    awaiting them.</p>
+
+  <h3>The demo moment</h3>
+
+  <p>If a journalist asks for the one thing that defines the product, this
+    is what gets recorded:</p>
+
+  <ol style="font-size: 16px; color: var(--ink); line-height: 1.7;">
+    <li>The kid swipes the card up.</li>
+    <li>Three water droplets shoot from the swipe and arc upward to the
+      corresponding flower.</li>
+    <li>The flower opens (0.4s spring) with a soft <em>ting</em>, a
+      medium haptic, and a ripple ring that lingers for 5 seconds.</li>
+    <li>The card stack underneath compacts; the next card slides up.</li>
+    <li>Top corner: seeds count, in a slow odometer roll, ticks up by 1.</li>
+  </ol>
+
+  <p>That sequence is the entire product. 600 milliseconds. Every other
+    surface in the app is context for that gesture. The 50 hours of
+    polish budget go here first.</p>
+
+  <h3>The silence at the end of the day</h3>
+
+  <p>Last card watered. Card stack empty. Wind sweeps through the garden.
+    Two birds settle in the tree. The tree visibly grows by 1.5% (perceptible
+    over a week, not a day). Sky tilts toward dusk. <strong>The app stays
+    silent.</strong> No "well done!" toast. No "what's next?" prompt. No
+    notification asking for an app review. The screen just sits there,
+    alive, until the kid puts the phone down.</p>
+
+  <p>That silence is the most expensive thing in the design. Every product
+    manager will want to fill it with a celebration screen, a leaderboard
+    update, a streak meter pulse. Jobs's job, in the room, is to defend
+    the silence.</p>
+
+  <h3>What this means for the parent app</h3>
+
+  <p>Most days a parent should not open the app. Approvals come as iOS
+    push notifications styled like text messages — a single tap from the
+    lock screen approves; a long-press shows the kid's note ("Took her
+    round the block, she met a labrador"). The Family Park view exists
+    for the rare moments parents want the overview — not as the home
+    screen.</p>
+
+  <p>The Codex is also intentionally undersold. A parent should configure
+    once, ever — at setup. After that, the app should be self-running.
+    If a parent finds themselves opening the Codex twice in a month,
+    we have a defaults problem, not a UI problem.</p>
+
+  <h3>What this means for the build plan below</h3>
+
+  <p>The 4-phase plan at the bottom of this page still stands, but each
+    phase is smaller after the cuts:</p>
+
+  <ul class="cut-list">
+    <li>Phase 1 ships without skills, without zone-chip nav, without per-card reward chips.</li>
+    <li>Phase 2 ships one play model, family-wide. The strict mode toggle is dropped.</li>
+    <li>Phase 3 ships a 2-row Codex, not a 7-row one. Settings move into the places they describe.</li>
+    <li>Phase 4 — the aliveness — gets <em>more</em> budget, because it's no longer competing with skill bars and reward chips for engineering time. The animations are the product.</li>
+  </ul>
+
+  <p>Net build estimate: <strong>~3.5 weeks</strong> instead of 5, because
+    half of what I drew was scope I'd argue out of the room.</p>
+
+  <hr class="rule">
+
+  <h2 style="opacity: 0.5; font-size: 18px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-mute); margin-top: 56px;">↓ The full draft below — to be re-cut against the doctrine above</h2>
+
+  <h2>1 — Home: garden + card stack synthesis</h2>
+  <p class="lede">The garden lives at the top. The card stack lives at the
+    bottom. The connection between them is causal: <strong>swiping the top
+    card waters the corresponding flower.</strong></p>
+
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen garden scr-home stage-bg-day">
+        <div class="topbar">
+          <div>
+            <div class="name">Yusuf's garden</div>
+            <div class="sub">Day 12 · gentle breeze</div>
+          </div>
+          <div class="seeds">🌱 24 seeds</div>
+        </div>
+        <div class="stage">
+          <svg class="tree" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="100" cy="60"  rx="64" ry="58" fill="#7fa64a"/>
+            <ellipse cx="60"  cy="100" rx="50" ry="42" fill="#94bd5e"/>
+            <ellipse cx="140" cy="100" rx="50" ry="42" fill="#94bd5e"/>
+            <ellipse cx="100" cy="120" rx="64" ry="44" fill="#a8cf72"/>
+            <rect x="92" y="148" width="16" height="80" fill="#6f4e2c" rx="3"/>
+          </svg>
+          <div class="butterfly">🦋</div>
+          <div class="visiting-bird">🐦</div>
+          <div class="flower f1">🪥</div>
+          <div class="flower f2 dim no-ripple">📚</div>
+          <div class="flower f3 no-ripple">🍽️</div>
+          <div class="flower f4 dim no-ripple">🧺</div>
+          <div class="flower f5 dim no-ripple">🚿</div>
+          <div class="grass-wave"></div>
+          <div class="ground"></div>
+          <div class="pet-wander">🐱</div>
+        </div>
+        <div class="cardstack">
+          <div class="swipe">⌃ swipe up to water · long press to choose</div>
+          <div class="c b3"></div>
+          <div class="c b2"></div>
+          <div class="c front">
+            <div class="cat">Daily habit · 1 of 5</div>
+            <div class="row">
+              <div class="icon">🪥</div>
+              <div class="body">
+                <div class="title">Brush your teeth</div>
+                <div class="desc">Waters the morning flower · earns 1 seed</div>
+              </div>
+            </div>
+            <div class="water-btn">💧 Water</div>
+          </div>
+        </div>
+        <div class="zone-nav">
+          <div class="z active">🏡</div>
+          <div class="z">🐾</div>
+          <div class="z">🌿</div>
+          <div class="z">⛲</div>
+          <div class="z">👤</div>
+        </div>
+      </div></div>
+      <p class="caption">Tree sways. Cat wanders. Butterfly flutters. The card asks one thing.</p>
+    </div>
+    <div class="copy">
+      <h3>The garden is alive</h3>
+      <p>Five things on this screen are moving subtly: the tree sways in the
+        breeze, a butterfly drifts toward a flower, the cat (Fifi) wanders
+        across the grass, a small bird flits in from the left, the grass
+        ripples. Nothing is loud. Nothing demands attention. <strong>The
+        screen is alive even when the kid isn't doing anything.</strong>
+        That's the soul piece you asked for.</p>
+
+      <div class="principle">The card pulls you forward</div>
+      <p>The bottom of the screen always shows ONE card — today's next chore.
+        Swipe it up to water → particles fall onto the corresponding flower
+        in the garden, the flower opens into bloom, a soft chime + haptic
+        fires, and the next card slides up from below. <strong>Swiping is
+        watering.</strong> The two metaphors fuse.</p>
+
+      <div class="principle">The garden tells the day's story</div>
+      <p>Today's flowers are sized big and bright. Yesterday's flowers are
+        smaller, off to the sides — they're permanent, they're growing the
+        garden's history. Watered flowers have a subtle ripple animation
+        (you can see it on the toothbrush flower above). Unwatered flowers
+        are dimmer, awaiting their card.</p>
+
+      <div class="principle">Long-press the card → see the spread</div>
+      <p>Hold the card for 0.4s and the stack opens into a list of all
+        today's cards. Tap any to bring it to the front out of order.
+        That's the only "list view" in the entire app. (Mockup is the next
+        screen below.)</p>
+
+      <div class="principle">Time of day shifts the scene</div>
+      <p>The background gradient changes through the day: dawn at 6am, day
+        from 9am, dusk from 5pm, night from 9pm. Visual difference is
+        subtle (a 10% color shift) — but kids feel the difference between
+        "morning chores" and "evening routine" without being told.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>2 — The card spread (long-press)</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen garden scr-spread stage-bg-day">
+        <div class="topbar">
+          <div>
+            <div class="name">Today, in order</div>
+            <div class="sub">Pick what to do next</div>
+          </div>
+          <div class="seeds">🌱 24</div>
+        </div>
+        <div class="stage">
+          <svg class="tree" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="100" cy="60"  rx="64" ry="58" fill="#7fa64a"/>
+            <ellipse cx="60"  cy="100" rx="50" ry="42" fill="#94bd5e"/>
+            <ellipse cx="140" cy="100" rx="50" ry="42" fill="#94bd5e"/>
+            <ellipse cx="100" cy="120" rx="64" ry="44" fill="#a8cf72"/>
+            <rect x="92" y="148" width="16" height="80" fill="#6f4e2c" rx="3"/>
+          </svg>
+          <div class="grass-wave"></div>
+          <div class="ground"></div>
+        </div>
+        <div class="pile">
+          <h4>5 cards · 0 watered</h4>
+          <div class="row">
+            <div class="ic">🪥</div>
+            <div class="body">
+              <div class="title">Brush your teeth</div>
+              <div class="meta">Daily habit · morning</div>
+            </div>
+            <div class="reward">+1 🌱</div>
+          </div>
+          <div class="row cat-routine">
+            <div class="ic">🐱</div>
+            <div class="body">
+              <div class="title">Feed Fifi</div>
+              <div class="meta">Routine · today's your turn</div>
+            </div>
+            <div class="reward">+2 🌱</div>
+          </div>
+          <div class="row">
+            <div class="ic">🚿</div>
+            <div class="body">
+              <div class="title">Shower / bath</div>
+              <div class="meta">Daily habit · evening</div>
+            </div>
+            <div class="reward">+1 🌱</div>
+          </div>
+          <div class="row">
+            <div class="ic">🧺</div>
+            <div class="body">
+              <div class="title">Tidy your room</div>
+              <div class="meta">Household</div>
+            </div>
+            <div class="reward">+5 🌱</div>
+          </div>
+          <div class="row cat-pitched">
+            <div class="ic">💡</div>
+            <div class="body">
+              <div class="title">Wash the car (your idea)</div>
+              <div class="meta">Pitched · awaiting parent</div>
+            </div>
+            <div class="reward">+8 🌱</div>
+          </div>
+        </div>
+      </div></div>
+      <p class="caption">The only list view in the app. Reachable only via long-press.</p>
+    </div>
+    <div class="copy">
+      <h3>The list view that hides itself</h3>
+      <p>By default, the kid sees one card. When they want to peek ahead or
+        skip around, they long-press and the stack expands into the spread
+        above. Color-coded by category (yellow = habit, green = routine,
+        purple = pitched). Tap any row → that card jumps to the front.</p>
+
+      <div class="principle">No grid. No agenda. Just an ordered list.</div>
+      <p>The current app's home screen shows everything — habits sections,
+        chores section, badges, leaderboard tile, etc. Here, that complexity
+        is one screen deep, only when the kid asks for it. <strong>Discovery
+        on demand, not on default.</strong></p>
+
+      <div class="principle">The pitched card is purple</div>
+      <p>If the kid pitched a contract ("Wash the car"), it appears in their
+        own spread with a purple accent and "awaiting parent" badge.
+        Continuity from the card concept's typed colors.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>3 — Animal Corner: real pets (chore-bearing)</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen garden scr-pets">
+        <div class="topbar">
+          <div>
+            <div class="name">Animal corner</div>
+            <div class="sub">Fifi's been watching for you</div>
+          </div>
+          <div class="seeds">🌱 24</div>
+        </div>
+        <div class="meadow">
+          <div class="grass"></div>
+          <div class="speech">Meow. The litter is full!</div>
+          <div class="fifi">🐱</div>
+        </div>
+        <div class="care">
+          <div class="care-row">
+            <div class="ic">🍲</div>
+            <div class="body">
+              <div class="title">Feed Fifi</div>
+              <div class="desc">Today's your turn · earns 1 seed</div>
+            </div>
+            <div class="check">→</div>
+          </div>
+          <div class="care-row">
+            <div class="ic">🧹</div>
+            <div class="body">
+              <div class="title">Clean the litter</div>
+              <div class="desc">Fifi reminded you · earns 2 seeds</div>
+            </div>
+            <div class="check">→</div>
+          </div>
+          <div class="care-row done">
+            <div class="ic">💧</div>
+            <div class="body">
+              <div class="title">Fresh water</div>
+              <div class="desc">Done by Sara at 7:42 ☼</div>
+            </div>
+            <div class="check">✓</div>
+          </div>
+        </div>
+        <div class="zone-nav">
+          <div class="z">🏡</div>
+          <div class="z active">🐾</div>
+          <div class="z">🌿</div>
+          <div class="z">⛲</div>
+          <div class="z">👤</div>
+        </div>
+      </div></div>
+      <p class="caption">Fifi is real. She's hungry. The chore is her, not a row.</p>
+    </div>
+    <div class="copy">
+      <h3>Real pets live in the Animal Corner</h3>
+      <p>Tap the 🐾 zone icon → Fifi's meadow. She wanders. She speaks
+        (a small bubble shows her current need). The three care rows below
+        are her actual chores from the data layer — feeding, litter, water
+        — but they appear here as her requests, with sibling history shown
+        ("Done by Sara at 7:42 yesterday").</p>
+
+      <div class="principle">This is where the duty lives</div>
+      <p>Real-world animal duties happen here and only here. They also
+        surface as cards in the home screen's stack — those two things are
+        the same data, two views. When you complete a duty here, the card
+        on the home screen disappears too.</p>
+
+      <div class="principle">Multi-pet meadow</div>
+      <p>If the family has multiple pets, the meadow is wider and they
+        each occupy a corner. Wandering animations make it feel like a
+        small farm. Tapping a pet brings them centre.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>4 — The Wildlife glade: garden shop (no chores)</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen garden scr-shop">
+        <div class="topbar">
+          <div>
+            <div class="name">Wildlife glade</div>
+            <div class="sub">Where seeds become friends</div>
+          </div>
+          <div class="seeds">🌱 24</div>
+        </div>
+        <div class="scene-glade">
+          <div class="ground"></div>
+          <div class="deer">🦌</div>
+          <div class="firefly f1"></div>
+          <div class="firefly f2"></div>
+          <div class="firefly f3"></div>
+        </div>
+        <div class="shop-banner">
+          🌿 These animals visit your garden. <strong>They have no chores.</strong>
+          Buy with seeds. They live with you forever.
+        </div>
+        <div class="grid">
+          <div class="item">
+            <div class="emo">🐢</div>
+            <div class="name">Tortoise</div>
+            <div class="price">5 🌱</div>
+          </div>
+          <div class="item">
+            <div class="emo">🦔</div>
+            <div class="name">Hedgehog</div>
+            <div class="owned">✓ owned</div>
+          </div>
+          <div class="item locked">
+            <div class="emo">🦌</div>
+            <div class="name">Visiting deer</div>
+            <div class="price">25 🌱</div>
+          </div>
+          <div class="item locked">
+            <div class="emo">🦋</div>
+            <div class="name">Butterfly nest</div>
+            <div class="price">12 🌱</div>
+          </div>
+        </div>
+        <div class="heads-up">⚐ Different from Animal Corner — these are decoration only.</div>
+        <div class="zone-nav">
+          <div class="z">🏡</div>
+          <div class="z">🐾</div>
+          <div class="z active">🌿</div>
+          <div class="z">⛲</div>
+          <div class="z">👤</div>
+        </div>
+      </div></div>
+      <p class="caption">Decoration ≠ duty. The shop is the glade where critters arrive.</p>
+    </div>
+    <div class="copy">
+      <h3>The split that solves your concern</h3>
+      <p>Your worry was: if the shop sells animals, kids might confuse them
+        with the real pets they have to look after. Here's the split:</p>
+
+      <table class="spec">
+        <thead><tr><th>Animal Corner (🐾)</th><th>Wildlife Glade (🌿)</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Real-world pets (Fifi the cat)</td>
+            <td>Bought ornamental creatures (a deer, a tortoise, fireflies)</td>
+          </tr>
+          <tr>
+            <td>Has chores attached (feed, litter, water)</td>
+            <td>No chores. Pure decoration.</td>
+          </tr>
+          <tr>
+            <td>Status rings: hungry, tired</td>
+            <td>No status. They just exist and animate.</td>
+          </tr>
+          <tr>
+            <td>Speaks: "The litter is full!"</td>
+            <td>Silent. Wanders. Sometimes shows up in the home garden.</td>
+          </tr>
+          <tr>
+            <td>Failure has consequence</td>
+            <td>No failure state — they live forever once bought.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="principle">The shop is the glade</div>
+      <p>The "shop" isn't a separate tab. It's a place — the wildlife glade.
+        You walk into it. You see the animals you've already brought home
+        wandering. You see the ones you could buy. <strong>Buying one is
+        adopting</strong> — they show up in your home garden the next time
+        you go back, mingling with the tree, alongside Fifi (who is
+        unmistakably special because she eats and meows).</p>
+
+      <div class="principle">Visual differentiation in the home garden</div>
+      <p>Garden critters get a faint pastel glow (you can see hedgehogs in
+        the home screen sometimes). Real pets like Fifi do not — they look
+        photographic by comparison. A 6-year-old will pick it up in a day.</p>
+
+      <div class="principle">The shop also sells flowers and trees</div>
+      <p>Beyond animals, the glade also sells flower types (unlocking new
+        flower-emoji palettes for chore types) and tree skins (cherry
+        blossom, maple, pine). Cosmetics that make the garden personal
+        without changing the data layer.</p>
+
+      <div class="principle">Cash rewards from contracts</div>
+      <p>Real money rewards (the £10 cash for "wash the car") stay outside
+        the seeds economy entirely. Cash shows up in a small purse in the
+        topbar when relevant — tap to see balance. Seeds are the in-app
+        currency; cash is the out-of-app reward. Two distinct things.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>5 — The Fountain: a flexible play-time system</h2>
+  <p class="lede">
+    You raised three things: families play differently, "all chores before
+    play" is unrealistic on a school afternoon, and the play system needs
+    to be customisable in setup. Here's the proposal.
+  </p>
+
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen garden scr-rest">
+        <div class="topbar">
+          <div>
+            <div class="name">By the fountain</div>
+            <div class="sub">After school · Tuesday</div>
+          </div>
+          <div class="seeds">🌱 24</div>
+        </div>
+        <div class="pond">
+          <div class="label">
+            <div class="h">1h 30m</div>
+            <div class="l">earned today</div>
+          </div>
+        </div>
+        <div class="help-line">
+          Each watered flower fills the pond by 15 minutes.<br>
+          You've watered 6 flowers · 2 still budding.
+        </div>
+        <div class="rooms">
+          <div class="room">
+            <div class="emo">🎮</div>
+            <div class="name">Console</div>
+            <div class="quota">45m left today</div>
+          </div>
+          <div class="room">
+            <div class="emo">💻</div>
+            <div class="name">PC</div>
+            <div class="quota">45m left today</div>
+          </div>
+          <div class="room special">
+            <div class="emo">🥽</div>
+            <div class="name">VR portal</div>
+            <div class="quota">⚡ Sat / Sun only</div>
+          </div>
+          <div class="room">
+            <div class="emo">📺</div>
+            <div class="name">Telly</div>
+            <div class="quota">free · with family</div>
+          </div>
+        </div>
+        <div class="zone-nav">
+          <div class="z">🏡</div>
+          <div class="z">🐾</div>
+          <div class="z">🌿</div>
+          <div class="z active">⛲</div>
+          <div class="z">👤</div>
+        </div>
+      </div></div>
+      <p class="caption">Earned, not gated. Custom rooms per family.</p>
+    </div>
+    <div class="copy">
+      <h3>The proposal: earn rate, no hard gate</h3>
+      <p>The current model is binary: chores done = play unlocked, otherwise
+        locked. That's too crude — your example of "evening teeth-brushing
+        blocks afternoon play" is exactly right.</p>
+
+      <p><strong>The new model has two dials:</strong></p>
+
+      <table class="spec">
+        <thead><tr><th>Dial</th><th>What it does</th><th>Family default</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Earn rate</strong></td>
+            <td>Each completed chore adds N minutes to the pond</td>
+            <td>15 min / chore</td>
+          </tr>
+          <tr>
+            <td><strong>Daily cap</strong></td>
+            <td>Max minutes the pond can hold today</td>
+            <td>2h weekday, 3h weekend</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>So at 4pm with 6 chores done, Yusuf has 90 minutes of pond time
+        even though evening chores haven't happened yet. Evening chores top
+        him up later. <strong>Future chores never block current play.</strong>
+        If a kid does no chores all day, the pond's empty — that's the only
+        gate.</p>
+
+      <div class="principle">Optional strict mode</div>
+      <p>For families that want the harder rule (we've met them), there's
+        a "must finish morning chain before screen time" toggle in setup.
+        Defaults to off. Most families will find the earn-rate model
+        sufficient because the natural friction is real: empty pond = no
+        play.</p>
+
+      <div class="principle">Rooms are family-customised</div>
+      <p>What "play" means varies wildly. Some families have Console + PC
+        + VR. Some have outdoor games and a TV. Some play together, some
+        don't. Setup asks each family which rooms exist for them — and
+        the fountain shows only those.</p>
+
+      <div class="principle">Setup wizard for play (next screen)</div>
+      <p>The setup flow asks four questions and configures the rooms,
+        rates, caps, and weekend rules from there. Six taps, no matrix.
+        See the next mockup.</p>
+
+      <div class="principle">Special: VR portal</div>
+      <p>VR is treated as more precious than other devices. Default rule:
+        weekends only, after-morning-chores. The portal in the fountain's
+        quartet shows a glow when available, locked text when not. Many
+        families will find this default appropriate — those who don't,
+        toggle it off in setup.</p>
+
+      <div class="principle">Special: family time room</div>
+      <p>If the parent ticks "Telly" or "Family games" in setup, that
+        room is marked "free, with family" — meaning it doesn't draw
+        from the pond. The kid can sit on the sofa with mum or dad
+        without the chore-gate kicking in. This handles your "play
+        together" case explicitly.</p>
+
+      <div class="principle">Edge cases worth noting</div>
+      <ul class="cut-list">
+        <li>If pond is empty, rooms show "Earn 15m by watering 1 flower". One nudge sentence, no lecture.</li>
+        <li>School days vs weekend caps differ — set in setup once.</li>
+        <li>Sick day mode: parent can grant 1h "free pond" for one day from the parent codex.</li>
+        <li>Outdoor play: a special room "Outside" that the kid can tap as "I'm going outside" — earns extra seeds, is parent-trust based, no enforcement. Optional.</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>6 — Setup wizard: configuring play for your family</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen garden scr-setup">
+        <div class="step">Step 3 of 6</div>
+        <div class="q">How does your family play?</div>
+        <div class="qsub">Pick everything that applies. We'll only show rooms by the fountain that you tick.</div>
+        <div class="options">
+          <div class="opt on">
+            <div class="e">🎮</div>
+            <div class="n">Console</div>
+            <div class="s">PS / Xbox / Switch</div>
+          </div>
+          <div class="opt on">
+            <div class="e">💻</div>
+            <div class="n">PC gaming</div>
+            <div class="s">Steam, Roblox, Minecraft</div>
+          </div>
+          <div class="opt on">
+            <div class="e">🥽</div>
+            <div class="n">VR</div>
+            <div class="s">Quest / PSVR</div>
+          </div>
+          <div class="opt on">
+            <div class="e">📺</div>
+            <div class="n">Family TV</div>
+            <div class="s">Watching together</div>
+          </div>
+          <div class="opt">
+            <div class="e">🌳</div>
+            <div class="n">Outdoor play</div>
+            <div class="s">Trampoline, park, bike</div>
+          </div>
+          <div class="opt">
+            <div class="e">📚</div>
+            <div class="n">Reading</div>
+            <div class="s">Kindle / books</div>
+          </div>
+          <div class="opt">
+            <div class="e">📱</div>
+            <div class="n">Tablet</div>
+            <div class="s">YouTube, social, etc</div>
+          </div>
+          <div class="opt">
+            <div class="e">🎲</div>
+            <div class="n">Family games</div>
+            <div class="s">Board games, cards</div>
+          </div>
+        </div>
+        <div class="next-btn">Next →</div>
+      </div></div>
+      <p class="caption">A wizard, not a settings matrix.</p>
+    </div>
+    <div class="copy">
+      <h3>The full setup, one question per screen</h3>
+      <ol style="font-size: 14px; color: var(--ink-soft); line-height: 1.7;">
+        <li><strong>Family name + a parent's first name.</strong> One field.</li>
+        <li><strong>Add the kids.</strong> Tap + for each kid, name + age. (5s per kid.)</li>
+        <li><strong>How does your family play?</strong> ← shown above. Multi-select. Determines the fountain's rooms.</li>
+        <li><strong>Earn rate.</strong> Slider: "Each chore = how many minutes of play?" Default 15. Range 5–30.</li>
+        <li><strong>Daily caps.</strong> Two sliders: weekday max / weekend max.</li>
+        <li><strong>Pets.</strong> Add Fifi & co. Same as the current flow but visual.</li>
+      </ol>
+      <p>That's the whole setup. Six screens. Zero matrix UIs. Zero
+        day-of-week grids in the middle of onboarding.</p>
+
+      <div class="principle">The "Strict mode" toggle is buried</div>
+      <p>The "must complete morning chores before any screen time" rule
+        lives in the Codex (parent settings) under "Advanced rules". By
+        default it's off. Families who want it find it; families who don't
+        never see it.</p>
+
+      <div class="principle">Per-kid customisation comes later</div>
+      <p>The wizard sets <em>family-wide</em> defaults so onboarding stays
+        fast. After setup, parents can fine-tune per-kid (different cap
+        for the 6-year-old vs the 12-year-old) from the Codex. Most won't
+        bother. Defaults take you 90% of the way.</p>
+
+      <div class="principle">Onboarding for the kid</div>
+      <p>Separate, lighter flow when the kid logs in for the first time:
+        "Pick your tree" (3 styles), "Pick your seed colour" (3 hues), "Meet
+        Fifi" (animation). 30 seconds. They land in their living garden.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>7 — Family Park (parent home)</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen garden scr-family stage-bg-day">
+        <div class="ribbon">
+          <div>The Haridys · Tuesday morning</div>
+          <div class="pill">3 ripe</div>
+        </div>
+        <div class="park">
+          <div class="plot">
+            <div class="mini-tree">
+              <svg viewBox="0 0 64 60">
+                <ellipse cx="32" cy="22" rx="22" ry="20" fill="#7fa64a"/>
+                <ellipse cx="22" cy="32" rx="14" ry="12" fill="#94bd5e"/>
+                <ellipse cx="42" cy="32" rx="14" ry="12" fill="#94bd5e"/>
+                <rect x="29" y="42" width="6" height="14" fill="#6f4e2c"/>
+              </svg>
+            </div>
+            <div class="body">
+              <div class="name">Yusuf · day 12</div>
+              <div class="progress">2 of 4 watered today</div>
+              <div class="bar"><span style="width:50%"></span></div>
+            </div>
+            <div class="ripe">2 ripe</div>
+          </div>
+          <div class="plot">
+            <div class="mini-tree">
+              <svg viewBox="0 0 64 60">
+                <ellipse cx="32" cy="20" rx="18" ry="16" fill="#a8cf72"/>
+                <rect x="29" y="36" width="6" height="14" fill="#6f4e2c"/>
+              </svg>
+            </div>
+            <div class="body">
+              <div class="name">Sara · day 4</div>
+              <div class="progress">3 of 3 watered today ✦</div>
+              <div class="bar"><span style="width:100%"></span></div>
+            </div>
+            <div class="ripe">1 ripe</div>
+          </div>
+          <div class="plot">
+            <div class="mini-tree">
+              <svg viewBox="0 0 64 60">
+                <ellipse cx="32" cy="42" rx="6" ry="4" fill="#94bd5e"/>
+                <rect x="30" y="36" width="4" height="14" fill="#6f4e2c"/>
+              </svg>
+            </div>
+            <div class="body">
+              <div class="name">You · participating</div>
+              <div class="progress">1 of 2 today</div>
+              <div class="bar"><span style="width:50%"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="zone-nav">
+          <div class="z active">🏡</div>
+          <div class="z">🐾</div>
+          <div class="z">🌿</div>
+          <div class="z">⛲</div>
+          <div class="z">📖</div>
+        </div>
+      </div></div>
+      <p class="caption">Parent home — the family park.</p>
+    </div>
+    <div class="copy">
+      <h3>One plot per family member</h3>
+      <p>The black ribbon at top shows family name + today's day + a red
+        pill with the count of ripe (unapproved) chores. Below: each family
+        member as a plot card, with their tree at the size it currently is
+        in their garden, today's progress bar, and a ripe-count badge if
+        any.</p>
+
+      <div class="principle">The five zone icons (parent variant)</div>
+      <p>The parent's bottom nav is slightly different. The fifth icon is
+        a 📖 (Codex) instead of 👤 (Profile). Otherwise the same:
+        🏡 Park · 🐾 Pets · 🌿 Glade · ⛲ Fountain · 📖 Codex.</p>
+
+      <table class="spec">
+        <thead><tr><th>Zone</th><th>Parent view</th></tr></thead>
+        <tbody>
+          <tr><td>🏡 Park</td><td>Family overview (this screen). Tap a plot → drill in.</td></tr>
+          <tr><td>🐾 Pets</td><td>Pet management: add/edit/remove, rotation kids, schedule. Same data as kid's Animal Corner.</td></tr>
+          <tr><td>🌿 Glade</td><td>What kids have bought. Parent can gift critters here too (drop a hedgehog into Yusuf's garden as a surprise).</td></tr>
+          <tr><td>⛲ Fountain</td><td>Family-wide play settings — earn rate, caps, room availability. Per-kid overrides nested.</td></tr>
+          <tr><td>📖 Codex</td><td>Everything else: invite codes, member roles, contracts, billing, advanced rules.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>8 — Drilling into a kid (parent)</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen garden scr-kid stage-bg-day">
+        <div class="head">
+          <div>
+            <div class="name">Yusuf's garden</div>
+            <div class="sub">Day 12 · 2 watered, 2 ripe</div>
+          </div>
+          <div class="x">✕</div>
+        </div>
+        <div class="stage-mini">
+          <svg class="tree" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="100" cy="60"  rx="64" ry="58" fill="#7fa64a"/>
+            <ellipse cx="60"  cy="100" rx="50" ry="42" fill="#94bd5e"/>
+            <ellipse cx="140" cy="100" rx="50" ry="42" fill="#94bd5e"/>
+            <ellipse cx="100" cy="120" rx="64" ry="44" fill="#a8cf72"/>
+            <rect x="92" y="148" width="16" height="80" fill="#6f4e2c" rx="3"/>
+          </svg>
+          <div class="ground"></div>
+        </div>
+        <div class="actions">
+          <div class="btn alert">🍎 Approve 2 ripe</div>
+          <div class="btn">+ Issue chore</div>
+          <div class="btn">⛲ Their fountain</div>
+          <div class="btn">⚙ Manage Yusuf</div>
+        </div>
+        <div class="timeline">
+          <h4>Today's timeline</h4>
+          <div class="tl-row">
+            <div class="t">07:14</div>
+            <div class="e">🪥</div>
+            <div class="l">Watered <span class="s">Brush teeth</span> · +1 🌱</div>
+          </div>
+          <div class="tl-row">
+            <div class="t">07:30</div>
+            <div class="e">🍳</div>
+            <div class="l">Watered <span class="s">Clear plate</span> · +1 🌱</div>
+          </div>
+          <div class="tl-row">
+            <div class="t">15:42</div>
+            <div class="e">🐱</div>
+            <div class="l">Submitted <span class="s">Feed Fifi</span> · ripe</div>
+          </div>
+          <div class="tl-row">
+            <div class="t">16:01</div>
+            <div class="e">🧺</div>
+            <div class="l">Submitted <span class="s">Tidy room</span> · ripe</div>
+          </div>
+        </div>
+      </div></div>
+      <p class="caption">Kid drill-in: tree, actions, timeline.</p>
+    </div>
+    <div class="copy">
+      <h3>What the parent sees when they tap a plot</h3>
+      <p>Tap a kid's plot in the Family Park → this overlay slides up.
+        Top half: the kid's actual living garden, miniature. Below: four
+        action buttons. Below that: today's timeline of what they've done.</p>
+
+      <table class="spec">
+        <thead><tr><th>Action</th><th>Behavior</th></tr></thead>
+        <tbody>
+          <tr><td>🍎 Approve N ripe</td><td>Slide-up sheet with the unapproved chores. One swipe-right to approve, one tap to reject.</td></tr>
+          <tr><td>+ Issue chore</td><td>One-off chore for this kid only. Title, points, due time. Lands as a card in their stack.</td></tr>
+          <tr><td>⛲ Their fountain</td><td>Per-kid play overrides — different cap, different rooms, sick-day grant.</td></tr>
+          <tr><td>⚙ Manage Yusuf</td><td>Edit name, age, biometric login, role, leave family. Rare actions, properly buried.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="principle">Timeline is the audit log</div>
+      <p>The bottom timeline is a soft, narrative log of what the kid did
+        today. <em>Watered Brush teeth at 7:14, +1 seed.</em> Replaces the
+        current "approvals tab" + "history view" + "stats screen" with one
+        scroll. Parents read it like a journal entry, not a spreadsheet.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <h2>9 — The Codex (parent settings)</h2>
+  <div class="pair">
+    <div>
+      <div class="phone"><div class="screen garden scr-codex">
+        <div class="head">
+          <div class="name">The Codex</div>
+          <div class="sub">Family setup &amp; quiet rules</div>
+        </div>
+        <div class="menu">
+          <div class="row">
+            <div class="ic">👨‍👩‍👧‍👦</div>
+            <div class="body">
+              <div class="title">Family members</div>
+              <div class="desc">3 in family · invite codes, roles, biometric</div>
+            </div>
+            <div class="arrow">›</div>
+          </div>
+          <div class="row">
+            <div class="ic">⛲</div>
+            <div class="body">
+              <div class="title">Play time defaults</div>
+              <div class="desc">15 min/chore · 2h weekday cap · 3h weekend</div>
+            </div>
+            <div class="arrow">›</div>
+          </div>
+          <div class="row">
+            <div class="ic">🐾</div>
+            <div class="body">
+              <div class="title">Pets &amp; rotation</div>
+              <div class="desc">Fifi (cat) · who feeds, who cleans, days</div>
+            </div>
+            <div class="arrow">›</div>
+          </div>
+          <div class="row">
+            <div class="ic">🗓</div>
+            <div class="body">
+              <div class="title">Bin schedule &amp; routines</div>
+              <div class="desc">Thursday collection · alternating</div>
+            </div>
+            <div class="arrow">›</div>
+          </div>
+          <div class="row">
+            <div class="ic">📜</div>
+            <div class="body">
+              <div class="title">Contracts &amp; cash rewards</div>
+              <div class="desc">3 active · £15 paid this month</div>
+            </div>
+            <div class="arrow">›</div>
+          </div>
+          <div class="row">
+            <div class="ic">🏆</div>
+            <div class="body">
+              <div class="title">Advanced rules</div>
+              <div class="desc">Strict mode, age gates, sick days, inter-family</div>
+            </div>
+            <div class="arrow">›</div>
+          </div>
+          <div class="row">
+            <div class="ic">💳</div>
+            <div class="body">
+              <div class="title">Account &amp; billing</div>
+              <div class="desc">Free tier · 1 family · Apple Sign-In</div>
+            </div>
+            <div class="arrow">›</div>
+          </div>
+        </div>
+      </div></div>
+      <p class="caption">Settings, named like spell pages in a wizard's codex.</p>
+    </div>
+    <div class="copy">
+      <h3>Everything else, in one place</h3>
+      <p>Seven rows. The Codex contains every advanced or rare-use setting
+        — none of which a parent should have to find more than once a month.
+        Family members. Play defaults. Pets. Schedules. Contracts. Advanced
+        rules. Billing.</p>
+
+      <div class="principle">"Advanced rules" is where strictness lives</div>
+      <p>This is where a parent enables strict mode (chores must be done
+        before play), age gates (different caps per kid), sick days, future
+        inter-family leaderboard opt-in, etc. Buried by design — defaults
+        cover 80% of families.</p>
+
+      <div class="principle">Naming choices</div>
+      <p>"Codex" not "Settings". "Play time defaults" not "Screen time
+        rules". "Family members" not "User management". Every word is
+        chosen to feel like a parent's <em>tool</em>, not an administrator's
+        console. Same data underneath; different language above.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Navigation flow -->
+  <h2>Navigation: how zones connect</h2>
+  <p class="lede">
+    The kid (and parent) get one always-visible row of five zone chips at
+    the bottom of every screen. Tap to camera-pan into the next zone.
+    Five places, no nested tabs, no hamburger menu.
+  </p>
+
+  <div class="flow-block">
+    <h3>Kid's zones</h3>
+    <div class="flow-grid">
+      <div class="node">
+        <div class="e">🏡</div>
+        <div class="n">Home garden</div>
+        <div class="d">Tree, today's flowers, card stack</div>
+      </div>
+      <div class="node">
+        <div class="e">🐾</div>
+        <div class="n">Animal corner</div>
+        <div class="d">Real pets &amp; their needs</div>
+      </div>
+      <div class="node">
+        <div class="e">🌿</div>
+        <div class="n">Wildlife glade</div>
+        <div class="d">Shop / decoration critters</div>
+      </div>
+      <div class="node">
+        <div class="e">⛲</div>
+        <div class="n">By the fountain</div>
+        <div class="d">Earned play time + rooms</div>
+      </div>
+      <div class="node">
+        <div class="e">👤</div>
+        <div class="n">Profile</div>
+        <div class="d">Skills, avatar, contracts I pitched</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-block">
+    <h3>Parent's zones</h3>
+    <div class="flow-grid">
+      <div class="node">
+        <div class="e">🏡</div>
+        <div class="n">Family park</div>
+        <div class="d">All plots side-by-side</div>
+      </div>
+      <div class="node">
+        <div class="e">🐾</div>
+        <div class="n">Pets</div>
+        <div class="d">Add, schedule, rotation</div>
+      </div>
+      <div class="node">
+        <div class="e">🌿</div>
+        <div class="n">Glade</div>
+        <div class="d">Family critters &amp; gifts</div>
+      </div>
+      <div class="node">
+        <div class="e">⛲</div>
+        <div class="n">Fountain</div>
+        <div class="d">Play settings &amp; per-kid</div>
+      </div>
+      <div class="node" style="grid-column: span 4; background: #fef9ed; border-color: #f4d99a;">
+        <div class="e">📖</div>
+        <div class="n">Codex</div>
+        <div class="d">Members, contracts, billing, advanced rules</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Animations breakdown -->
+  <h2>What's alive on every screen</h2>
+  <table class="spec">
+    <thead><tr><th>Element</th><th>Animation</th><th>Cycle</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td>Tree</td><td>Subtle sway 1° each way</td><td>7s</td><td>Wind. The garden is outdoors and breathing.</td></tr>
+      <tr><td>Grass</td><td>Skew 2° on horizon</td><td>4s</td><td>Reinforces wind direction.</td></tr>
+      <tr><td>Butterfly</td><td>Floats path between flowers</td><td>6s</td><td>Sense of inhabited space.</td></tr>
+      <tr><td>Visiting bird</td><td>Flits in from edge, lands, leaves</td><td>20s rare</td><td>Surprise. Reward for keeping the screen open.</td></tr>
+      <tr><td>Pet (Fifi)</td><td>Wanders left-right, faces direction of travel</td><td>18s</td><td>She's alive. The garden has weight.</td></tr>
+      <tr><td>Watered flower</td><td>Slow ripple ring around it</td><td>3.5s</td><td>"You did this." Quiet pride.</td></tr>
+      <tr><td>Pond water</td><td>Concentric ripples from centre</td><td>2.5s</td><td>Earned time, kept fresh.</td></tr>
+      <tr><td>Fireflies (glade)</td><td>Float upward, fade out, respawn</td><td>4–6s staggered</td><td>Magical glade at dusk.</td></tr>
+      <tr><td>Stars (night)</td><td>Twinkle opacity 0.4 → 1</td><td>3s</td><td>Time of day shift after 9pm.</td></tr>
+      <tr><td>Card swipe</td><td>Spring + 3 water particles fall on flower + ripple bloom</td><td>0.6s</td><td>The watering moment. The product's heartbeat.</td></tr>
+    </tbody>
+  </table>
+
+  <p>All CSS-driven where possible. SwiftUI translation: SF Symbols for icons,
+    <code>.matchedGeometryEffect</code> for the swipe-to-water transition,
+    <code>TimelineView</code> for the time-of-day shifts, <code>SpriteKit</code>
+    for the wandering cat (one small overlay).</p>
+
+  <hr class="rule">
+
+  <!-- Build plan -->
+  <h2>Build plan</h2>
+  <p class="lede">If you greenlight this, here's how I'd phase the actual implementation.</p>
+
+  <table class="spec">
+    <thead><tr><th>Phase</th><th>What ships</th><th>Time</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Phase 1 — Skin</strong></td>
+        <td>
+          Replace the QuestMapView home with the garden + card-stack synthesis.
+          Keep all current data — no schema change.
+          Tree + 5 flowers + card stack + the swipe-to-water animation.
+          Animal corner + Wildlife glade as zone variants of the same view.
+          Old neon screens still reachable via legacy mode for safety.
+        </td>
+        <td>~2 weeks</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 2 — Play system</strong></td>
+        <td>
+          The Fountain with the new earn-rate model. Setup wizard for play.
+          Migration: existing screen-time rules become defaults + advanced
+          rules. Add the per-pet "Cadence" model that collapses the day grid.
+        </td>
+        <td>~1 week</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 3 — Parent rebuild</strong></td>
+        <td>
+          Family Park view. Kid drill-in with timeline. Codex with everything
+          that's currently in 5 different settings screens. Approval as
+          "ripe fruit" gesture.
+        </td>
+        <td>~1 week</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 4 — Aliveness</strong></td>
+        <td>
+          The animations. Time-of-day shifts. Wildlife glade as a real shop
+          (seeds → critters with permanent ambient presence). The pet
+          wandering. The bird visit.
+        </td>
+        <td>~1 week</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Total: ~5 weeks of focused build. Schema barely changes (a few JSONB
+    field additions). Backend untouched. The whole new direction is an
+    iOS-side rewrite, which is the right place to do it.</p>
+
+  <hr class="rule">
+
+  <p style="margin-top: 32px;">
+    <a href="garden.html">← The Garden (the foundation)</a><br>
+    <a href="quest.html">← The Quest (alt direction)</a><br>
+    <a href="card.html">← The Card (alt direction)</a><br>
+    <a href="./">↑ Back to overview</a>
+  </p>
+</div>
+</body></html>
